@@ -8,4 +8,10 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Mestr.Core\Mestr.Core.csproj" />
+    <ProjectReference Include="..\Mestr.Data\Mestr.Data.csproj" />
+    <ProjectReference Include="..\Mestr.Services\Mestr.Services.csproj" />
+  </ItemGroup>
+
 </Project>
