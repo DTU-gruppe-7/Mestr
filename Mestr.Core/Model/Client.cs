@@ -15,7 +15,7 @@ public class Client
     private List<Project> projects;
 
     // Constructor
-    public Client(Guid? uuid = Guid.NewGuid(), string name, string email, string phoneNumber, string address,
+    public Client(Guid uuid, string name, string email, string phoneNumber, string address,
                   string postalAddress, string city, List<Project>? projects = null,
                   string? cvr = null)
     {
@@ -33,7 +33,7 @@ public class Client
 
 
     // Properties 
-    public int UUId { get => uuid; }
+    public Guid UUId { get => uuid; }
     public string Name { get => name; set => name = value; }
     public string Email { get => email; set => email = value; }
     public string PhoneNumber { get => phoneNumber; set => phoneNumber = value; }
@@ -53,7 +53,7 @@ public class Client
     // Check if client is B2B
     public bool IsBusinessClient()
     {
-        return !string.IsNullOrEmpty(CVR);
+        return !string.IsNullOrEmpty(cvr);
     }
 
 }

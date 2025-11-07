@@ -9,11 +9,10 @@ public class Earning
 	private DateTime date;
 	private bool isPaid;
 	private DateTime? paymentDate;
-	private PaymentMethod method;
 	private Project project;
 
-    public Earning(Guid? uuid = Guid.NewGuid(), Guid projectuuid, string description, decimal amount,
-		DateTime date, bool isPaid, Datetime? paymentDate = null, PaymentMethod method, Project project)
+    public Earning(Guid uuid, Guid projectuuid, string description, decimal amount,
+		DateTime date, bool isPaid, DateTime? paymentDate = null, Project project)
 	{
 		this.uuid = uuid;
 		this.projectuuid = projectuuid;
@@ -22,20 +21,18 @@ public class Earning
 		this.date = date;
 		this.isPaid = isPaid;
 		this.paymentDate = paymentDate;
-		this.method = method;
 		this.project = project;
     }
-	public int Uuid { get => uuid; set => uuid = value; }
-	public int Projectuuid { get => projectuuid; set => projectuuid = value; }
+	public Guid Uuid { get => uuid; set => uuid = value; }
+	public Guid Projectuuid { get => projectuuid; set => projectuuid = value; }
 	public string Description { get => description; set => description = value; }
 	public decimal Amount { get => amount; set => amount = value; }
 	public DateTime Date { get => date; set => date = value; }
 	public bool IsPaid { get => isPaid; set => isPaid = value; }
 	public DateTime? PaymentDate { get => paymentDate; set => paymentDate = value; }
-	public PaymentMethod Method { get => method; set => method = value; }
 	private Project Project { get => project; set => project = value; }
 
-	public MarkAsPaid(DateTime paymentDate)
+	public void MarkAsPaid(DateTime paymentDate)
 	{
 		this.isPaid = true;
 		this.paymentDate = paymentDate;

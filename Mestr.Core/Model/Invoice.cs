@@ -1,9 +1,9 @@
 ﻿using System;
 
-public class Class1
+public class Invoice
 {
 	private Guid uuid;
-	private Guid projectuuid;
+	private Guid projectUuid;
 	private string invoiceNumber;
 	private DateTime invoiceDate;
 	private DateTime dueDate;
@@ -14,13 +14,12 @@ public class Class1
 	private InvoiceStatus status;
 	private string filePath;
 	private Project project;
-	private List<InvoiceLine> Lines;
 
-    public Class1(Guid? uuid = Guid.NewGuid(), Guid projectuuid, string invoiceNumber, DateTime invoiceDate, DateTime dueDate, decimal subTotal,
+    public Invoice(Guid uuid, Guid projectUuid, string invoiceNumber, DateTime invoiceDate, DateTime dueDate, decimal subTotal,
 		decimal vatPercentage, decimal vatAmount, decimal totalAmount, InvoiceStatus status, string filePath, Project project)
 	{
 		this.uuid = uuid;
-		this.projectuuid = projectuuid;
+		this.projectUuid = projectUuid;
 		this.invoiceNumber = invoiceNumber;
 		this.invoiceDate = invoiceDate;
 		this.dueDate = dueDate;
@@ -31,10 +30,9 @@ public class Class1
 		this.status = status;
 		this.filePath = filePath;
 		this.project = project;
-		this.Lines = new List<InvoiceLine>;
     }
-	public int Uuid { get => uuid; set => uuid = value; }
-	public int Projectuuid { get => projectuuid; set => projectuuid = value; }
+	public Guid Uuid { get => uuid; set => uuid = value; }
+	public Guid ProjectUuid { get => projectUuid; set => projectUuid = value; }
 	public string InvoiceNumber { get => invoiceNumber; set => invoiceNumber = value; }
 	public DateTime InvoiceDate { get => invoiceDate; set => invoiceDate = value; }
 	public DateTime DueDate { get => dueDate; set => dueDate = value; }
@@ -45,19 +43,18 @@ public class Class1
 	public InvoiceStatus Status { get => status; set => status = value; }
 	public string FilePath { get => filePath; set => filePath = value; }
 	public Project Project { get => project; set => project = value; }
-	public List<InvoiceLine> Lines { get => Lines; set => Lines = value; }
 
-	public void calculateTotal(//parameter input)
+	public void calculateTotal()//parameter input)
 	{
         // Implementation to calculate total amount
     }
 
-	public void generatePdf(//parameter input)
+	public void generatePdf()//parameter input)
 	{
         // Implementation to generate PDF invoice
     }
 
-	public void sendInvoice(//parameter input)
+	public void sendInvoice()//parameter input)
 	{
         // Implementation to send invoice to client
     }

@@ -5,7 +5,7 @@ public class Project
 {
     // Private fields
     private Guid uuid;
-    private int clientuuid;
+    private Guid clientUuid;
     private string name;
     private DateTime createdDate;
     private DateTime startDate;
@@ -13,15 +13,15 @@ public class Project
     private string description;
     private ProjectStatus status;
     private Client client;
-    private List<Expenses> expenses;
-    private List<Earnings> earnings;
+    private List<Expense> expenses;
+    private List<Earning> earnings;
     private decimal totalExpenses;
     private decimal totalEarnings;
     private decimal result;
     private double profitability;
 
     // Constructor
-    public Project(Guid? uuid = Guid.NewGuid(), Guid clientUuid, string name, DateTime startDate, 
+    public Project(Guid uuid, Guid clientUuid, string name, DateTime startDate, 
                    string description, ProjectStatus status, Client client,
                    DateTime? endDate = null)
     {
@@ -36,8 +36,8 @@ public class Project
         this.endDate = endDate;
 
         // Initialiser lister
-        this.expenses = new List<Expenses>();
-        this.earnings = new List<Earnings>();
+        this.expenses = new List<Expense>();
+        this.earnings = new List<Earning>();
 
         this.totalExpenses = 0;
         this.totalEarnings = 0;
@@ -46,16 +46,16 @@ public class Project
     }
 
     // Properties 
-    public int Uuid { get => uuid; set => uuid = value; }
-    public int ClientUuid { get => clientUuid; set => clientUuid = value; }
+    public Guid Uuid { get => uuid; set => uuid = value; }
+    public Guid ClientUuid { get => clientUuid; set => clientUuid = value; }
     public string Name { get => name; set => name = value; }
     public DateTime StartDate { get => startDate; set => startDate = value; }
     public DateTime? EndDate { get => endDate; set => endDate = value; }
     public string Description { get => description; set => description = value; }
     public ProjectStatus Status { get => status; set => status = value; }
     public Client Client { get => client; set => client = value; }
-    public List<Expenses> Expenses { get => expenses; set => expenses = value; }
-    public List<Earnings> Earnings { get => earnings; set => earnings = value; }
+    public List<Expense> Expenses { get => expenses; set => expenses = value; }
+    public List<Earning> Earnings { get => earnings; set => earnings = value; }
     public decimal TotalExpenses { get => totalExpenses; set => totalExpenses = value; }
     public decimal TotalEarnings { get => totalEarnings; set => totalEarnings = value; }
     public decimal Result { get => result; set => result = value; }
@@ -63,6 +63,7 @@ public class Project
 
     public double calculateEconomy()
     {
+        return (double)(totalEarnings - totalExpenses);
     }
     
     public bool isFinished()
