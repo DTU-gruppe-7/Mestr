@@ -10,7 +10,7 @@ namespace Mestr.Data.DbContext
     internal class SqliteDbContext
     {
         private readonly string _connectionString;
-        public SqliteDbContext(string connectionString)
+        public SqliteDbContext()
         {
             _connectionString = $"Data Source=data.db";
         }
