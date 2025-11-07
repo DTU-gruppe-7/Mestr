@@ -7,7 +7,7 @@ namespace Mestr.Data.Repository
 {
     public class ProjectRepository : IRepository<Project>
     {
-        public void Add(Project uuid)
+        public void Add(Project entity)
         {
             if (entity == null)
             {
@@ -19,7 +19,7 @@ namespace Mestr.Data.Repository
             using var command = connection.CreateCommand();
             command.CommandText = "INSERT INTO Projects (uuid, name, startDate, endDate, description, status, createdDate)" +
                 "VALUES (@uuid, @name, @startDate, @endDate, @description, @status, @createdDate);";
-            command.Parameters.AddWithValue("@uuid", uuid.ToString());
+            command.Parameters.AddWithValue("@uuid", entity.ToString());
             command.Parameters.AddWithValue("@name", entity.Name);
             command.Parameters.AddWithValue("@startDate", entity.StartDate);
             command.Parameters.AddWithValue("@endDate", entity.EndDate);
@@ -40,9 +40,9 @@ namespace Mestr.Data.Repository
 
         }
 
-        public Project GetByUUID(Guid uuid)
+        public Project GetByUuid(Guid uuid)
         {
-            if (uuid == null)
+            if (uuid == Guid.Empty)
             {
                 throw new ArgumentNullException(nameof(uuid));
             }
@@ -132,7 +132,7 @@ namespace Mestr.Data.Repository
 
         public void Delete(Guid uuid)
         {
-            if (uuid == null)
+            if (uuid == Guid.Empty)
             {
                 throw new ArgumentNullException(nameof(uuid));
             }

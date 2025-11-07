@@ -7,11 +7,11 @@ namespace Mestr.Data.Repository
 {
     public class ExpenseRepository : IRepository<Expense>
     {
-        public void Add(Expense uuid)
+        public void Add(Expense entity)
         {
-            if (uuid == null)
+            if (entity == null)
             {
-                throw new ArgumentNullException(nameof(uuid));
+                throw new ArgumentNullException(nameof(entity));
             }
 
             SqliteDbContext dbContext = new SqliteDbContext();
@@ -32,7 +32,7 @@ namespace Mestr.Data.Repository
             connection.Close();
         }
 
-        public Expense GetByUUID(Guid uuid)
+        public Expense GetByUuid(Guid uuid)
         {
             if (uuid == Guid.Empty)
             {

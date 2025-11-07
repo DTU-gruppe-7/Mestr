@@ -17,7 +17,7 @@ namespace Mestr.Data.Repository
             SqliteDbContext dbContext = new SqliteDbContext();
             SqliteConnection connection = dbContext.CreateConnection();
             using var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO earning (uuid, projectuuid, description, amount, date, isPaid, paymentDate, method, project) " +
+            command.CommandText = "INSERT INTO earnings (uuid, projectuuid, description, amount, date, isPaid, paymentDate, method, project) " +
                 "VALUES (@uuid, @projectUuid, @description, @amount, @date, @isPaid, @paymentDate, @method, @project);";
             command.Parameters.AddWithValue("@uuid", entity.uuid.ToString());
             command.Parameters.AddWithValue("@projectUuid", entity.projectuuid.ToString());
@@ -32,7 +32,7 @@ namespace Mestr.Data.Repository
             connection.Close();
         }
 
-        public Earning GetByUUID(Guid uuid)
+        public Earning GetByUuid(Guid uuid)
         {
             if (uuid == Guid.Empty)
             {
@@ -42,7 +42,7 @@ namespace Mestr.Data.Repository
             SqliteDbContext dbContext = new SqliteDbContext();
             SqliteConnection connection = dbContext.CreateConnection();
             using var command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM earning WHERE uuid = @uuid";
+            command.CommandText = "SELECT * FROM earnings WHERE uuid = @uuid";
             command.Parameters.AddWithValue("@uuid", uuid.ToString());
 
             using var reader = command.ExecuteReader();
@@ -75,7 +75,7 @@ namespace Mestr.Data.Repository
             SqliteDbContext dbContext = new SqliteDbContext();
             SqliteConnection connection = dbContext.CreateConnection();
             using var command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM earning";
+            command.CommandText = "SELECT * FROM earnings";
 
             using var reader = command.ExecuteReader();
             while (reader.Read())
@@ -109,7 +109,7 @@ namespace Mestr.Data.Repository
             SqliteDbContext dbContext = new SqliteDbContext();
             SqliteConnection connection = dbContext.CreateConnection();
             using var command = connection.CreateCommand();
-            command.CommandText = "UPDATE earning " +
+            command.CommandText = "UPDATE earnings " +
                 "SET projectuuid = @projectUuid, " +
                 "description = @description, " +
                 "amount = @amount, " +
@@ -143,7 +143,7 @@ namespace Mestr.Data.Repository
             SqliteDbContext dbContext = new SqliteDbContext();
             SqliteConnection connection = dbContext.CreateConnection();
             using var command = connection.CreateCommand();
-            command.CommandText = "DELETE FROM earning WHERE uuid = @uuid";
+            command.CommandText = "DELETE FROM earnings WHERE uuid = @uuid";
             command.Parameters.AddWithValue("@uuid", uuid.ToString());
             command.ExecuteNonQuery();
             connection.Close();

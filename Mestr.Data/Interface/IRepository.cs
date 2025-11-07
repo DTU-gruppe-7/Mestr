@@ -9,9 +9,9 @@ namespace Mestr.Data.Interface
     internal interface IRepository<T>
     {
         void Add(T entity);
-        T GetByID(int uuid);
+        T GetByUuid(Guid uuid);
         IEnumerable<T> GetAll();
         void Update(T entity);
-        void Delete(int uuid);
+        void Delete(Guid uuid);
     }
 }
