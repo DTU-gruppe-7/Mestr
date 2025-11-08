@@ -37,9 +37,15 @@ namespace Mestr.Services.Service
             return newProject;
         }
 
+        public Project? GetProjectByUuid(Guid uuid)
+        {
+            return _projectRepository.GetByUuid(uuid);
+        }
+
         public IEnumerable<Project> LoadAllProjects()
         {
             return _projectRepository.GetAll();
-        } 
+        }
+
     }
 }
