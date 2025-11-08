@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Mestr.UI.views
+namespace Mestr.UI.View
 {
     /// <summary>
-    /// Interaction logic for DashBoardView.xaml
+    /// Interaction logic for ProjectView.xaml
     /// </summary>
-    public partial class DashBoardView : UserControl
+    public partial class ProjectView : UserControl
     {
-        public DashBoardView()
+        public ProjectView()
         {
             InitializeComponent();
         }

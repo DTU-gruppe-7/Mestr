@@ -4,15 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Mestr.UI"
-       
-        xmlns:views="clr-namespace:Mestr.UI.views"
-        xmlns:viewmodels="clr.namespace:Mestr.UI.ViewModels"
-        
+        xmlns:views="clr-namespace:Mestr.UI.View"
+        xmlns:viewmodels="clr-namespace:Mestr.UI.ViewModels"
         mc:Ignorable="d"
         Title="MainWindow" Height="720" Width="1280">
-    
- 
+
     <Grid>
-        <views:DashBoardView/>
+        <views:ProjectView/>
     </Grid>
 </Window>
