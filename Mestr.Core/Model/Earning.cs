@@ -1,5 +1,6 @@
 ﻿using System;
 
+namespace Mestr.Core.Model;
 public class Earning
 {
 	private Guid uuid;

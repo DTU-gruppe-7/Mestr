@@ -1,13 +1,19 @@
 ﻿using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Microsoft.Data.Sqlite;
-using System.Runtime.InteropServices.Marshalling;
-using System.Xml.Linq;
+using Mestr.Core.Model;
+using Mestr.Core.Enum;
 
 namespace Mestr.Data.Repository
 {
     public class ProjectRepository : IRepository<Project>
     {
+        private readonly SqliteDbContext _dbContext;
+        private readonly SqliteConnection _connection;
+        public ProjectRepository() {
+            _dbContext = SqliteDbContext.Instance;
+            _connection = _dbContext.GetConnection();
+        }
         public void Add(Project entity)
         {
             if (entity == null)
@@ -15,9 +21,8 @@ namespace Mestr.Data.Repository
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            SqliteDbContext dbContext = new SqliteDbContext();
-            SqliteConnection connection = dbContext.CreateConnection();
-            using var command = connection.CreateCommand();
+            
+            using var command = _connection.CreateCommand();
             command.CommandText = "INSERT INTO Projects (uuid, name,createdDate, startDate, endDate, description, status)" +
                 "VALUES (@uuid, @name, @createdDate, @startDate, @endDate, @description, @status);";
             command.Parameters.AddWithValue("@uuid", entity.Uuid);
@@ -26,49 +31,35 @@ namespace Mestr.Data.Repository
             command.Parameters.AddWithValue("@startDate", entity.StartDate);
             command.Parameters.AddWithValue("@endDate", entity.EndDate);
             command.Parameters.AddWithValue("@description", entity.Description);
-            command.Parameters.AddWithValue("@status", entity.Status);
+            command.Parameters.AddWithValue("@status", entity.Status.ToString());
             command.ExecuteNonQuery();
-            connection.Close();
-
-            // Udkommenteret, hvis datatypen skal defineres eksplicit
-            // command.Parameters.Add("@uuid", System.Data.DbType.Int32).Value = entity.Id;
-            // command.Parameters.Add("@Name", System.Data.DbType.String).Value = entity.Name;
-            // command.Parameters.Add("@startDate", System.Data.DbType.DateTime).Value = entity.StartDate;
-            // command.Parameters.Add("@endDate", System.Data.DbType.DateTime).Value = entity.EndDate;
-            // command.Parameters.Add("@description", System.Data.DbType.String).Value = entity.Description;
-            // command.Parameters.Add("@status", System.Data.DbType.String).Value = entity.Status;
-            // command.Parameters.Add("@createdDate", System.Data.DbType.DateTime).Value = entity.CreatedDate;
-
         }
 
-        public Project GetByUuid(Guid uuid)
+        public Project? GetByUuid(Guid uuid)
         {
             if (uuid == Guid.Empty)
             {
                 throw new ArgumentNullException(nameof(uuid));
             }
 
-
-            SqliteDbContext dbContext = new SqliteDbContext();
-            SqliteConnection connection = dbContext.CreateConnection();
-            using var command = connection.CreateCommand();
+            using var command = _connection.CreateCommand();
             command.CommandText = "SELECT * FROM projects WHERE uuid = @uuid";
-            command.Parameters.AddWithValue("@uuid", uuid.ToString());
+            
+            command.Parameters.AddWithValue("@uuid", uuid);
 
             using var reader = command.ExecuteReader();
             while (reader.Read()) {
                 var project = new Project(
-                                        Guid.Parse(reader["uuid"].ToString()),
-                    reader["name"].ToString(),
+                    Guid.Parse(reader["uuid"].ToString()!),
+                    reader["name"].ToString()!,
+                    reader.GetDateTime(reader.GetOrdinal("createdDate")),
                     reader.GetDateTime(reader.GetOrdinal("startDate")),
-                    reader.GetDateTime(reader.GetOrdinal("endDate")),
-                    reader["description"].ToString(),
+                    reader["description"].ToString()!,
                     Enum.TryParse<ProjectStatus>(reader["status"].ToString(), out var status)
                     ? status
                     : ProjectStatus.Planned, // default fallback value
-                    reader.GetDateTime(reader.GetOrdinal("createdDate"))
+                    reader.GetDateTime(reader.GetOrdinal("endDate"))
                     );
-                connection.Close();
                 return project;
             }
             return null;
@@ -78,29 +69,25 @@ namespace Mestr.Data.Repository
         {
             var projects = new List<Project>();
 
-            SqliteDbContext dbContext = new SqliteDbContext();
-            SqliteConnection connection = dbContext.CreateConnection();
-            using var command = connection.CreateCommand();
+            using var command = _connection.CreateCommand();
             command.CommandText = "SELECT * FROM Projects";
 
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
                 var project = new Project(
-                    Guid.Parse(reader["uuid"].ToString()),
-                    reader["name"].ToString(),
+                    Guid.Parse(reader["uuid"].ToString()!),
+                    reader["name"].ToString()!,
+                    reader.GetDateTime(reader.GetOrdinal("createdDate")),
                     reader.GetDateTime(reader.GetOrdinal("startDate")),
-                    reader.GetDateTime(reader.GetOrdinal("endDate")),
-                    reader["description"].ToString(),
+                    reader["description"].ToString()!,
                     Enum.TryParse<ProjectStatus>(reader["status"].ToString(), out var status) 
         ? status 
         : ProjectStatus.Planned, // default fallback value
-                    reader.GetDateTime(reader.GetOrdinal("createdDate"))
+                    reader.GetDateTime(reader.GetOrdinal("endDate"))
                     );
                 projects.Add(project);
             }
-
-            connection.Close();
             return projects;
         }
 
@@ -110,16 +97,13 @@ namespace Mestr.Data.Repository
             {
                 throw new ArgumentNullException(nameof(entity));
             }
-
-            SqliteDbContext dbContext = new SqliteDbContext();
-            SqliteConnection connection = dbContext.CreateConnection();
-            using var command = connection.CreateCommand();
+            using var command = _connection.CreateCommand();
             command.CommandText = "UPDATE projects " +
-                "SET name = @name " +
-                "SET startDate = @startDate " +
-                "SET endDate = @endDate " +
-                "SET description = @description " +
-                "SET status = @status " +
+                "SET name = @name, " +
+                "startDate = @startDate, " +
+                "endDate = @endDate, " +
+                "description = @description, " +
+                "status = @status " +
                 "WHERE uuid = @uuid";
 
             command.Parameters.AddWithValue("@uuid", entity.Uuid);
@@ -127,9 +111,8 @@ namespace Mestr.Data.Repository
             command.Parameters.AddWithValue("@startDate", entity.StartDate);
             command.Parameters.AddWithValue("@endDate", entity.EndDate);
             command.Parameters.AddWithValue("@description", entity.Description);
-            command.Parameters.AddWithValue("@status", entity.Status);
+            command.Parameters.AddWithValue("@status", entity.Status.ToString());
             command.ExecuteNonQuery();
-            connection.Close();
 
         }
 
@@ -139,14 +122,10 @@ namespace Mestr.Data.Repository
             {
                 throw new ArgumentNullException(nameof(uuid));
             }
-
-            SqliteDbContext dbContext = new SqliteDbContext();
-            SqliteConnection connection = dbContext.CreateConnection();
-            using var command = connection.CreateCommand();
+            using var command = _connection.CreateCommand();
             command.CommandText = "DELETE FROM projects WHERE uuid = @uuid";
-            command.Parameters.AddWithValue("@uuid", uuid.ToString());
+            command.Parameters.AddWithValue("@uuid", uuid);
             command.ExecuteNonQuery();
-            connection.Close();
         }
     }
 }
