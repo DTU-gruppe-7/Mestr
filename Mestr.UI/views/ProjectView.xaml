@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mestr.UI.Views"
+             xmlns:viewmodels="clr-namespace:Mestr.UI.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
@@ -17,7 +18,7 @@
 
         <DockPanel Grid.Row="0" Margin="10">
             <Button Content="Home" DockPanel.Dock="Left"
-                    Command="{Binding GoHomeCommand}"
+                   
                     FontSize="12" Height="34" Width="71"
                     Background="White" Foreground="Black"
                     BorderThickness="1,1,1,1" Padding="14,8"
@@ -55,25 +56,25 @@
                                Foreground="#475569" 
                                FontWeight="SemiBold" 
                                Margin="0,0,0,5"/>
-                    <TextBox Margin="0,0,0,15" 
-                             HorizontalAlignment="Stretch"
-                             Text="{Binding ProjektNavn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Text="{Binding ProjectName, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,15" 
+                             HorizontalAlignment="Stretch"/>
 
                     <TextBlock Text="KUNDENAVN" 
                                Foreground="#475569" 
                                FontWeight="SemiBold" 
                                Margin="0,0,0,5"/>
-                    <TextBox Margin="0,0,0,15" 
-                             HorizontalAlignment="Stretch"
-                             Text="{Binding KundeNavn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Text="{Binding ClientName, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,15" 
+                             HorizontalAlignment="Stretch" />
 
                     <TextBlock Text="DEADLINE" 
                                Foreground="#475569" 
                                FontWeight="SemiBold" 
                                Margin="0,0,0,5"/>
-                    <DatePicker HorizontalAlignment="Stretch" 
-                                Margin="0,0,0,15"
-                                SelectedDate="{Binding Deadline, Mode=TwoWay}" />
+                    <DatePicker SelectedDate="{Binding Deadline}"
+                                HorizontalAlignment="Stretch" 
+                                Margin="0,0,0,15" />
                 </StackPanel>
 
                 <Grid Grid.Column="2" Margin="20,0,0,0">
@@ -92,19 +93,19 @@
                                Margin="0,0,0,5"/>
 
                     <TextBox Grid.Row="2"
+                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                              TextWrapping="Wrap" 
                              HorizontalAlignment="Stretch" 
                              VerticalAlignment="Stretch" AcceptsReturn="True" 
-                             VerticalScrollBarVisibility="Auto"
-                             Text="{Binding Beskrivelse, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                             VerticalScrollBarVisibility="Auto"/>
                 </Grid>
 
             </Grid>
         </Border>
         <StackPanel Grid.Row="2" Orientation="Horizontal"
                     HorizontalAlignment="Right" Margin="10">
-            <Button Content="Annuller" Margin="0,0,10,0"
-                    Command="{Binding AnnullerCommand}"
+            <Button Content="Annuller" Command="{Binding CancelCommand}" Margin="0,0,10,0"
+                    
                     Background="#0057E8" Foreground="White"
                     BorderThickness="0" Padding="14,8"
                     FontWeight="SemiBold" Cursor="Hand">
@@ -114,8 +115,8 @@
                     </Style>
                 </Button.Resources>
             </Button>
-            <Button Content="Opret projekt" 
-                    Command="{Binding OpretProjektCommand}"
+            <Button Content="Opret projekt" Command="{Binding CreateProjectCommand}"
+                    
                     Background="#0057E8" Foreground="White"
                     BorderThickness="0" Padding="14,8"
                     FontWeight="SemiBold" Cursor="Hand">
