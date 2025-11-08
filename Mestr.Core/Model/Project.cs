@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Mestr.Core.Enum;
 
+namespace Mestr.Core.Model;
 public class Project
 {
     // Private fields

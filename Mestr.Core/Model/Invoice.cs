@@ -1,4 +1,7 @@
 ﻿using System;
+using Mestr.Core.Enum;
+
+namespace Mestr.Core.Model;
 
 public class Invoice
 {

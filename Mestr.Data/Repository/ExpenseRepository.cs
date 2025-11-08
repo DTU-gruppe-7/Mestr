@@ -1,9 +1,8 @@
 ﻿using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Microsoft.Data.Sqlite;
-using System;
-using System.Runtime.InteropServices.Marshalling;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using Mestr.Core.Model;
+using Mestr.Core.Enum;
 
 namespace Mestr.Data.Repository
 {

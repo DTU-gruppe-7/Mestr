@@ -1,8 +1,8 @@
 ﻿using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Microsoft.Data.Sqlite;
-using System.Runtime.InteropServices.Marshalling;
-using System.Xml.Linq;
+using Mestr.Core.Model;
+using Mestr.Core.Enum;
 
 namespace Mestr.Data.Repository
 {
