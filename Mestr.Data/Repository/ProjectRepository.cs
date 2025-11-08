@@ -100,10 +100,10 @@ namespace Mestr.Data.Repository
             using var command = _connection.CreateCommand();
             command.CommandText = "UPDATE projects " +
                 "SET name = @name, " +
-                "SET startDate = @startDate, " +
-                "SET endDate = @endDate, " +
-                "SET description = @description, " +
-                "SET status = @status " +
+                "startDate = @startDate, " +
+                "endDate = @endDate, " +
+                "description = @description, " +
+                "status = @status " +
                 "WHERE uuid = @uuid";
 
             command.Parameters.AddWithValue("@uuid", entity.Uuid);
