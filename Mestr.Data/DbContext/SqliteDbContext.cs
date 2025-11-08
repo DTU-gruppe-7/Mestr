@@ -1,20 +1,24 @@
-﻿using System;
+﻿using Microsoft.Data.Sqlite;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
-using System.IO;
 
 namespace Mestr.Data.DbContext
 {
     internal class SqliteDbContext
     {
+        private static SqliteDbContext? _instance;
+        private static readonly object _lock = new object();
         private readonly string _connectionString;
-        public SqliteDbContext()
+        private SqliteConnection? _connection;
+        private SqliteDbContext()
         {
             // Store in user's AppData folder
-            // %appdata%\Local\Mestr\data.db
+            // %LocalAppData%\Mestr\data.db
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var dbFolder = Path.Combine(appDataPath, "Mestr");
             Directory.CreateDirectory(dbFolder); // Ensure folder exists
@@ -22,6 +26,24 @@ namespace Mestr.Data.DbContext
             
             _connectionString = $"Data Source={dbPath}";
             InitializeDatabase();
+        }
+
+        public static SqliteDbContext Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    lock (_lock) // ✅ ADDED thread safety
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = new SqliteDbContext();
+                        }
+                    }
+                }
+                return _instance;
+            }
         }
 
         private void InitializeDatabase()
@@ -66,16 +88,39 @@ namespace Mestr.Data.DbContext
             command.ExecuteNonQuery();
         }
 
-        public SqliteConnection CreateConnection()
+        public SqliteConnection GetConnection()
         {
-            var connection = new SqliteConnection(_connectionString);
-            connection.Open();
-            return connection;
+            if (_connection == null || _connection.State != System.Data.ConnectionState.Open)
+            {
+                lock (_lock) // ✅ ADDED thread safety
+                {
+                    if (_connection == null || _connection.State != System.Data.ConnectionState.Open)
+                    {
+                        _connection?.Dispose();
+                        _connection = new SqliteConnection(_connectionString);
+                        _connection.Open();
+                    }
+                }
+            }
+            return _connection;
         }
 
         public SqliteTransaction BeginTransaction(SqliteConnection connection)
         {
             return connection.BeginTransaction();
+        }
+
+        public void CloseConnection()
+        {
+            lock (_lock) // ✅ ADDED thread safety
+            {
+                if (_connection != null && _connection.State == System.Data.ConnectionState.Open)
+                {
+                    _connection.Close();
+                    _connection.Dispose();
+                    _connection = null;
+                }
+            }
         }
     }
 }

@@ -8,16 +8,20 @@ namespace Mestr.Data.Repository
 {
     public class ExpenseRepository : IRepository<Expense>
     {
+        private readonly SqliteDbContext _dbContext;
+        private readonly SqliteConnection _connection;
+
+        public ExpenseRepository() {
+            _dbContext = SqliteDbContext.Instance;
+            _connection = _dbContext.GetConnection();
+        }
         public void Add(Expense entity)
         {
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
-
-            SqliteDbContext dbContext = new SqliteDbContext();
-            SqliteConnection connection = dbContext.CreateConnection();
-            using var command = connection.CreateCommand();
+            using var command = _connection.CreateCommand();
             command.CommandText = "INSERT INTO expenses (uuid, projectUuid, description, amount, date, category, isAccepted) " +
                 "VALUES (@uuid, @projectUuid, @description, @amount, @date, @category, @isAccepted);";
             command.Parameters.AddWithValue("@uuid", entity.Uuid);
@@ -28,19 +32,16 @@ namespace Mestr.Data.Repository
             command.Parameters.AddWithValue("@category", entity.Category);
             command.Parameters.AddWithValue("@isAccepted", entity.IsAccepted);
             command.ExecuteNonQuery();
-            connection.Close();
         }
 
-        public Expense GetByUuid(Guid uuid)
+        public Expense? GetByUuid(Guid uuid)
         {
             if (uuid == Guid.Empty)
             {
                 throw new ArgumentNullException(nameof(uuid));
             }
 
-            SqliteDbContext dbContext = new SqliteDbContext();
-            SqliteConnection connection = dbContext.CreateConnection();
-            using var command = connection.CreateCommand();
+            using var command = _connection.CreateCommand();
             command.CommandText = "SELECT * FROM expenses WHERE uuid = @uuid";
             command.Parameters.AddWithValue("@uuid", uuid);
 
@@ -49,9 +50,9 @@ namespace Mestr.Data.Repository
             while (reader.Read())
             {
                 var expense = new Expense(
-                    Guid.Parse(reader["uuid"].ToString()),
-                    Guid.Parse(reader["projectuuid"].ToString()),
-                    reader["description"].ToString(),
+                    Guid.Parse(reader["uuid"].ToString()!),
+                    Guid.Parse(reader["projectuuid"].ToString()!),
+                    reader["description"].ToString()!,
                     reader.GetDecimal(reader.GetOrdinal("amount")),
                     reader.GetDateTime(reader.GetOrdinal("date")),
                     Enum.TryParse<ExpenseCategory>(reader["category"].ToString(), out var status)
@@ -59,11 +60,9 @@ namespace Mestr.Data.Repository
                     : ExpenseCategory.Other, // default fallback value
                     reader.GetBoolean(reader.GetOrdinal("isAccepted"))
                 );
-                connection.Close();
                 return expense;
             }
 
-            connection.Close();
             return null;
         }
 
@@ -71,18 +70,16 @@ namespace Mestr.Data.Repository
         {
             var expenses = new List<Expense>();
 
-            SqliteDbContext dbContext = new SqliteDbContext();
-            SqliteConnection connection = dbContext.CreateConnection();
-            using var command = connection.CreateCommand();
+            using var command = _connection.CreateCommand();
             command.CommandText = "SELECT * FROM expense";
 
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
                 var expense = new Expense(
-                    Guid.Parse(reader["uuid"].ToString()),
-                    Guid.Parse(reader["projectuuid"].ToString()),
-                    reader["description"].ToString(),
+                    Guid.Parse(reader["uuid"].ToString()!),
+                    Guid.Parse(reader["projectuuid"].ToString()!),
+                    reader["description"].ToString()!,
                     reader.GetDecimal(reader.GetOrdinal("amount")),
                     reader.GetDateTime(reader.GetOrdinal("date")),
                     Enum.TryParse<ExpenseCategory>(reader["category"].ToString(), out var status)
@@ -94,7 +91,6 @@ namespace Mestr.Data.Repository
                 expenses.Add(expense);
             }
 
-            connection.Close();
             return expenses;
         }
 
@@ -105,9 +101,7 @@ namespace Mestr.Data.Repository
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            SqliteDbContext dbContext = new SqliteDbContext();
-            SqliteConnection connection = dbContext.CreateConnection();
-            using var command = connection.CreateCommand();
+            using var command = _connection.CreateCommand();
             command.CommandText = "UPDATE expenses " +
                 "SET projectuuid = @projectUuid, " +
                 "description = @description, " +
@@ -125,7 +119,6 @@ namespace Mestr.Data.Repository
             command.Parameters.AddWithValue("@isAccepted", entity.IsAccepted);
             command.Parameters.AddWithValue("@uuid", entity.Uuid);
             command.ExecuteNonQuery();
-            connection.Close();
         }
 
         public void Delete(Guid uuid)
@@ -134,14 +127,10 @@ namespace Mestr.Data.Repository
             {
                 throw new ArgumentNullException(nameof(uuid));
             }
-
-            SqliteDbContext dbContext = new SqliteDbContext();
-            SqliteConnection connection = dbContext.CreateConnection();
-            using var command = connection.CreateCommand();
+            using var command = _connection.CreateCommand();
             command.CommandText = "DELETE FROM expenses WHERE uuid = @uuid";
             command.Parameters.AddWithValue("@uuid", uuid);
             command.ExecuteNonQuery();
-            connection.Close();
         }
     }
 }
