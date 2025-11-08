@@ -107,13 +107,13 @@ namespace Mestr.Data.Repository
                 "amount = @amount, " +
                 "date = @date, " +
                 "category = @category, " +
-                "isAccepted = @isAccepted, " +
+                "isAccepted = @isAccepted " +
                 "WHERE uuid = @uuid";
 
             command.Parameters.AddWithValue("@description", entity.Description);
             command.Parameters.AddWithValue("@amount", entity.Amount);
             command.Parameters.AddWithValue("@date", entity.Date);
-            command.Parameters.AddWithValue("@category", entity.Category);
+            command.Parameters.AddWithValue("@category", entity.Category.ToString());
             command.Parameters.AddWithValue("@isAccepted", entity.IsAccepted);
             command.Parameters.AddWithValue("@uuid", entity.Uuid);
             command.ExecuteNonQuery();

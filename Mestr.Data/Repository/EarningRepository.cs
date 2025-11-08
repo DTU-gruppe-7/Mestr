@@ -94,15 +94,13 @@ namespace Mestr.Data.Repository
             }
             using var command = _connection.CreateCommand();
             command.CommandText = "UPDATE earnings " +
-                "SET projectuuid = @projectUuid, " +
-                "description = @description, " +
+                "SET description = @description, " +
                 "amount = @amount, " +
                 "date = @date, " +
                 "isPaid = @isPaid " +
                 "WHERE uuid = @uuid";
 
             command.Parameters.AddWithValue("@uuid", entity.Uuid);
-            command.Parameters.AddWithValue("@projectUuid", entity.ProjectUuid);
             command.Parameters.AddWithValue("@description", entity.Description);
             command.Parameters.AddWithValue("@amount", entity.Amount);
             command.Parameters.AddWithValue("@date", entity.Date);

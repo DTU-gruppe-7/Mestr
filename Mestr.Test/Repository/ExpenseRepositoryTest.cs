@@ -58,12 +58,15 @@ namespace Mestr.Test.Repository
         }
         [Fact]
 
-        public void GetByUuid_NonExistentUuid_ThrowsException()
+        public void GetByUuid_NonExistentUuid_ReturnNull()
         {
             // Arrange
             var nonExistentUuid = Guid.NewGuid();
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => _expenseRepository.GetByUuid(nonExistentUuid));
+            // Act
+            Expense retrievedExpense = _expenseRepository.GetByUuid(nonExistentUuid);
+            // Assert
+            Assert.Null(retrievedExpense);
+
         }
 
         [Fact]
