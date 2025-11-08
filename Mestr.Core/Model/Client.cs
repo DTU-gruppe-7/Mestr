@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Mestr.Core.Interface;
+using System;
 using System.Collections.Generic;
 
 namespace Mestr.Core.Model;
-public class Client
+public class Client : IClient
 {
-	private Guid uuid;
+	private readonly Guid _uuid;
 	private string name;
 	private string email;
 	private string phoneNumber;
@@ -12,15 +13,14 @@ public class Client
 	private string postalAddress;
 	private string city;
 	private string? cvr;
-	private DateTime initDate;
-    private List<Project> projects;
+	private readonly DateTime initDate;
+    private IList<IProject> projects;
 
     // Constructor
     public Client(Guid uuid, string name, string email, string phoneNumber, string address,
-                  string postalAddress, string city, List<Project>? projects = null,
-                  string? cvr = null)
+                  string postalAddress, string city, string? cvr = null)
     {
-        this.uuid = uuid;
+        this._uuid = uuid;
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
@@ -29,21 +29,48 @@ public class Client
         this.city = city;
         this.cvr = cvr;
         this.initDate = DateTime.Now;
-        this.projects = projects ?? new List<Project>();
+        this.projects = new List<IProject>();
     }
 
 
     // Properties 
-    public Guid UUId { get => uuid; }
-    public string Name { get => name; set => name = value; }
-    public string Email { get => email; set => email = value; }
-    public string PhoneNumber { get => phoneNumber; set => phoneNumber = value; }
+    public Guid Uuid { get => _uuid; }
+    public string Name {get => name; set => name = value;}
+    
+    public string Email 
+    { 
+        get => email; 
+        set 
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Email cannot be empty.", nameof(Email));
+            
+            if (!IsValidEmail(value))
+                throw new ArgumentException("Invalid email format.", nameof(Email));
+            
+            email = value;
+        } 
+    }
+    public string PhoneNumber 
+    { 
+        get => phoneNumber; 
+        set 
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Phone number cannot be empty.", nameof(PhoneNumber));
+            
+            if (!IsValidPhoneNumber(value))
+                throw new ArgumentException("Invalid phone number format.", nameof(PhoneNumber));
+            
+            phoneNumber = value;
+        } 
+    }
     public string Address { get => address; set => address = value; }
     public string PostalAddress { get => postalAddress; set => postalAddress = value; }
     public string City { get => city; set => city = value; }
     public string? Cvr { get => cvr; set => cvr = value; }
-    public DateTime InitDate { get => initDate; }
-    public List<Project> Projects { get => projects; set => projects = value; }
+    public DateTime InitDate { get; }
+    public IList<IProject> Projects { get => projects; set => projects = value; }
 
     // Get entire address
     public string GetFullAddress()
@@ -57,4 +84,26 @@ public class Client
         return !string.IsNullOrEmpty(cvr);
     }
 
+    private static bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+        
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool IsValidPhoneNumber(string phoneNumber)
+    {
+        // A simple phone number validation: check if it contains only digits and has a valid length
+        // This is a basic validation, you can expand it based on your requirements
+        return phoneNumber.All(char.IsDigit) && phoneNumber.Length >= 7 && phoneNumber.Length <= 15;
+    }
 }

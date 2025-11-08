@@ -1,11 +1,12 @@
 ﻿using System;
 using Mestr.Core.Enum;
+using Mestr.Core.Interface;
 
 namespace Mestr.Core.Model;
 
-public class Invoice
+public class Invoice : IInvoice
 {
-	private Guid uuid;
+	private readonly Guid _uuid;
 	private Guid projectUuid;
 	private string invoiceNumber;
 	private DateTime invoiceDate;
@@ -16,12 +17,12 @@ public class Invoice
 	private decimal totalAmount;
 	private InvoiceStatus status;
 	private string filePath;
-	private Project project;
+	private IProject project;
 
     public Invoice(Guid uuid, Guid projectUuid, string invoiceNumber, DateTime invoiceDate, DateTime dueDate, decimal subTotal,
-		decimal vatPercentage, decimal vatAmount, decimal totalAmount, InvoiceStatus status, string filePath, Project project)
+		decimal vatPercentage, decimal vatAmount, decimal totalAmount, InvoiceStatus status, string filePath, IProject project)
 	{
-		this.uuid = uuid;
+		this._uuid = uuid;
 		this.projectUuid = projectUuid;
 		this.invoiceNumber = invoiceNumber;
 		this.invoiceDate = invoiceDate;
@@ -34,8 +35,8 @@ public class Invoice
 		this.filePath = filePath;
 		this.project = project;
     }
-	public Guid Uuid { get => uuid;}
-	public Guid ProjectUuid { get => projectUuid;}
+	public Guid Uuid { get => _uuid;}
+	public Guid ProjectUuid { get => projectUuid; set => projectUuid = value; }
 	public string InvoiceNumber { get => invoiceNumber; set => invoiceNumber = value; }
 	public DateTime InvoiceDate { get => invoiceDate; set => invoiceDate = value; }
 	public DateTime DueDate { get => dueDate; set => dueDate = value; }
@@ -45,20 +46,6 @@ public class Invoice
 	public decimal TotalAmount { get => totalAmount; set => totalAmount = value; }
 	public InvoiceStatus Status { get => status; set => status = value; }
 	public string FilePath { get => filePath; set => filePath = value; }
-	public Project Project { get => project; set => project = value; }
+	public IProject Project { get => project; set => project = value; }
 
-	public void calculateTotal()//parameter input)
-	{
-        // Implementation to calculate total amount
-    }
-
-	public void generatePdf()//parameter input)
-	{
-        // Implementation to generate PDF invoice
-    }
-
-	public void sendInvoice()//parameter input)
-	{
-        // Implementation to send invoice to client
-    }
 }
