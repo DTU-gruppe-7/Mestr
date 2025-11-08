@@ -26,7 +26,7 @@ namespace Mestr.Data.Repository
             command.Parameters.AddWithValue("@startDate", entity.StartDate);
             command.Parameters.AddWithValue("@endDate", entity.EndDate);
             command.Parameters.AddWithValue("@description", entity.Description);
-            command.Parameters.AddWithValue("@status", entity.Status);
+            command.Parameters.AddWithValue("@status", entity.Status.ToString());
             command.ExecuteNonQuery();
             connection.Close();
 
@@ -53,12 +53,13 @@ namespace Mestr.Data.Repository
             SqliteConnection connection = dbContext.CreateConnection();
             using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM projects WHERE uuid = @uuid";
-            command.Parameters.AddWithValue("@uuid", uuid.ToString());
+            
+            command.Parameters.AddWithValue("@uuid", uuid);
 
             using var reader = command.ExecuteReader();
             while (reader.Read()) {
                 var project = new Project(
-                                        Guid.Parse(reader["uuid"].ToString()),
+                    Guid.Parse(reader["uuid"].ToString()),
                     reader["name"].ToString(),
                     reader.GetDateTime(reader.GetOrdinal("startDate")),
                     reader.GetDateTime(reader.GetOrdinal("endDate")),
@@ -144,7 +145,7 @@ namespace Mestr.Data.Repository
             SqliteConnection connection = dbContext.CreateConnection();
             using var command = connection.CreateCommand();
             command.CommandText = "DELETE FROM projects WHERE uuid = @uuid";
-            command.Parameters.AddWithValue("@uuid", uuid.ToString());
+            command.Parameters.AddWithValue("@uuid", uuid);
             command.ExecuteNonQuery();
             connection.Close();
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+namespace Mestr.Core.Model;
 public class Client
 {
 	private Guid uuid;

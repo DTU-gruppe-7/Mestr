@@ -43,7 +43,7 @@ namespace Mestr.Data.Repository
             SqliteConnection connection = dbContext.CreateConnection();
             using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM earnings WHERE uuid = @uuid";
-            command.Parameters.AddWithValue("@uuid", uuid.ToString());
+            command.Parameters.AddWithValue("@uuid", uuid);  
 
             using var reader = command.ExecuteReader();
             while (reader.Read())
@@ -132,7 +132,7 @@ namespace Mestr.Data.Repository
             SqliteConnection connection = dbContext.CreateConnection();
             using var command = connection.CreateCommand();
             command.CommandText = "DELETE FROM earnings WHERE uuid = @uuid";
-            command.Parameters.AddWithValue("@uuid", uuid.ToString());
+            command.Parameters.AddWithValue("@uuid", uuid);
             command.ExecuteNonQuery();
             connection.Close();
         }
