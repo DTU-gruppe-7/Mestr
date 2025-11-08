@@ -71,7 +71,7 @@ namespace Mestr.Data.Repository
             var expenses = new List<Expense>();
 
             using var command = _connection.CreateCommand();
-            command.CommandText = "SELECT * FROM expense";
+            command.CommandText = "SELECT * FROM expenses";
 
             using var reader = command.ExecuteReader();
             while (reader.Read())
@@ -103,15 +103,13 @@ namespace Mestr.Data.Repository
 
             using var command = _connection.CreateCommand();
             command.CommandText = "UPDATE expenses " +
-                "SET projectuuid = @projectUuid, " +
-                "description = @description, " +
+                "SET description = @description, " +
                 "amount = @amount, " +
                 "date = @date, " +
                 "category = @category, " +
                 "isAccepted = @isAccepted, " +
                 "WHERE uuid = @uuid";
 
-            command.Parameters.AddWithValue("@projectUuid", entity.ProjectUuid);
             command.Parameters.AddWithValue("@description", entity.Description);
             command.Parameters.AddWithValue("@amount", entity.Amount);
             command.Parameters.AddWithValue("@date", entity.Date);
