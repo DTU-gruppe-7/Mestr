@@ -19,6 +19,7 @@ namespace Mestr.UI
         public MainWindow()
         {
             InitializeComponent();
+
         }
     }
 }

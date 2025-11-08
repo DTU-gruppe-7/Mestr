@@ -56,7 +56,7 @@
                                Foreground="#475569" 
                                FontWeight="SemiBold" 
                                Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding ProjectName}"
+                    <TextBox Text="{Binding ProjectName, UpdateSourceTrigger=PropertyChanged}"
                              Margin="0,0,0,15" 
                              HorizontalAlignment="Stretch"/>
 
@@ -64,7 +64,7 @@
                                Foreground="#475569" 
                                FontWeight="SemiBold" 
                                Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding ClientName}"
+                    <TextBox Text="{Binding ClientName, UpdateSourceTrigger=PropertyChanged}"
                              Margin="0,0,0,15" 
                              HorizontalAlignment="Stretch" />
 
@@ -93,7 +93,7 @@
                                Margin="0,0,0,5"/>
 
                     <TextBox Grid.Row="2"
-                             Text="{Binding Description}"
+                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                              TextWrapping="Wrap" 
                              HorizontalAlignment="Stretch" 
                              VerticalAlignment="Stretch" AcceptsReturn="True" 

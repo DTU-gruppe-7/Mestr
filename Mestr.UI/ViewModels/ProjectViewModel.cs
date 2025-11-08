@@ -59,6 +59,13 @@ namespace Mestr.UI.ViewModels
 
         public ICommand CreateProjectCommand { get; }
         public ICommand CancelCommand { get; }
+
+        public ProjectViewModel()
+        {
+            CreateProjectCommand = new Command.ProjectCommand();
+            CancelCommand = new Command.ProjectCommand();
+        }
+
     }
 
 }
