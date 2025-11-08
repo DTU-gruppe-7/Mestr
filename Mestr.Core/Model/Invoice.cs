@@ -31,8 +31,8 @@ public class Invoice
 		this.filePath = filePath;
 		this.project = project;
     }
-	public Guid Uuid { get => uuid; set => uuid = value; }
-	public Guid ProjectUuid { get => projectUuid; set => projectUuid = value; }
+	public Guid Uuid { get => uuid;}
+	public Guid ProjectUuid { get => projectUuid;}
 	public string InvoiceNumber { get => invoiceNumber; set => invoiceNumber = value; }
 	public DateTime InvoiceDate { get => invoiceDate; set => invoiceDate = value; }
 	public DateTime DueDate { get => dueDate; set => dueDate = value; }

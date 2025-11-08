@@ -1,7 +1,9 @@
 ﻿using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Microsoft.Data.Sqlite;
+using System;
 using System.Runtime.InteropServices.Marshalling;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Mestr.Data.Repository
 {
@@ -17,17 +19,15 @@ namespace Mestr.Data.Repository
             SqliteDbContext dbContext = new SqliteDbContext();
             SqliteConnection connection = dbContext.CreateConnection();
             using var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO expenses (uuid, projectuuid, description, amount, date, category, receiptpath, isAccepted, project) " +
-                "VALUES (@uuid, @projectUuid, @description, @amount, @date, @category, @receiptPath, @isAccepted, @project);";
-            command.Parameters.AddWithValue("@uuid", entity.uuid.ToString());
-            command.Parameters.AddWithValue("@projectUuid", entity.projectuuid.ToString());
-            command.Parameters.AddWithValue("@description", entity.description);
-            command.Parameters.AddWithValue("@amount", entity.amount);
-            command.Parameters.AddWithValue("@date", entity.date);
-            command.Parameters.AddWithValue("@category", entity.category);
-            command.Parameters.AddWithValue("@receiptPath", entity.receiptpath ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@isAccepted", entity.isAccepted);
-            command.Parameters.AddWithValue("@project", entity.project);
+            command.CommandText = "INSERT INTO expenses (uuid, projectUuid, description, amount, date, category, isAccepted) " +
+                "VALUES (@uuid, @projectUuid, @description, @amount, @date, @category, @isAccepted);";
+            command.Parameters.AddWithValue("@uuid", entity.Uuid);
+            command.Parameters.AddWithValue("@projectUuid", entity.ProjectUuid);
+            command.Parameters.AddWithValue("@description", entity.Description);
+            command.Parameters.AddWithValue("@amount", entity.Amount);
+            command.Parameters.AddWithValue("@date", entity.Date);
+            command.Parameters.AddWithValue("@category", entity.Category);
+            command.Parameters.AddWithValue("@isAccepted", entity.IsAccepted);
             command.ExecuteNonQuery();
             connection.Close();
         }
@@ -48,18 +48,17 @@ namespace Mestr.Data.Repository
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
-                var expense = new Expense
-                {
-                    uuid = Guid.Parse(reader["uuid"].ToString()),
-                    projectuuid = Guid.Parse(reader["projectuuid"].ToString()),
-                    description = reader["description"].ToString(),
-                    amount = reader.GetDecimal(reader.GetOrdinal("amount")),
-                    date = reader.GetDateTime(reader.GetOrdinal("date")),
-                    category = reader["category"].ToString(),
-                    receiptpath = reader["receiptpath"] != DBNull.Value ? reader["receiptpath"].ToString() : null,
-                    isAccepted = reader.GetBoolean(reader.GetOrdinal("isAccepted")),
-                    project = reader["project"].ToString()
-                };
+                var expense = new Expense(
+                    Guid.Parse(reader["uuid"].ToString()),
+                    Guid.Parse(reader["projectuuid"].ToString()),
+                    reader["description"].ToString(),
+                    reader.GetDecimal(reader.GetOrdinal("amount")),
+                    reader.GetDateTime(reader.GetOrdinal("date")),
+                    Enum.TryParse<ExpenseCategory>(reader["category"].ToString(), out var status)
+                    ? status
+                    : ExpenseCategory.Other, // default fallback value
+                    reader.GetBoolean(reader.GetOrdinal("isAccepted"))
+                );
                 connection.Close();
                 return expense;
             }
@@ -80,18 +79,18 @@ namespace Mestr.Data.Repository
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
-                var expense = new Expense
-                {
-                    uuid = Guid.Parse(reader["uuid"].ToString()),
-                    projectuuid = Guid.Parse(reader["projectuuid"].ToString()),
-                    description = reader["description"].ToString(),
-                    amount = reader.GetDecimal(reader.GetOrdinal("amount")),
-                    date = reader.GetDateTime(reader.GetOrdinal("date")),
-                    category = reader["category"].ToString(),
-                    receiptpath = reader["receiptpath"] != DBNull.Value ? reader["receiptpath"].ToString() : null,
-                    isAccepted = reader.GetBoolean(reader.GetOrdinal("isAccepted")),
-                    project = reader["project"].ToString()
-                };
+                var expense = new Expense(
+                    Guid.Parse(reader["uuid"].ToString()),
+                    Guid.Parse(reader["projectuuid"].ToString()),
+                    reader["description"].ToString(),
+                    reader.GetDecimal(reader.GetOrdinal("amount")),
+                    reader.GetDateTime(reader.GetOrdinal("date")),
+                    Enum.TryParse<ExpenseCategory>(reader["category"].ToString(), out var status)
+                    ? status
+                    : ExpenseCategory.Other, // default fallback value
+                    reader.GetBoolean(reader.GetOrdinal("isAccepted"))
+                    );
+           
                 expenses.Add(expense);
             }
 
@@ -115,20 +114,16 @@ namespace Mestr.Data.Repository
                 "amount = @amount, " +
                 "date = @date, " +
                 "category = @category, " +
-                "receiptpath = @receiptPath, " +
                 "isAccepted = @isAccepted, " +
-                "project = @project " +
                 "WHERE uuid = @uuid";
 
-            command.Parameters.AddWithValue("@uuid", entity.uuid.ToString());
-            command.Parameters.AddWithValue("@projectUuid", entity.projectuuid.ToString());
-            command.Parameters.AddWithValue("@description", entity.description);
-            command.Parameters.AddWithValue("@amount", entity.amount);
-            command.Parameters.AddWithValue("@date", entity.date);
-            command.Parameters.AddWithValue("@category", entity.category);
-            command.Parameters.AddWithValue("@receiptPath", entity.receiptpath ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@isAccepted", entity.isAccepted);
-            command.Parameters.AddWithValue("@project", entity.project);
+            command.Parameters.AddWithValue("@projectUuid", entity.ProjectUuid);
+            command.Parameters.AddWithValue("@description", entity.Description);
+            command.Parameters.AddWithValue("@amount", entity.Amount);
+            command.Parameters.AddWithValue("@date", entity.Date);
+            command.Parameters.AddWithValue("@category", entity.Category);
+            command.Parameters.AddWithValue("@isAccepted", entity.IsAccepted);
+            command.Parameters.AddWithValue("@uuid", entity.Uuid);
             command.ExecuteNonQuery();
             connection.Close();
         }

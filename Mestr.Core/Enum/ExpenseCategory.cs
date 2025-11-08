@@ -2,11 +2,11 @@
 
 public enum ExpenseCategory
 {
-    materials,
-    salary,
-    transport,
-    tools,
-    subcontractor,
-    other
+    Materials,
+    Salary,
+    Transport,
+    Tools,
+    Subcontractor,
+    Other
 }
 

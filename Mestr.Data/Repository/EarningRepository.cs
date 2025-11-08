@@ -17,17 +17,15 @@ namespace Mestr.Data.Repository
             SqliteDbContext dbContext = new SqliteDbContext();
             SqliteConnection connection = dbContext.CreateConnection();
             using var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO earnings (uuid, projectuuid, description, amount, date, isPaid, paymentDate, method, project) " +
-                "VALUES (@uuid, @projectUuid, @description, @amount, @date, @isPaid, @paymentDate, @method, @project);";
-            command.Parameters.AddWithValue("@uuid", entity.uuid.ToString());
-            command.Parameters.AddWithValue("@projectUuid", entity.projectuuid.ToString());
-            command.Parameters.AddWithValue("@description", entity.description);
-            command.Parameters.AddWithValue("@amount", entity.amount);
-            command.Parameters.AddWithValue("@date", entity.date);
-            command.Parameters.AddWithValue("@isPaid", entity.isPaid);
-            command.Parameters.AddWithValue("@paymentDate", entity.paymentDate);
-            command.Parameters.AddWithValue("@method", entity.method);
-            command.Parameters.AddWithValue("@project", entity.project);
+            command.CommandText = "INSERT INTO earnings (uuid, projectuuid, description, amount, date, isPaid) " +
+                "VALUES (@uuid, @projectUuid, @description, @amount, @date, @isPaid);";
+            //Get the value from entity uuid property   
+            command.Parameters.AddWithValue("@uuid", entity.Uuid);
+            command.Parameters.AddWithValue("@projectUuid", entity.ProjectUuid);
+            command.Parameters.AddWithValue("@description", entity.Description);
+            command.Parameters.AddWithValue("@amount", entity.Amount);
+            command.Parameters.AddWithValue("@date", entity.Date);
+            command.Parameters.AddWithValue("@isPaid", entity.IsPaid);
             command.ExecuteNonQuery();
             connection.Close();
         }
@@ -48,18 +46,15 @@ namespace Mestr.Data.Repository
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
-                var earning = new Earning
-                {
-                    uuid = Guid.Parse(reader["uuid"].ToString()),
-                    projectuuid = Guid.Parse(reader["projectuuid"].ToString()),
-                    description = reader["description"].ToString(),
-                    amount = reader.GetDecimal(reader.GetOrdinal("amount")),
-                    date = reader.GetDateTime(reader.GetOrdinal("date")),
-                    isPaid = reader.GetBoolean(reader.GetOrdinal("isPaid")),
-                    paymentDate = reader["paymentDate"] != DBNull.Value ? reader.GetDateTime(reader.GetOrdinal("paymentDate")) : (DateTime?)null,
-                    method = reader["method"].ToString(),
-                    project = reader["project"].ToString()
-                };
+                var earning = new Earning(
+                    Guid.Parse(reader["uuid"].ToString()),
+                    Guid.Parse(reader["projectuuid"].ToString()),
+                    reader["description"].ToString(),
+                    reader.GetDecimal(reader.GetOrdinal("amount")),
+                    reader.GetDateTime(reader.GetOrdinal("date")),
+                    reader.GetBoolean(reader.GetOrdinal("isPaid"))
+                    );
+
                 connection.Close();
                 return earning;
             }
@@ -68,6 +63,7 @@ namespace Mestr.Data.Repository
             return null;
         }
 
+        // Fix for CS7036: Use the constructor that requires all parameters for Earning in GetAll()
         public IEnumerable<Earning> GetAll()
         {
             var earnings = new List<Earning>();
@@ -80,18 +76,14 @@ namespace Mestr.Data.Repository
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
-                var earning = new Earning
-                {
-                    uuid = Guid.Parse(reader["uuid"].ToString()),
-                    projectuuid = Guid.Parse(reader["projectuuid"].ToString()),
-                    description = reader["description"].ToString(),
-                    amount = reader.GetDecimal(reader.GetOrdinal("amount")),
-                    date = reader.GetDateTime(reader.GetOrdinal("date")),
-                    isPaid = reader.GetBoolean(reader.GetOrdinal("isPaid")),
-                    paymentDate = reader["paymentDate"] != DBNull.Value ? reader.GetDateTime(reader.GetOrdinal("paymentDate")) : (DateTime?)null,
-                    method = reader["method"].ToString(),
-                    project = reader["project"].ToString()
-                };
+                var earning = new Earning(
+                    Guid.Parse(reader["uuid"].ToString()),
+                    Guid.Parse(reader["projectuuid"].ToString()),
+                    reader["description"].ToString(),
+                    reader.GetDecimal(reader.GetOrdinal("amount")),
+                    reader.GetDateTime(reader.GetOrdinal("date")),
+                    reader.GetBoolean(reader.GetOrdinal("isPaid"))
+                );
                 earnings.Add(earning);
             }
 
@@ -115,20 +107,14 @@ namespace Mestr.Data.Repository
                 "amount = @amount, " +
                 "date = @date, " +
                 "isPaid = @isPaid, " +
-                "paymentDate = @paymentDate, " +
-                "method = @method, " +
-                "project = @project " +
                 "WHERE uuid = @uuid";
 
-            command.Parameters.AddWithValue("@uuid", entity.uuid.ToString());
-            command.Parameters.AddWithValue("@projectUuid", entity.projectuuid.ToString());
-            command.Parameters.AddWithValue("@description", entity.description);
-            command.Parameters.AddWithValue("@amount", entity.amount);
-            command.Parameters.AddWithValue("@date", entity.date);
-            command.Parameters.AddWithValue("@isPaid", entity.isPaid);
-            command.Parameters.AddWithValue("@paymentDate", entity.paymentDate.HasValue ? (object)entity.paymentDate.Value : DBNull.Value);
-            command.Parameters.AddWithValue("@method", entity.method);
-            command.Parameters.AddWithValue("@project", entity.project);
+            command.Parameters.AddWithValue("@uuid", entity.Uuid);
+            command.Parameters.AddWithValue("@projectUuid", entity.ProjectUuid);
+            command.Parameters.AddWithValue("@description", entity.Description);
+            command.Parameters.AddWithValue("@amount", entity.Amount);
+            command.Parameters.AddWithValue("@date", entity.Date);
+            command.Parameters.AddWithValue("@isPaid", entity.IsPaid);
             command.ExecuteNonQuery();
             connection.Close();
         }

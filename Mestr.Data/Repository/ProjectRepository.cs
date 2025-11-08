@@ -2,6 +2,7 @@
 using Mestr.Data.Interface;
 using Microsoft.Data.Sqlite;
 using System.Runtime.InteropServices.Marshalling;
+using System.Xml.Linq;
 
 namespace Mestr.Data.Repository
 {
@@ -17,15 +18,15 @@ namespace Mestr.Data.Repository
             SqliteDbContext dbContext = new SqliteDbContext();
             SqliteConnection connection = dbContext.CreateConnection();
             using var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO Projects (uuid, name, startDate, endDate, description, status, createdDate)" +
-                "VALUES (@uuid, @name, @startDate, @endDate, @description, @status, @createdDate);";
-            command.Parameters.AddWithValue("@uuid", entity.ToString());
+            command.CommandText = "INSERT INTO Projects (uuid, name,createdDate, startDate, endDate, description, status)" +
+                "VALUES (@uuid, @name, @createdDate, @startDate, @endDate, @description, @status);";
+            command.Parameters.AddWithValue("@uuid", entity.Uuid);
             command.Parameters.AddWithValue("@name", entity.Name);
+            command.Parameters.AddWithValue("@createdDate", entity.CreatedDate);
             command.Parameters.AddWithValue("@startDate", entity.StartDate);
             command.Parameters.AddWithValue("@endDate", entity.EndDate);
             command.Parameters.AddWithValue("@description", entity.Description);
             command.Parameters.AddWithValue("@status", entity.Status);
-            command.Parameters.AddWithValue("@createdDate", entity.CreatedDate);
             command.ExecuteNonQuery();
             connection.Close();
 
@@ -56,20 +57,21 @@ namespace Mestr.Data.Repository
 
             using var reader = command.ExecuteReader();
             while (reader.Read()) {
-                var project = new Project
-                {
-                    uuid = reader.GetInt32(0),
-                    name = reader.GetString(1),
-                    startDate = reader.GetDateTime(2),
-                    endDate = reader.GetDateTime(3),
-                    description = reader.GetString(4),
-                    status = reader.GetString(5),
-                    createdDate = reader.GetDateTime(6)
-                };
+                var project = new Project(
+                                        Guid.Parse(reader["uuid"].ToString()),
+                    reader["name"].ToString(),
+                    reader.GetDateTime(reader.GetOrdinal("startDate")),
+                    reader.GetDateTime(reader.GetOrdinal("endDate")),
+                    reader["description"].ToString(),
+                    Enum.TryParse<ProjectStatus>(reader["status"].ToString(), out var status)
+                    ? status
+                    : ProjectStatus.Planned, // default fallback value
+                    reader.GetDateTime(reader.GetOrdinal("createdDate"))
+                    );
                 connection.Close();
                 return project;
             }
-
+            return null;
         }
 
         public IEnumerable<Project> GetAll()
@@ -84,16 +86,17 @@ namespace Mestr.Data.Repository
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
-                var project = new Project
-                {
-                    uuid = Guid.Parse(reader["uuid"].ToString()),
-                    name = reader["name"].ToString(),
-                    startDate = reader.GetDateTime(reader.GetOrdinal("startDate")),
-                    endDate = reader.GetDateTime(reader.GetOrdinal("endDate")),
-                    description = reader["description"].ToString(),
-                    status = reader["status"].ToString(),
-                    createdDate = reader.GetDateTime(reader.GetOrdinal("createdDate"))
-                };
+                var project = new Project(
+                    Guid.Parse(reader["uuid"].ToString()),
+                    reader["name"].ToString(),
+                    reader.GetDateTime(reader.GetOrdinal("startDate")),
+                    reader.GetDateTime(reader.GetOrdinal("endDate")),
+                    reader["description"].ToString(),
+                    Enum.TryParse<ProjectStatus>(reader["status"].ToString(), out var status) 
+        ? status 
+        : ProjectStatus.Planned, // default fallback value
+                    reader.GetDateTime(reader.GetOrdinal("createdDate"))
+                    );
                 projects.Add(project);
             }
 
@@ -119,12 +122,12 @@ namespace Mestr.Data.Repository
                 "SET status = @status " +
                 "WHERE uuid = @uuid";
 
-            command.Parameters.AddWithValue("@uuid", entity.uuid.ToString());
-            command.Parameters.AddWithValue("@name", entity.name);
-            command.Parameters.AddWithValue("@startDate", entity.startDate);
-            command.Parameters.AddWithValue("@endDate", entity.endDate);
-            command.Parameters.AddWithValue("@description", entity.description);
-            command.Parameters.AddWithValue("@status", entity.status);
+            command.Parameters.AddWithValue("@uuid", entity.Uuid);
+            command.Parameters.AddWithValue("@name", entity.Name);
+            command.Parameters.AddWithValue("@startDate", entity.StartDate);
+            command.Parameters.AddWithValue("@endDate", entity.EndDate);
+            command.Parameters.AddWithValue("@description", entity.Description);
+            command.Parameters.AddWithValue("@status", entity.Status);
             command.ExecuteNonQuery();
             connection.Close();
 
