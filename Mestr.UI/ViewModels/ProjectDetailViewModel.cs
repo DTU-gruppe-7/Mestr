@@ -3,7 +3,6 @@ using System.Windows.Input;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
 using Mestr.Core.Model;
-using Mestr.Core.Enum;
 using Mestr.UI.Command;
 
 namespace Mestr.UI.ViewModels
