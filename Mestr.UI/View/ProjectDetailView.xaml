@@ -52,14 +52,14 @@
                     VerticalAlignment="Center"/>
 
             <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                <TextBlock Text="{Binding SelectedProject.Navn, FallbackValue='Projekt Navn'}"
+                <TextBlock Text="{Binding Project.Name, FallbackValue='Projekt Navn'}"
                            FontSize="24" FontWeight="SemiBold"
                            Foreground="#1E293B"
                            HorizontalAlignment="Center"/>
 
                 <TextBlock FontSize="14" Foreground="#555" HorizontalAlignment="Center">
                     <Run Text="Status: "/>
-                    <Run Text="{Binding SelectedProject.Status, FallbackValue='N/A'}" 
+                    <Run Text="{Binding Project.Status, FallbackValue='N/A'}" 
                          FontWeight="SemiBold"/>
                 </TextBlock>
             </StackPanel>
@@ -118,46 +118,51 @@
                         </Style>
                     </Grid.Resources>
 
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel>
-                            <TextBlock Text="Indtægter" Style="{StaticResource ListTitle}"/>
-                            <DataGrid ItemsSource="{Binding IndtægtsLinjer}"
-                                      AutoGenerateColumns="False"
-                                      IsReadOnly="True"
-                                      BorderThickness="0"
-                                      Background="Transparent"
-                                      HeadersVisibility="Column"
-                                      GridLinesVisibility="Horizontal"
-                                      HorizontalGridLinesBrush="#EAEBEE"
-                                      ColumnHeaderStyle="{StaticResource HeaderStyle}"
-                                      CellStyle="{StaticResource CellStyle}">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Navn" Binding="{Binding Navn}" Width="2*" />
-                                    <DataGridTextColumn Header="Estimat" Binding="{Binding EstimatBeløb, StringFormat=C}" Width="*" />
-                                    <DataGridTextColumn Header="Faktureret beløb" Binding="{Binding FaktureretBeløb, StringFormat=C}" Width="*" />
-                                </DataGrid.Columns>
-                            </DataGrid>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <StackPanel Orientation="Horizontal">
+                            <!-- Indtægter -->
+                            <StackPanel Width="440" Margin="0,0,20,0">
+                                <TextBlock Text="Indtægter" Style="{StaticResource ListTitle}"/>
+                                <DataGrid ItemsSource="{Binding IndtægtsLinjer}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      BorderThickness="0"
+                      Background="Transparent"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="#EAEBEE"
+                      ColumnHeaderStyle="{StaticResource HeaderStyle}"
+                      CellStyle="{StaticResource CellStyle}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Navn" Binding="{Binding Navn}" Width="2*" />
+                                        <DataGridTextColumn Header="Estimat" Binding="{Binding EstimatBeløb, StringFormat=C}" Width="*" />
+                                        <DataGridTextColumn Header="Faktureret beløb" Binding="{Binding FaktureretBeløb, StringFormat=C}" Width="*" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
 
-                            <TextBlock Text="Udgifter" Style="{StaticResource ListTitle}" Margin="0,20,0,8"/>
-                            <DataGrid ItemsSource="{Binding UdgiftsLinjer}"
-                                      AutoGenerateColumns="False"
-                                      IsReadOnly="True"
-                                      BorderThickness="0"
-                                      Background="Transparent"
-                                      HeadersVisibility="Column"
-                                      GridLinesVisibility="Horizontal"
-                                      HorizontalGridLinesBrush="#EAEBEE"
-                                      ColumnHeaderStyle="{StaticResource HeaderStyle}"
-                                      CellStyle="{StaticResource CellStyle}">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="*" />
-                                    <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Navn}" Width="*" />
-                                    <DataGridTextColumn Header="Estimat" Binding="{Binding EstimatAmount, StringFormat=C}" Width="*" />
-                                    <DataGridTextColumn Header="Nuværende forbrug" Binding="{Binding NuværendeForbrug, StringFormat=C}" Width="*"/>
-                                    <DataGridTextColumn Header="Samlet udgift" Binding="{Binding FaktureretBeløb, StringFormat=C}" Width="*" />
-                                </DataGrid.Columns>
-                            </DataGrid>
-
+                            <!-- Udgifter -->
+                            <StackPanel Width="440">
+                                <TextBlock Text="Udgifter" Style="{StaticResource ListTitle}" Margin="0,0,0,8"/>
+                                <DataGrid ItemsSource="{Binding UdgiftsLinjer}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      BorderThickness="0"
+                      Background="Transparent"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="#EAEBEE"
+                      ColumnHeaderStyle="{StaticResource HeaderStyle}"
+                      CellStyle="{StaticResource CellStyle}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="*" />
+                                        <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Navn}" Width="*" />
+                                        <DataGridTextColumn Header="Estimat" Binding="{Binding EstimatAmount, StringFormat=C}" Width="*" />
+                                        <DataGridTextColumn Header="Nuværende forbrug" Binding="{Binding NuværendeForbrug, StringFormat=C}" Width="*"/>
+                                        <DataGridTextColumn Header="Samlet udgift" Binding="{Binding FaktureretBeløb, StringFormat=C}" Width="*" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
@@ -194,6 +199,7 @@
 
             <Button Grid.Column="0"
                     Content="Generer faktura"
+                    Command="{Binding GenerateInvoiceCommand}"
                     HorizontalAlignment="Left"
                     Background="#0057E8"
                     Foreground="White"
@@ -211,10 +217,12 @@
             <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <Button Content="Annullere"
                         Style="{StaticResource LinkButton}"
+                        Command="{Binding NavigateToDashboardCommand}"
                         Margin="0,0,20,0"
                         VerticalAlignment="Center"/>
 
-                <Button Content="Gem"
+                <Button Content="Gem" 
+                        Command="{Binding SaveProjectDetailsCommand}"
                         Background="#0057E8"
                         Foreground="White"
                         BorderThickness="0"
