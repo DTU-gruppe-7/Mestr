@@ -8,5 +8,9 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Mestr.Services\Mestr.Services.csproj" />
+  </ItemGroup>
+
 </Project>
     

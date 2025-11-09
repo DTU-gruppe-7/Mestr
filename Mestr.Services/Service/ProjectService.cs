@@ -1,6 +1,7 @@
 ﻿using Mestr.Core.Enum;
 using Mestr.Core.Model;
 using Mestr.Data.Interface;
+using Mestr.Data.Repository;
 using Mestr.Services.Interface;
 using SQLitePCL;
 
@@ -10,9 +11,9 @@ namespace Mestr.Services.Service
     {
         private readonly IRepository<Project> _projectRepository;
 
-        public ProjectService(IRepository<Project> projectRepository)
+        public ProjectService()
         {
-            _projectRepository = projectRepository;
+            _projectRepository = new ProjectRepository();
 
         }
         public Project CreateProject(string name, string description, DateTime? endDate)
