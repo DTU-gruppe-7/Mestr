@@ -67,15 +67,61 @@
                            Margin="15,20,0,10" 
                            Foreground="#1E293B"/>
 
-                <ListBox ItemsSource="{Binding Projects}">
+
+                <ListBox Grid.Row="1" ItemsSource="{Binding Projects}"
+
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    BorderThickness="0"
+                    Background="Transparent">
+                    
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Text="{Binding Name}" />
+                            <StackPanel Margin="5">
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                        FontSize="14"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,10,0"
+                                        TextTrimming="CharacterEllipsis"
+                                        ToolTip="{Binding Name}">
+                                        
+                                        <Run Text="Projekt Navn: " FontWeight="Bold"/>
+                                        <Run Text="{Binding Name}"/>
+                                    </TextBlock>
+
+                                    <TextBlock Grid.Column="1"
+                                        FontSize="14" 
+                                        Foreground="Black"
+                                        TextWrapping="Wrap"
+                                        Margin="0,0,10,0">
+                                        <Run Text="Status: " FontWeight="Bold"/>
+                                        <Run Text="{Binding Status}"/>
+                                    </TextBlock>
+
+                                    <TextBlock Grid.Column="2"
+                                        FontSize="14" 
+                                        Foreground="Black"
+                                        TextWrapping="Wrap"
+                                        Margin="0,0,10,0">
+                                        <Run Text="Deadline: " FontWeight="Bold"/>
+                                        <Run Text="{Binding EndDate}"/>
+                                    </TextBlock>
+                                </Grid>
+
                                 <Button Content="View Details" 
-                        Command="{Binding DataContext.ViewProjectDetailsCommand, 
-                                  RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding Uuid}" />
+                                    Command="{Binding DataContext.ViewProjectDetailsCommand, 
+                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding Uuid}" 
+                                    Margin="0,5,0,0"
+                                    HorizontalAlignment="Left"/>
+
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -100,6 +146,7 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
@@ -110,20 +157,64 @@
                            Margin="15,20,0,0" 
                            Foreground="#333"/>
 
-                <ListBox Grid.Row="1"
-                         ItemsSource="{Binding AfsluttedeProjekter}"
-                         BorderThickness="0"
-                         Background="Transparent"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Navn}" 
-                                       Margin="15,5" 
-                                       FontSize="14"
-                                       Foreground="#555"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                <Separator Grid.Row="1"
+                           Background="#EAEBEE"
+                           Margin="15,0,15,10"/>
+
+                <ScrollViewer Grid.Row="2"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <ListBox 
+                        ItemsSource="{Binding CompletedProjects}"
+                        BorderThickness="0"
+                        Background="Transparent"
+                        ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="5">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0"
+                                            Margin="2,5" 
+                                            FontSize="14"
+                                            Foreground="Black">
+                                            <Run Text="Projekt Navn: " FontWeight="Bold"/>
+                                            <Run Text="{Binding Name}"/>
+                                        </TextBlock>
+                                        
+                                        <TextBlock Grid.Column="1"
+                                            Margin="15,5" 
+                                            FontSize="14"
+                                            Foreground="Black">
+                                            <Run Text="Status: " FontWeight="Bold"/>
+                                            <Run Text="{Binding Status}"/>
+                                        </TextBlock>
+
+                                        <TextBlock Grid.Column="2"
+                                            Margin="15,5" 
+                                            FontSize="14"
+                                            Foreground="Black">
+                                            <Run Text="Overskud: " FontWeight="Bold"/>
+                                            <Run Text="{Binding Status}"/>
+                                        </TextBlock>
+                                    </Grid>
+                                    
+                                    <Button Content="View Details" 
+                                        Command="{Binding DataContext.ViewProjectDetailsCommand, 
+                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding Uuid}" 
+                                        Margin="2,5,0,0"
+                                        HorizontalAlignment="Left"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </ScrollViewer>
             </Grid>
         </Border>
     </Grid>

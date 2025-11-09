@@ -10,19 +10,20 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Mestr.UI.ViewModels;
 
 namespace Mestr.UI.View
 {
     /// <summary>
-    /// Interaction logic for ProjectView.xaml
+    /// Interaction logic for EconomyWindow.xaml
     /// </summary>
-    public partial class ProjectView : UserControl
+    public partial class EconomyWindow : Window
     {
-        public ProjectView()
+        public EconomyWindow()
         {
             InitializeComponent();
+          DataContext = new EconomyViewModel();
         }
     }
 }

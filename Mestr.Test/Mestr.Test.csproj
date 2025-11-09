@@ -6,6 +6,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Mestr.Test</RootNamespace>
     <TargetFramework>net9.0-windows7.0</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
 
     <!--
     This template uses native xUnit.net command line options when using 'dotnet run' and
