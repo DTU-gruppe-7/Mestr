@@ -69,7 +69,10 @@ namespace Mestr.UI.ViewModels
 
         private void SaveProjectDetails()
         {
-            
+            //Todo: Implement save logic
+
+            _mainViewModel.NavigateToDashboardCommand.Execute(null);
+
         }
 
         private void GenerateInvoice()
