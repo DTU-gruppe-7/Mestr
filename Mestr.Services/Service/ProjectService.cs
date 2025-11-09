@@ -48,5 +48,29 @@ namespace Mestr.Services.Service
             return _projectRepository.GetAll();
         }
 
+        public IEnumerable<Project> LoadOngoingProjects() 
+        {
+            return _projectRepository.GetAll()
+                .Where(p => p.Status == ProjectStatus.Ongoing || p.Status == ProjectStatus.Planned);
+        }
+
+        public IEnumerable<Project> LoadCompletedProjects()
+        {
+            return _projectRepository.GetAll()
+                .Where(p => p.Status == ProjectStatus.Completed);
+        }
+
+        public void CompleteProject(Guid projectId)
+        {
+            var project = _projectRepository.GetByUuid(projectId);
+            if (project == null)
+            {
+                throw new ArgumentException("Project not found.", nameof(projectId));
+            }
+            project.Status = ProjectStatus.Completed;
+            project.EndDate= DateTime.Now;
+            _projectRepository.Update(project);
+        }
+
     }
 }

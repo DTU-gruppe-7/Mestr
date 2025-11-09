@@ -67,7 +67,7 @@
             <Button Grid.Column="2"
                     Content="Afslut projekt"
                     Style="{StaticResource LinkButton}"
-                    Command="{Binding AfslutProjektCommand}"
+                    Command="{Binding CompleteProjectCommand}"
                     VerticalAlignment="Center"/>
         </Grid>
 

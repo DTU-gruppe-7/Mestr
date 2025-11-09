@@ -11,5 +11,9 @@ namespace Mestr.Services.Interface
         Project CreateProject(string name, string description, DateTime? endDate);
         Project? GetProjectByUuid(Guid uuid);
         IEnumerable<Project> LoadAllProjects();
+        IEnumerable<Project> LoadOngoingProjects();
+        IEnumerable<Project> LoadCompletedProjects();
+        void CompleteProject(Guid projectId);
+
     }
 }
