@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
+using Mestr.UI.Command;
 using Mestr.Core.Model;
 using System.Collections.ObjectModel;
 
@@ -47,19 +48,33 @@ namespace Mestr.UI.ViewModels
         }
 
         public ICommand NavigateToDashboardCommand => _mainViewModel?.NavigateToDashboardCommand;
+        public ICommand SaveProjectDetailsCommand { get; }
+        public ICommand GenerateInvoiceCommand { get; }
 
         public ProjectDetailViewModel(MainViewModel mainViewModel, Guid projectId)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectId = projectId;
             _projectService = new ProjectService(); // TODO: Inject this
-            
+            SaveProjectDetailsCommand = new RelayCommand(SaveProjectDetails);
+            GenerateInvoiceCommand = new RelayCommand(GenerateInvoice);
+
             LoadProject();
         }
 
         private void LoadProject()
         {
             Project = _projectService.GetProjectByUuid(_projectId);
+        }
+
+        private void SaveProjectDetails()
+        {
+            
+        }
+
+        private void GenerateInvoice()
+        {
+
         }
     }
 }

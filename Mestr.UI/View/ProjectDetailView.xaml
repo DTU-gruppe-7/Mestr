@@ -52,14 +52,14 @@
                     VerticalAlignment="Center"/>
 
             <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                <TextBlock Text="{Binding Project.name, FallbackValue='Projekt Navn'}"
+                <TextBlock Text="{Binding Project.Name, FallbackValue='Projekt Navn'}"
                            FontSize="24" FontWeight="SemiBold"
                            Foreground="#1E293B"
                            HorizontalAlignment="Center"/>
 
                 <TextBlock FontSize="14" Foreground="#555" HorizontalAlignment="Center">
                     <Run Text="Status: "/>
-                    <Run Text="{Binding SelectedProject.Status, FallbackValue='N/A'}" 
+                    <Run Text="{Binding Project.Status, FallbackValue='N/A'}" 
                          FontWeight="SemiBold"/>
                 </TextBlock>
             </StackPanel>
@@ -199,6 +199,7 @@
 
             <Button Grid.Column="0"
                     Content="Generer faktura"
+                    Command="{Binding GenerateInvoiceCommand}"
                     HorizontalAlignment="Left"
                     Background="#0057E8"
                     Foreground="White"
@@ -220,7 +221,8 @@
                         Margin="0,0,20,0"
                         VerticalAlignment="Center"/>
 
-                <Button Content="Gem"
+                <Button Content="Gem" 
+                        Command="{Binding SaveProjectDetailsCommand}"
                         Background="#0057E8"
                         Foreground="White"
                         BorderThickness="0"
