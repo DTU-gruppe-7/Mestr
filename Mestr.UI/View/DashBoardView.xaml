@@ -111,13 +111,13 @@
                            Foreground="#333"/>
 
                 <ListBox Grid.Row="1"
-                         ItemsSource="{Binding AfsluttedeProjekter}"
+                         ItemsSource="{Binding CompletedProjects}"
                          BorderThickness="0"
                          Background="Transparent"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Navn}" 
+                            <TextBlock Text="{Binding Name}" 
                                        Margin="15,5" 
                                        FontSize="14"
                                        Foreground="#555"/>
