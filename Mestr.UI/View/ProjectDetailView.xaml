@@ -48,7 +48,7 @@
             <Button Grid.Column="0"
                     Content="HOME"
                     Style="{StaticResource LinkButton}"
-                    Command="{Binding GåTilHomeCommand}"
+                    Command="{Binding NavigateToDashboardCommand}"
                     VerticalAlignment="Center"/>
 
             <StackPanel Grid.Column="1" HorizontalAlignment="Center">

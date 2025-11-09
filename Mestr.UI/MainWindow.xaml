@@ -10,6 +10,6 @@
         Title="MainWindow" Height="720" Width="1280">
 
     <Grid>
-        <views:ProjectView/>
+        <ContentControl Content="{Binding CurrentViewModel}"/>
     </Grid>
 </Window>
