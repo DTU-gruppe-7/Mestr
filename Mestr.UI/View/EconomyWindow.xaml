@@ -1,0 +1,114 @@
+﻿<Window x:Class="Mestr.UI.View.EconomyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add Transaction"
+        Width="400"
+        Background="#F9FAFB"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        SizeToContent="Height"
+        MaxHeight="700">
+    <!-- Adjust max height as needed -->
+
+    <Window.Resources>
+        <Style x:Key="ModernTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#D1D5DB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style x:Key="ModernComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#D1D5DB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+                <!-- Header -->
+            <TextBlock Text="Add Transaction" FontSize="20" FontWeight="Bold" Foreground="#333" Margin="0 0 0 15"/>
+
+            <!-- Transaction Type -->
+            <StackPanel Grid.Row="1" Margin="0 4">
+                <TextBlock Text="Transaction Type" FontSize="11" Foreground="#555" Margin="0 0 0 2"/>
+                <ComboBox ItemsSource="{Binding TransactionTypes}" 
+                          SelectedItem="{Binding SelectedTransactionType}"
+                            Style="{StaticResource ModernComboBoxStyle}"
+                          Height="30"/>
+            </StackPanel>
+
+            <!-- Name -->
+            <StackPanel Grid.Row="2" Margin="0 4">
+                <TextBlock Text="Name" FontSize="11" Foreground="#555" Margin="0 0 0 2"/>
+                <TextBox Text="{Binding Name}"
+                            Style="{StaticResource ModernTextBoxStyle}"
+                         Height="30"/>
+            </StackPanel>
+
+            <!-- Description -->
+            <StackPanel Grid.Row="3" Margin="0 4">
+                <TextBlock Text="Description" FontSize="11" Foreground="#555" Margin="0 0 0 2"/>
+                <TextBox Text="{Binding Description}"
+                            Style="{StaticResource ModernTextBoxStyle}"
+                         Height="30"/>
+            </StackPanel>
+
+            <!-- Amount -->
+            <StackPanel Grid.Row="4" Margin="0 4">
+                <TextBlock Text="Amount" FontSize="11" Foreground="#555" Margin="0 0 0 2"/>
+                <TextBox Text="{Binding Amount}" 
+                            Style="{StaticResource ModernTextBoxStyle}"
+                         Height="30"/>
+            </StackPanel>
+
+            <!-- Category - Hidden when "Indtægt" is selected -->
+            <StackPanel Grid.Row="5" Margin="0 4" Visibility="{Binding CategoryVisibility}">
+                <TextBlock Text="Category" FontSize="11" Foreground="#555" Margin="0 0 0 2"/>
+                <ComboBox ItemsSource="{Binding Categories}" 
+                          SelectedItem="{Binding SelectedCategory}"
+                            Style="{StaticResource ModernComboBoxStyle}"
+                          Height="30"/>
+            </StackPanel>
+
+
+            <!-- Date -->
+            <StackPanel Grid.Row="6" Margin="0 4">
+                <TextBlock Text="Date" FontSize="11" Foreground="#555" Margin="0 0 0 2"/>
+                <DatePicker SelectedDate="{Binding Date}"
+                    Background="#FFFFFF"
+                    BorderBrush="#D1D5DB"
+                    BorderThickness="1"
+                    Padding="8"
+                    FontSize="14"
+                    Height="40"/>
+
+            </StackPanel>
+
+
+            <!-- Buttons -->
+            <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 15 0 0">
+                <Button Content="Cancel" Width="80" Margin="5"
+                        Command="{Binding CancelCommand}"
+                        Background="#E5E7EB" Foreground="#333"/>
+                <Button Content="Save" Width="80" Margin="5"
+                        Command="{Binding SaveCommand}"
+                        Background="#2563EB" Foreground="White"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Window>

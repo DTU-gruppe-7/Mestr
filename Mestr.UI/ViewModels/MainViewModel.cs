@@ -22,14 +22,14 @@ namespace Mestr.UI.ViewModels
 
         public ICommand NavigateToProjectCommand { get; }
         public ICommand NavigateToDashboardCommand { get; }
-        public ICommand NavigateToProjectDetailsCommand { get; } // Now accepts Guid parameter
+        public ICommand NavigateToProjectDetailsCommand { get; }
 
         public MainViewModel()
         {
             // Non-parameterized navigation
             NavigateToProjectCommand = new RelayCommand(NavigateToProject);
             NavigateToDashboardCommand = new RelayCommand(NavigateToDashboard);
-            
+
             // Parameterized navigation - expects Guid
             NavigateToProjectDetailsCommand = new RelayCommand<Guid>(NavigateToProjectDetails);
             
@@ -51,5 +51,7 @@ namespace Mestr.UI.ViewModels
         {
             CurrentViewModel = new ProjectDetailViewModel(this, projectUuid);
         }
+
+        
     }
 }

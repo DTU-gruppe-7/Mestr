@@ -1,9 +1,11 @@
-﻿using System;
-using System.Windows.Input;
+﻿using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
-using Mestr.Core.Model;
+using Mestr.UI.View;
 using Mestr.UI.Command;
+using System;
+using System.Windows.Input;
+
 
 namespace Mestr.UI.ViewModels
 {
@@ -28,13 +30,19 @@ namespace Mestr.UI.ViewModels
         public ICommand CompleteProjectCommand { get; }
 
 
+        public ICommand ShowEconomyWindowCommand { get; }
+
         public ProjectDetailViewModel(MainViewModel mainViewModel, Guid projectId)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectId = projectId;
             _projectService = new ProjectService(); // TODO: Inject this
+            
+            ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow);
+
 
             CompleteProjectCommand = new RelayCommand(CompleteProject);
+
             LoadProject();
         }
 
@@ -43,6 +51,14 @@ namespace Mestr.UI.ViewModels
             Project = _projectService.GetProjectByUuid(_projectId);
         }
 
+
+        private void ShowEconomyWindow()
+        {
+            var economyWindow = new EconomyWindow();
+            economyWindow.Owner = App.Current.MainWindow;
+            economyWindow.ShowDialog();
+        }
+        
         private void CompleteProject()
         {
             if (Project != null)
@@ -50,6 +66,7 @@ namespace Mestr.UI.ViewModels
                 _projectService.CompleteProject(_projectId);
                 _mainViewModel.NavigateToDashboardCommand.Execute(null);
             }
+
         }
     }
 }
