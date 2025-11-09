@@ -1,9 +1,10 @@
-﻿using Mestr.Data.DbContext;
+﻿using Mestr.Core.Enum;
+using Mestr.Core.Interface;
+using Mestr.Core.Model;
+using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Microsoft.Data.Sqlite;
 using System.Runtime.InteropServices.Marshalling;
-using Mestr.Core.Model;
-using Mestr.Core.Enum;
 
 namespace Mestr.Data.Repository
 {
@@ -61,7 +62,6 @@ namespace Mestr.Data.Repository
 
             return null;
         }
-
         public IEnumerable<Earning> GetAll()
         {
             var earnings = new List<Earning>();
