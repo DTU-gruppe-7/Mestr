@@ -172,7 +172,7 @@
                     <Button Grid.Column="0"
                             Content="Tilføj ny post..."
                             Style="{StaticResource LinkButton}"
-                            Command="{Binding TilføjPostCommand}"
+                            Command="{Binding ShowEconomyWindowCommand}"
                             HorizontalAlignment="Left"/>
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal">

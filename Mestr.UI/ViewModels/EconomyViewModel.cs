@@ -1,0 +1,194 @@
+﻿using Mestr.Core.Enum;
+using Mestr.UI.Command;
+using System;
+using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Input;
+
+namespace Mestr.UI.ViewModels
+{
+    internal class EconomyViewModel : ViewModelBase
+    {
+        private string _selectedTransactionType;
+        private string _name;
+        private string _description;
+        private decimal _amount;
+        private string _selectedCategory;
+        private DateTime _date;
+        private bool _isPaid;
+        private Visibility _categoryVisibility;
+
+        public EconomyViewModel()
+        {
+            // Initialize collections with Danish terms
+            TransactionTypes = new ObservableCollection<string> { "Udgift", "Indtægt" };
+            Categories = new ObservableCollection<string>();
+            
+            // Set defaults
+            SelectedTransactionType = "Udgift";
+            Date = DateTime.Now;
+            CategoryVisibility = Visibility.Visible; // Show category by default
+
+            // Initialize commands
+            SaveCommand = new RelayCommand(Save, CanSave);
+            CancelCommand = new RelayCommand(Cancel);
+
+            // Load expense categories by default
+            LoadCategories();
+        }
+
+        // Collections
+        public ObservableCollection<string> TransactionTypes { get; }
+        public ObservableCollection<string> Categories { get; }
+
+        // Properties
+        public string SelectedTransactionType
+        {
+            get => _selectedTransactionType;
+            set
+            {
+                _selectedTransactionType = value;
+                OnPropertyChanged(nameof(SelectedTransactionType));
+                LoadCategories();
+                UpdateCategoryVisibility();
+            }
+        }
+
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                _name = value;
+                OnPropertyChanged(nameof(Name));
+            }
+        }
+
+        public string Description
+        {
+            get => _description;
+            set
+            {
+                _description = value;
+                OnPropertyChanged(nameof(Description));
+            }
+        }
+
+        public decimal Amount
+        {
+            get => _amount;
+            set
+            {
+                _amount = value;
+                OnPropertyChanged(nameof(Amount));
+            }
+        }
+
+        public string SelectedCategory
+        {
+            get => _selectedCategory;
+            set
+            {
+                _selectedCategory = value;
+                OnPropertyChanged(nameof(SelectedCategory));
+            }
+        }
+
+        public DateTime Date
+        {
+            get => _date;
+            set
+            {
+                _date = value;
+                OnPropertyChanged(nameof(Date));
+            }
+        }
+
+        public bool IsPaid
+        {
+            get => _isPaid;
+            set
+            {
+                _isPaid = value;
+                OnPropertyChanged(nameof(IsPaid));
+            }
+        }
+
+        public Visibility CategoryVisibility
+        {
+            get => _categoryVisibility;
+            set
+            {
+                _categoryVisibility = value;
+                OnPropertyChanged(nameof(CategoryVisibility));
+            }
+        }
+
+        // Commands
+        public ICommand SaveCommand { get; }
+        public ICommand CancelCommand { get; }
+
+        // Methods
+        private void LoadCategories()
+        {
+            Categories.Clear();
+
+            if (SelectedTransactionType == "Udgift")
+            {
+                // Load expense categories from enum
+                foreach (ExpenseCategory category in System.Enum.GetValues(typeof(ExpenseCategory)))
+                {
+                    Categories.Add(category.ToString());
+                }
+            }
+
+            // Select first category by default
+            if (Categories.Count > 0)
+            {
+                SelectedCategory = Categories[0];
+            }
+        }
+
+        private void UpdateCategoryVisibility()
+        {
+            // Hide category when "Indtægt" is selected
+            CategoryVisibility = SelectedTransactionType == "Indtægt" 
+                ? Visibility.Collapsed 
+                : Visibility.Visible;
+        }
+
+        private bool CanSave()
+        {
+            // Don't require category for "Indtægt"
+            bool categoryValid = SelectedTransactionType == "Indtægt" 
+                || !string.IsNullOrWhiteSpace(SelectedCategory);
+            
+            return !string.IsNullOrWhiteSpace(Name) 
+                   && Amount > 0;
+        }
+
+        private void Save()
+        {
+            // TODO: Implement save logic with repository
+            // Create Expense or Earning based on SelectedTransactionType
+            // Save to database
+            // Close window
+
+            MessageBox.Show($"Saving {SelectedTransactionType}: {Name} - {Amount:C}", "Save Transaction");
+            
+            // Close the window
+            CloseWindow();
+        }
+
+        private void Cancel()
+        {
+            CloseWindow();
+        }
+
+        private void CloseWindow()
+        {
+            // This will be called from the view
+            Application.Current.Windows.OfType<View.EconomyWindow>().FirstOrDefault()?.Close();
+        }
+    }
+}
