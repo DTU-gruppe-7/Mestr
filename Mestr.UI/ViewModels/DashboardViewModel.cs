@@ -14,6 +14,7 @@ namespace Mestr.UI.ViewModels
         private readonly MainViewModel _mainViewModel;
         private readonly IProjectService _projectService;
         private ObservableCollection<Project> _projects;
+        private ObservableCollection<Project> _completedProjects;
 
         public ObservableCollection<Project> Projects
         {
@@ -22,6 +23,16 @@ namespace Mestr.UI.ViewModels
             {
                 _projects = value;
                 OnPropertyChanged(nameof(Projects));
+            }
+        }
+
+        public ObservableCollection<Project>CompletedProjects
+        {
+            get => _completedProjects;
+            set
+            {
+                _completedProjects = value;
+                OnPropertyChanged(nameof(CompletedProjects));
             }
         }
 
@@ -41,8 +52,10 @@ namespace Mestr.UI.ViewModels
 
         private void LoadProjects()
         {
-            var projects = _projectService.LoadAllProjects();
+            var projects = _projectService.LoadOngoingProjects();
             Projects = new ObservableCollection<Project>(projects);
+            var completedProjects = _projectService.LoadCompletedProjects();
+            CompletedProjects = new ObservableCollection<Project>(completedProjects);
         }
 
         private void ViewProjectDetails(Guid projectId)
