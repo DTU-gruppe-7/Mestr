@@ -2,7 +2,9 @@
 using Mestr.UI.Command;
 using System;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
@@ -56,11 +58,13 @@ namespace Mestr.UI.ViewModels
 
         public string Name
         {
-            get => _name;
+            get { return _name; }
             set
             {
                 _name = value;
                 OnPropertyChanged(nameof(Name));
+                ValidateName(nameof(Name), value, "Navn");
+                ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
             }
         }
 
@@ -79,8 +83,11 @@ namespace Mestr.UI.ViewModels
             get => _amount;
             set
             {
+                // Fix: Remove invalid assignment and null comparison for value type
                 _amount = value;
                 OnPropertyChanged(nameof(Amount));
+                ValidateAmount(value);
+                ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
             }
         }
 
@@ -163,7 +170,8 @@ namespace Mestr.UI.ViewModels
             bool categoryValid = SelectedTransactionType == "Indtægt" 
                 || !string.IsNullOrWhiteSpace(SelectedCategory);
             
-            return !string.IsNullOrWhiteSpace(Name) 
+            return !HasErrors
+                   && !string.IsNullOrWhiteSpace(Name) 
                    && Amount > 0;
         }
 
@@ -190,5 +198,6 @@ namespace Mestr.UI.ViewModels
             // This will be called from the view
             Application.Current.Windows.OfType<View.EconomyWindow>().FirstOrDefault()?.Close();
         }
+
     }
 }
