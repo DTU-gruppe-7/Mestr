@@ -21,6 +21,8 @@ namespace Mestr.UI.View
     /// </summary>
     public partial class EconomyWindow : Window
     {
+        private readonly Regex regex = new Regex(@"^[0-9]*(\.[0-9]*)?$");
+
         public EconomyWindow()
         {
             InitializeComponent();
@@ -29,25 +31,37 @@ namespace Mestr.UI.View
         private void AmountBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             // Allow digits and optional decimal separator
-            Regex regex = new Regex(@"^[0-9]*(\.[0-9]*)?$");
-            TextBox textBox = sender as TextBox;
-            string newText = textBox.Text.Insert(textBox.SelectionStart, e.Text);
-            e.Handled = !regex.IsMatch(newText);
+            
+            TextBox? textBox = sender as TextBox;
+            if (textBox == null)
+            {
+                e.Handled = true;
+                return;
+            } else             {
+                string newText = textBox.Text.Insert(textBox.SelectionStart, e.Text);
+                e.Handled = !regex.IsMatch(newText);
+            }
         }
 
 
         private void AmountBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var textBox = sender as TextBox;
+            TextBox? textBox = sender as TextBox;
 
-            // If user deletes all text, set it to "0"
-            if (string.IsNullOrWhiteSpace(textBox.Text))
+            if (textBox != null && string.IsNullOrWhiteSpace(textBox.Text))
             {
                 textBox.Text = "0";
 
                 // Move caret to end so user can continue typing
                 textBox.CaretIndex = textBox.Text.Length;
+                
+            } else 
+            {
+                e.Handled = true;
+                return;
             }
+
+            
         }
 
 
@@ -56,7 +70,6 @@ namespace Mestr.UI.View
             if (e.DataObject.GetDataPresent(typeof(string)))
             {
                 string pasteText = (string)e.DataObject.GetData(typeof(string));
-                Regex regex = new Regex(@"^[0-9]*(\.[0-9]*)?$");
                 if (!regex.IsMatch(pasteText))
                 {
                     e.CancelCommand();

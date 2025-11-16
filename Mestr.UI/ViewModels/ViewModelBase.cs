@@ -13,10 +13,10 @@ namespace Mestr.UI.ViewModels
     public abstract class ViewModelBase : INotifyPropertyChanged, INotifyDataErrorInfo
     {
         public bool HasErrors => _errors.Count > 0;
-        public event PropertyChangedEventHandler PropertyChanged;
-        public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
 
-        private readonly Dictionary<string, List<string>> _errors = new();
+        private readonly Dictionary<string, List<string>> _errors = [];
         protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
@@ -24,7 +24,7 @@ namespace Mestr.UI.ViewModels
         protected void AddError(string propertyName, string error)
         {
             if (!_errors.ContainsKey(propertyName))
-                _errors[propertyName] = new List<string>();
+                _errors[propertyName] = [];
 
             if (!_errors[propertyName].Contains(error))
             {
@@ -35,27 +35,34 @@ namespace Mestr.UI.ViewModels
 
         protected void ClearErrors(string propertyName)
         {
-            if (_errors.ContainsKey(propertyName))
+            if (!_errors.ContainsKey(propertyName))
             {
-                _errors.Remove(propertyName);
-                ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+                return;
             }
+            _errors.Remove(propertyName);
+            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
         }
-        public IEnumerable GetErrors(string propertyName)
+        public IEnumerable GetErrors(string? propertyName)
         {
-            return propertyName != null && _errors.ContainsKey(propertyName)
-                ? _errors[propertyName]
-                : null;
+            if (propertyName != null && _errors.TryGetValue(propertyName, out var errors))
+                return errors;
+            return Enumerable.Empty<string>();
         }
 
         protected void AmountBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             // Allow digits and one decimal separator
-            Regex regex = new Regex(@"^[0-9]*(\.[0-9]*)?$");
-            TextBox textBox = sender as TextBox;
-
-            string newText = textBox.Text.Insert(textBox.SelectionStart, e.Text);
-            e.Handled = !regex.IsMatch(newText);
+            Regex regex = new(@"^[0-9]*(\.[0-9]*)?$");
+            TextBox? textBox = sender as TextBox;
+            if (textBox != null) {
+                string newText = textBox.Text.Insert(textBox.SelectionStart, e.Text);
+                e.Handled = !regex.IsMatch(newText);
+            }
+            if (textBox == null)
+            {
+                e.Handled = true;
+                return;
+            }
         }
 
         // Validation logic
@@ -72,20 +79,20 @@ namespace Mestr.UI.ViewModels
             }
         }
 
-        protected void ValidateAmount(decimal amount)
+        protected void ValidateAmount(string propertyName, decimal amount)
         {
-            ClearErrors(nameof(amount));
+            ClearErrors(propertyName);
 
             // Check if amount is zero or negative
             if (amount <= 0)
             {
-                AddError(nameof(amount), "Beløb skal være større end 0.");
+                AddError(propertyName, "Beløb skal være større end 0.");
             }
 
             // Optional: Check for upper limit
             if (amount > 1_000_000) // Example max limit
             {
-                AddError(nameof(amount), "Beløb må ikke overstige 1.000.000.");
+                AddError(propertyName, "Beløb må ikke overstige 1.000.000.");
             }
         }
 
@@ -93,7 +100,7 @@ namespace Mestr.UI.ViewModels
         {
             ClearErrors(propertyName);
 
-            if (date.HasValue && date.Value < DateTime.Now)
+            if (date.HasValue && date.Value.Date < DateTime.Today)
             {
                 AddError(propertyName, "Deadline skal være en fremtidig dato.");
             }

@@ -13,8 +13,8 @@ namespace Mestr.UI.ViewModels
     {
         private readonly MainViewModel _mainViewModel;
         private readonly IProjectService _projectService;
-        private ObservableCollection<Project> _projects;
-        private ObservableCollection<Project> _completedProjects;
+        private ObservableCollection<Project> _projects = [];
+        private ObservableCollection<Project> _completedProjects = [];
 
         public ObservableCollection<Project> Projects
         {
@@ -36,7 +36,7 @@ namespace Mestr.UI.ViewModels
             }
         }
 
-        public ICommand NavigateToProjectCommand => _mainViewModel?.NavigateToProjectCommand;
+        public ICommand NavigateToProjectCommand => _mainViewModel.NavigateToProjectCommand;
         public ICommand ViewProjectDetailsCommand { get; }
 
         public DashboardViewModel(MainViewModel mainViewModel, IProjectService projectService)

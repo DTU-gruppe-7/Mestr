@@ -8,11 +8,11 @@ namespace Mestr.UI.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
-        private ViewModelBase _currentViewModel;
+        private ViewModelBase? _currentViewModel; // Make nullable to satisfy CS8618
         
         public ViewModelBase CurrentViewModel 
         { 
-            get => _currentViewModel;
+            get => _currentViewModel!;
             set
             {
                 _currentViewModel = value;

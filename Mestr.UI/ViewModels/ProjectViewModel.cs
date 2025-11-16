@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Xml.Linq;
 
 namespace Mestr.UI.ViewModels
 {
@@ -16,13 +15,10 @@ namespace Mestr.UI.ViewModels
     {
         private readonly MainViewModel _mainViewModel;
         private readonly IProjectService _projectService;
-        private string _projectName;
-
-        // INotifyPropertyChanged implementation
-        public event PropertyChangedEventHandler PropertyChanged;
+        private string _projectName = string.Empty;
 
         public ICommand CreateProjectCommand { get; }
-        public ICommand NavigateToDashboardCommand => _mainViewModel?.NavigateToDashboardCommand;
+        public ICommand NavigateToDashboardCommand => _mainViewModel.NavigateToDashboardCommand;
 
         public ProjectViewModel(MainViewModel mainViewModel, IProjectService projectService)
         {
@@ -44,7 +40,7 @@ namespace Mestr.UI.ViewModels
         }
 
 
-        private string _clientName;
+        private string _clientName = string.Empty;
         public string ClientName
         {
             get { return _clientName; }
@@ -71,7 +67,7 @@ namespace Mestr.UI.ViewModels
             }
         }
 
-        private string _description;
+        private string _description = string.Empty;
         public string Description
         {
             get { return _description; }

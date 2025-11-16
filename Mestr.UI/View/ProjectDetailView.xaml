@@ -7,30 +7,6 @@
              d:DesignHeight="700" d:DesignWidth="1000"
              Background="#F5F7FA">
 
-    <UserControl.Resources>
-        <Style x:Key="LinkButton" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#0057E8"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <TextBlock x:Name="ContentText"
-                                   Text="{TemplateBinding Content}"
-                                   Foreground="{TemplateBinding Foreground}"/>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ContentText" Property="TextDecorations" Value="Underline"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
-
-
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -47,7 +23,7 @@
 
             <Button Grid.Column="0"
                     Content="HOME"
-                    Style="{StaticResource LinkButton}"
+                    Style="{StaticResource HomeButtonStyle}"
                     Command="{Binding NavigateToDashboardCommand}"
                     VerticalAlignment="Center"/>
 
@@ -199,41 +175,23 @@
 
             <Button Grid.Column="0"
                     Content="Generer faktura"
+                    Style="{StaticResource ModernButtonStyle}"
                     Command="{Binding GenerateInvoiceCommand}"
                     HorizontalAlignment="Left"
-                    Background="#0057E8"
-                    Foreground="White"
-                    BorderThickness="0"
-                    Padding="14,8"
-                    FontWeight="SemiBold"
-                    Cursor="Hand">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="8"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
+                    Padding="14,8"/>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <Button Content="Annullere"
+                <Button Content="Annuller"
                         Style="{StaticResource LinkButton}"
                         Command="{Binding NavigateToDashboardCommand}"
                         Margin="0,0,20,0"
                         VerticalAlignment="Center"/>
 
                 <Button Content="Gem" 
+                        Style="{StaticResource ModernButtonStyle}"
                         Command="{Binding SaveProjectDetailsCommand}"
-                        Background="#0057E8"
-                        Foreground="White"
-                        BorderThickness="0"
                         Padding="20,8"
-                        FontWeight="SemiBold"
-                        Cursor="Hand">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="8"/>
-                        </Style>
-                    </Button.Resources>
+                        VerticalAlignment="Center">
                 </Button>
             </StackPanel>
 
