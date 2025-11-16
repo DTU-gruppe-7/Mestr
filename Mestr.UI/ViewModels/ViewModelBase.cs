@@ -49,22 +49,6 @@ namespace Mestr.UI.ViewModels
             return Enumerable.Empty<string>();
         }
 
-        protected void AmountBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            // Allow digits and one decimal separator
-            Regex regex = new(@"^[0-9]*(\.[0-9]*)?$");
-            TextBox? textBox = sender as TextBox;
-            if (textBox != null) {
-                string newText = textBox.Text.Insert(textBox.SelectionStart, e.Text);
-                e.Handled = !regex.IsMatch(newText);
-            }
-            if (textBox == null)
-            {
-                e.Handled = true;
-                return;
-            }
-        }
-
         // Validation logic
         protected void ValidateName(string propertyName, string value, string displayName)
         {

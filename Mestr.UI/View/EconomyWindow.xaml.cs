@@ -31,13 +31,14 @@ namespace Mestr.UI.View
         private void AmountBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             // Allow digits and optional decimal separator
-            
-            TextBox? textBox = sender as TextBox;
-            if (textBox == null)
+
+            if (sender is not TextBox textBox)
             {
                 e.Handled = true;
                 return;
-            } else             {
+            }
+            else
+            {
                 string newText = textBox.Text.Insert(textBox.SelectionStart, e.Text);
                 e.Handled = !regex.IsMatch(newText);
             }
@@ -46,22 +47,21 @@ namespace Mestr.UI.View
 
         private void AmountBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            TextBox? textBox = sender as TextBox;
-
-            if (textBox != null && string.IsNullOrWhiteSpace(textBox.Text))
+            if (sender is TextBox textBox && string.IsNullOrWhiteSpace(textBox.Text))
             {
                 textBox.Text = "0";
 
                 // Move caret to end so user can continue typing
                 textBox.CaretIndex = textBox.Text.Length;
-                
-            } else 
+
+            }
+            else
             {
                 e.Handled = true;
                 return;
             }
 
-            
+
         }
 
 
