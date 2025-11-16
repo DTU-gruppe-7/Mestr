@@ -5,14 +5,22 @@
              xmlns:views="clr-namespace:Mestr.UI.View"
              xmlns:viewmodels="clr-namespace:Mestr.UI.ViewModels">
     <Application.Resources>
-        <DataTemplate DataType="{x:Type viewmodels:ProjectViewModel}">
-            <views:ProjectView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type viewmodels:DashboardViewModel}">
-            <views:DashboardView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type viewmodels:ProjectDetailViewModel}">
-            <views:ProjectDetailView/>
-        </DataTemplate> 
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Mestr.UI;component/Component/Styles/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <DataTemplate DataType="{x:Type viewmodels:ProjectViewModel}">
+                <views:ProjectView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewmodels:DashboardViewModel}">
+                <views:DashboardView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewmodels:ProjectDetailViewModel}">
+                <views:ProjectDetailView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewmodels:EconomyViewModel}">
+                <views:EconomyWindow/>
+            </DataTemplate>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

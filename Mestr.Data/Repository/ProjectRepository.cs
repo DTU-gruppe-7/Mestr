@@ -22,7 +22,6 @@ namespace Mestr.Data.Repository
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            
             using var command = _connection.CreateCommand();
             command.CommandText = "INSERT INTO Projects (uuid, name,createdDate, startDate, endDate, description, status)" +
                 "VALUES (@uuid, @name, @createdDate, @startDate, @endDate, @description, @status);";

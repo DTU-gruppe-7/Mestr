@@ -21,10 +21,15 @@ namespace Mestr.UI.ViewModels
         public EconomyViewModel()
         {
             // Initialize collections with Danish terms
-            TransactionTypes = new ObservableCollection<string> { "Udgift", "Indtægt" };
-            Categories = new ObservableCollection<string>();
-            
-            // Set defaults
+            TransactionTypes = ["Udgift", "Indtægt"];
+            Categories = [];
+
+            // Set defaults for non-nullable fields
+            _selectedTransactionType = "Udgift";
+            _name = string.Empty;
+            _description = string.Empty;
+            _selectedCategory = string.Empty;
+
             SelectedTransactionType = "Udgift";
             Date = DateTime.Now;
             CategoryVisibility = Visibility.Visible; // Show category by default
@@ -56,11 +61,13 @@ namespace Mestr.UI.ViewModels
 
         public string Name
         {
-            get => _name;
+            get { return _name; }
             set
             {
                 _name = value;
                 OnPropertyChanged(nameof(Name));
+                ValidateName(nameof(Name), value, "Navn");
+                ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
             }
         }
 
@@ -79,8 +86,11 @@ namespace Mestr.UI.ViewModels
             get => _amount;
             set
             {
+                // Fix: Remove invalid assignment and null comparison for value type
                 _amount = value;
                 OnPropertyChanged(nameof(Amount));
+                ValidateAmount(nameof(Amount),value);
+                ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
             }
         }
 
@@ -136,7 +146,7 @@ namespace Mestr.UI.ViewModels
             if (SelectedTransactionType == "Udgift")
             {
                 // Load expense categories from enum
-                foreach (ExpenseCategory category in System.Enum.GetValues(typeof(ExpenseCategory)))
+                foreach (ExpenseCategory category in Enum.GetValues<ExpenseCategory>())
                 {
                     Categories.Add(category.ToString());
                 }
@@ -159,11 +169,9 @@ namespace Mestr.UI.ViewModels
 
         private bool CanSave()
         {
-            // Don't require category for "Indtægt"
-            bool categoryValid = SelectedTransactionType == "Indtægt" 
-                || !string.IsNullOrWhiteSpace(SelectedCategory);
             
-            return !string.IsNullOrWhiteSpace(Name) 
+            return !HasErrors
+                   && !string.IsNullOrWhiteSpace(Name) 
                    && Amount > 0;
         }
 
@@ -185,10 +193,11 @@ namespace Mestr.UI.ViewModels
             CloseWindow();
         }
 
-        private void CloseWindow()
+        private static void CloseWindow()
         {
             // This will be called from the view
             Application.Current.Windows.OfType<View.EconomyWindow>().FirstOrDefault()?.Close();
         }
+
     }
 }

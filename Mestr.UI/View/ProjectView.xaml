@@ -3,11 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Mestr.UI.View"
-             xmlns:viewmodels="clr-namespace:Mestr.UI.ViewModels"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-
+             d:DesignHeight="450" d:DesignWidth="800"
+             Language="da-DK">
 
     <Grid Background="#FFF5F7FA">
         <Grid.RowDefinitions>
@@ -15,25 +13,20 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        
 
+        <!-- Header -->
         <DockPanel Grid.Row="0" Margin="10">
-            <Button Content="Home" Command="{Binding NavigateToDashboardCommand}" DockPanel.Dock="Left"
-                   
-                    FontSize="12" Height="34" Width="71"
-                    Background="White" Foreground="Black"
-                    BorderThickness="1,1,1,1" Padding="14,8"
-                    FontWeight="Bold" Cursor="Hand" BorderBrush="Black">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="8"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
+            <Button Content="Home" 
+                    Command="{Binding NavigateToDashboardCommand}" 
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource HomeButtonStyle}"/>
             <TextBlock Text="Nyt projekt" DockPanel.Dock="Top"
                        FontSize="20" FontWeight="SemiBold"
                        HorizontalAlignment="Center" Foreground="#1E293B"/>
         </DockPanel>
 
+        <!-- Main Content -->
         <Border Grid.Row="1" Background="White" Margin="20" CornerRadius="8" BorderBrush="#E0E0E0" BorderThickness="1">
             <Border.Effect>
                 <DropShadowEffect Color="Black" Direction="270"
@@ -47,85 +40,111 @@
                     <ColumnDefinition Width="1.5*"/>
                 </Grid.ColumnDefinitions>
 
+                <!-- Left Column -->
                 <StackPanel Grid.Column="1">
                     <TextBlock Text="Oprettelse af nyt projekt"
                                FontSize="16" Margin="0,0,0,20"
                                Foreground="#1E293B" FontWeight="SemiBold"/>
 
-                    <TextBlock Text="PROJEKTNAVN" 
-                               Foreground="#475569" 
-                               FontWeight="SemiBold" 
-                               Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding ProjectName, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,15" 
-                             HorizontalAlignment="Stretch"/>
+                    <!-- Project Name -->
+                    <TextBlock Text="PROJEKTNAVN" Foreground="#475569" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <Grid Margin="0 0 0 15">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <!-- Input -->
+                            <RowDefinition Height="20"/>
+                            <!-- Fixed space for error -->
+                        </Grid.RowDefinitions>
+                        <TextBox x:Name="NameBox"
+                                 Grid.Row="0"
+                                 Text="{Binding ProjectName, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                 Style="{StaticResource ModernTextBoxStyle}"
+                                 Height="30"/>
+                        <ItemsControl Grid.Row="1"
+                                      ItemsSource="{Binding Path=(Validation.Errors), ElementName=NameBox}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Foreground="Red" FontSize="11" Text="{Binding ErrorContent}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
 
-                    <TextBlock Text="KUNDENAVN" 
-                               Foreground="#475569" 
-                               FontWeight="SemiBold" 
-                               Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding ClientName, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,15" 
-                             HorizontalAlignment="Stretch" />
+                    <!-- Client Name -->
+                    <TextBlock Text="KUNDENAVN" Foreground="#475569" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <Grid Margin="0 0 0 15">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="20"/>
+                        </Grid.RowDefinitions>
+                        <TextBox x:Name="ClientBox"
+                                 Grid.Row="0"
+                                 Text="{Binding ClientName, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                 Style="{StaticResource ModernTextBoxStyle}"
+                                 Height="30"/>
+                        <ItemsControl Grid.Row="1"
+                                      ItemsSource="{Binding Path=(Validation.Errors), ElementName=ClientBox}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Foreground="Red" FontSize="11" Text="{Binding ErrorContent}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
 
-                    <TextBlock Text="DEADLINE" 
-                               Foreground="#475569" 
-                               FontWeight="SemiBold" 
-                               Margin="0,0,0,5"/>
-                    <DatePicker SelectedDate="{Binding Deadline}"
-                                HorizontalAlignment="Stretch" 
-                                Margin="0,0,0,15" />
+                    <!-- Deadline -->
+                    <TextBlock Text="DEADLINE" Foreground="#475569" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <Grid Margin="0 0 0 15">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="20"/>
+                        </Grid.RowDefinitions>
+                        <DatePicker x:Name="DeadlineBox"
+                                    Grid.Row="0"
+                                    SelectedDate="{Binding Deadline, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                    Style="{StaticResource ModernDatePickerStyle}"
+                                    Height="40"
+                                    Language="da-DK"/>
+                        <ItemsControl Grid.Row="1"
+                                      ItemsSource="{Binding Path=(Validation.Errors), ElementName=DeadlineBox}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Foreground="Red" FontSize="11" Text="{Binding ErrorContent}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
                 </StackPanel>
 
+                <!-- Right Column -->
                 <Grid Grid.Column="2" Margin="20,0,0,0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text=" " 
-                               FontSize="16" Margin="0,0,0,20" />
-
-                    <TextBlock Grid.Row="1" Text="BESKRIVELSE" 
-                               Foreground="#475569" 
-                               FontWeight="SemiBold" 
-                               Margin="0,0,0,5"/>
-
+                    <TextBlock Grid.Row="1" Text="BESKRIVELSE" Foreground="#475569" FontWeight="SemiBold" Margin="0,0,0,5"/>
                     <TextBox Grid.Row="2"
                              Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                             TextWrapping="Wrap" 
-                             HorizontalAlignment="Stretch" 
-                             VerticalAlignment="Stretch" AcceptsReturn="True" 
+                             TextWrapping="Wrap"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch"
+                             AcceptsReturn="True"
                              VerticalScrollBarVisibility="Auto"/>
                 </Grid>
-
             </Grid>
         </Border>
-        <StackPanel Grid.Row="2" Orientation="Horizontal"
-                    HorizontalAlignment="Right" Margin="10">
-            <Button Content="Annuller" Command="{Binding NavigateToDashboardCommand}" Margin="0,0,10,0"
-                    
-                    Background="#0057E8" Foreground="White"
-                    BorderThickness="0" Padding="14,8"
-                    FontWeight="SemiBold" Cursor="Hand">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="8"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
-            <Button Content="Opret projekt" Command="{Binding CreateProjectCommand}"
-                    
-                    Background="#0057E8" Foreground="White"
-                    BorderThickness="0" Padding="14,8"
-                    FontWeight="SemiBold" Cursor="Hand">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="8"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+            <Button Content="Annuller" 
+                    Command="{Binding NavigateToDashboardCommand}" 
+                    Margin="0,0,10,0"
+                    Style="{StaticResource ModernButtonStyle}"/>
+            <Button Content="Opret projekt" 
+                    Command="{Binding CreateProjectCommand}"
+                    Style="{StaticResource ModernButtonStyle}"/>
         </StackPanel>
     </Grid>
 </UserControl>

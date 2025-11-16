@@ -22,6 +22,9 @@ namespace Mestr.Services.Service
             {
                 throw new ArgumentException("Project name cannot be null or empty.", nameof(name));
             }
+            if (string.IsNullOrWhiteSpace(description)) {
+                description = "";
+            }
 
             var newProject = new Project(
                 uuid: Guid.NewGuid(),

@@ -12,11 +12,11 @@ namespace Mestr.UI.ViewModels
     public class ProjectDetailViewModel : ViewModelBase
     {
         private readonly MainViewModel _mainViewModel;
-        private readonly IProjectService _projectService;
+        private readonly ProjectService _projectService;
         private readonly Guid _projectId;
-        private Project _project;
-        private ObservableCollection<Earning> _earnings;
-        private ObservableCollection<Expense> _expenses;
+        private Project _project = null!;
+        private ObservableCollection<Earning> _earnings = [];
+        private ObservableCollection<Expense> _expenses = [];
 
         public ObservableCollection<Earning> Earnings
         {
@@ -48,7 +48,7 @@ namespace Mestr.UI.ViewModels
             }
         }
 
-        public ICommand NavigateToDashboardCommand => _mainViewModel?.NavigateToDashboardCommand;
+        public ICommand NavigateToDashboardCommand => _mainViewModel.NavigateToDashboardCommand;
 
         public ICommand SaveProjectDetailsCommand { get; }
         public ICommand GenerateInvoiceCommand { get; }
@@ -73,7 +73,16 @@ namespace Mestr.UI.ViewModels
 
         private void LoadProject()
         {
-            Project = _projectService.GetProjectByUuid(_projectId);
+            var project = _projectService.GetProjectByUuid(_projectId);
+            if (project != null)
+            {
+                Project = project;
+            }
+            else
+            {
+                // Handle the case where the project is not found (optional: set to a default or throw)
+                // Project = new Project(); // if you want to avoid nulls entirely
+            }
         }
 
 
@@ -95,8 +104,10 @@ namespace Mestr.UI.ViewModels
 
         private void ShowEconomyWindow()
         {
-            var economyWindow = new EconomyWindow();
-            economyWindow.Owner = App.Current.MainWindow;
+            var economyWindow = new EconomyWindow
+            {
+                Owner = App.Current.MainWindow
+            };
             economyWindow.ShowDialog();
         }
         
