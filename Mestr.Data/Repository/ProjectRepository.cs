@@ -58,7 +58,9 @@ namespace Mestr.Data.Repository
                     Enum.TryParse<ProjectStatus>(reader["status"].ToString(), out var status)
                     ? status
                     : ProjectStatus.Planned, // default fallback value
-                    reader.GetDateTime(reader.GetOrdinal("endDate"))
+                    reader["endDate"] is DBNull
+                    ? (DateTime?)null
+                    : reader.GetDateTime(reader.GetOrdinal("endDate"))
                     );
                 return project;
             }
@@ -83,7 +85,9 @@ namespace Mestr.Data.Repository
                     Enum.TryParse<ProjectStatus>(reader["status"].ToString(), out var status) 
         ? status 
         : ProjectStatus.Planned, // default fallback value
-                    reader.GetDateTime(reader.GetOrdinal("endDate"))
+                    reader["endDate"] is DBNull
+                    ? (DateTime?)null
+                    : reader.GetDateTime(reader.GetOrdinal("endDate"))
                     );
                 projects.Add(project);
             }
@@ -108,7 +112,9 @@ namespace Mestr.Data.Repository
             command.Parameters.AddWithValue("@uuid", entity.Uuid);
             command.Parameters.AddWithValue("@name", entity.Name);
             command.Parameters.AddWithValue("@startDate", entity.StartDate);
-            command.Parameters.AddWithValue("@endDate", entity.EndDate);
+            command.Parameters.AddWithValue("@endDate", entity.EndDate.HasValue
+                ? (object)entity.EndDate.Value
+                : DBNull.Value);
             command.Parameters.AddWithValue("@description", entity.Description);
             command.Parameters.AddWithValue("@status", entity.Status.ToString());
             command.ExecuteNonQuery();

@@ -63,6 +63,36 @@ namespace Mestr.Services.Service
                 .Where(p => p.Status == ProjectStatus.Completed);
         }
 
+        public void UpdateProject(Project project)
+        {
+            if (project == null)
+            {
+                throw new ArgumentNullException(nameof(project), "Project must not be null.");
+            }
+            // Business Logic: Her kan du tjekke, om navnet er validt osv.
+            _projectRepository.Update(project);
+        }
+
+        // --- NY METODE TIL GENÅBNING (TOGGLE STATUS) ---
+        public void UpdateProjectStatus(Guid projectId, ProjectStatus newStatus)
+        {
+            var project = _projectRepository.GetByUuid(projectId);
+            if (project == null)
+            {
+                throw new ArgumentException("Project not found.", nameof(projectId));
+            }
+
+            // Forretningslogik: Hvis vi genåbner, fjern da slutdatoen
+            if (newStatus != ProjectStatus.Completed)
+            {
+                project.EndDate = null;
+            }
+
+            project.Status = newStatus;
+
+            _projectRepository.Update(project);
+        }
+
         public void CompleteProject(Guid projectId)
         {
             var project = _projectRepository.GetByUuid(projectId);

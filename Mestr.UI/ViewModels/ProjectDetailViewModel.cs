@@ -1,10 +1,11 @@
+using Mestr.Core.Enum;
+using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
 using Mestr.UI.Command;
-using Mestr.Core.Model;
-using System.Collections.ObjectModel;
 using Mestr.UI.View;
 using System;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
@@ -13,10 +14,12 @@ namespace Mestr.UI.ViewModels
     {
         private readonly MainViewModel _mainViewModel;
         private readonly ProjectService _projectService;
-        private readonly Guid _projectId;
+        private Guid _projectId;
         private Project _project = null!;
         private ObservableCollection<Earning> _earnings = [];
         private ObservableCollection<Expense> _expenses = [];
+
+        public bool IsProjectCompleted => Project != null && Project.Status == Core.Enum.ProjectStatus.Completed;
 
         public ObservableCollection<Earning> Earnings
         {
@@ -27,7 +30,7 @@ namespace Mestr.UI.ViewModels
                 OnPropertyChanged(nameof(Earnings));
             }
         }
-        
+
         public ObservableCollection<Expense> Expenses
         {
             get => _expenses;
@@ -52,7 +55,7 @@ namespace Mestr.UI.ViewModels
 
         public ICommand SaveProjectDetailsCommand { get; }
         public ICommand GenerateInvoiceCommand { get; }
-        public ICommand CompleteProjectCommand { get; }
+        public ICommand ToggleProjectStatusCommand { get; }
         public ICommand ShowEconomyWindowCommand { get; }
 
         public ProjectDetailViewModel(MainViewModel mainViewModel, Guid projectId)
@@ -60,13 +63,13 @@ namespace Mestr.UI.ViewModels
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectId = projectId;
             _projectService = new ProjectService(); // TODO: Inject this
-            
+
             SaveProjectDetailsCommand = new RelayCommand(SaveProjectDetails);
             GenerateInvoiceCommand = new RelayCommand(GenerateInvoice);
-           
+
             ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow);
 
-            CompleteProjectCommand = new RelayCommand(CompleteProject);
+            ToggleProjectStatusCommand = new RelayCommand(ToggleProjectStatus);
 
             LoadProject();
         }
@@ -97,7 +100,7 @@ namespace Mestr.UI.ViewModels
         private void GenerateInvoice()
         {
             //ToDo Implement Invoice logic
-            
+
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
 
@@ -110,7 +113,7 @@ namespace Mestr.UI.ViewModels
             };
             economyWindow.ShowDialog();
         }
-        
+
         private void CompleteProject()
         {
             if (Project != null)
@@ -119,6 +122,26 @@ namespace Mestr.UI.ViewModels
                 _mainViewModel.NavigateToDashboardCommand.Execute(null);
             }
 
+        }
+
+        private void ToggleProjectStatus()
+        {
+            if (Project == null || Project.Uuid == Guid.Empty) return;
+
+            if (IsProjectCompleted)
+            {
+                Project.Status = ProjectStatus.Ongoing;
+                _projectService.UpdateProjectStatus(Project.Uuid, ProjectStatus.Ongoing);
+            }
+            else 
+            {
+                Project.Status = ProjectStatus.Completed;
+                _projectService.CompleteProject(Project.Uuid);
+            }
+
+            Project.Status = IsProjectCompleted ? ProjectStatus.Ongoing: ProjectStatus.Completed;
+            OnPropertyChanged(nameof(IsProjectCompleted));
+            _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
     }
 }

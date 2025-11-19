@@ -41,10 +41,22 @@
             </StackPanel>
 
             <Button Grid.Column="2"
-                    Content="Afslut projekt"
-                    Style="{StaticResource LinkButton}"
-                    Command="{Binding CompleteProjectCommand}"
-                    VerticalAlignment="Center"/>
+                    VerticalAlignment="Center"
+                    
+                   Command="{Binding ToggleProjectStatusCommand}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource LinkButton}">
+                        <Setter Property="Content" Value="Afslut projekt"/>
+
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsProjectCompleted}" Value="True">
+
+                                <Setter Property="Content" Value="Genåbn projekt"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
         </Grid>
 
 
