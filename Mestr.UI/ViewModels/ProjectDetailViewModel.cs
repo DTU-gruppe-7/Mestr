@@ -14,12 +14,12 @@ namespace Mestr.UI.ViewModels
     {
         private readonly MainViewModel _mainViewModel;
         private readonly ProjectService _projectService;
-        private Guid _projectId;
+        private readonly Guid _projectId;
         private Project _project = null!;
         private ObservableCollection<Earning> _earnings = [];
         private ObservableCollection<Expense> _expenses = [];
 
-        public bool IsProjectCompleted => Project != null && Project.Status == Core.Enum.ProjectStatus.Completed;
+        public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Completed;
 
         public ObservableCollection<Earning> Earnings
         {
@@ -131,15 +131,14 @@ namespace Mestr.UI.ViewModels
             if (IsProjectCompleted)
             {
                 Project.Status = ProjectStatus.Ongoing;
-                _projectService.UpdateProjectStatus(Project.Uuid, ProjectStatus.Ongoing);
+                _projectService.UpdateProjectStatus(_projectId, ProjectStatus.Ongoing);
             }
             else 
             {
                 Project.Status = ProjectStatus.Completed;
-                _projectService.CompleteProject(Project.Uuid);
+                _projectService.CompleteProject(_projectId);
             }
 
-            Project.Status = IsProjectCompleted ? ProjectStatus.Ongoing: ProjectStatus.Completed;
             OnPropertyChanged(nameof(IsProjectCompleted));
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }

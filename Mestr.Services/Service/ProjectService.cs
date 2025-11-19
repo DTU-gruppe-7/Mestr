@@ -82,14 +82,17 @@ namespace Mestr.Services.Service
                 throw new ArgumentException("Project not found.", nameof(projectId));
             }
 
-            // Forretningslogik: Hvis vi genåbner, fjern da slutdatoen
-            if (newStatus != ProjectStatus.Completed)
+            
+            if (newStatus == ProjectStatus.Completed)
+            {
+                project.EndDate = DateTime.Now;
+            }
+            else
             {
                 project.EndDate = null;
             }
 
             project.Status = newStatus;
-
             _projectRepository.Update(project);
         }
 
