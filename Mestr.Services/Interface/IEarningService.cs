@@ -12,7 +12,7 @@ namespace Mestr.Services.Interface
     {
         Earning GetByUuid(Guid uuid);
         List<Earning> GetAllByProjectUuid(Guid projektUuid);
-        Earning AddNewExpense(Guid projectUuid, string description, decimal amount, DateTime date);
+        Earning AddNewEarning(Guid projectUuid, string description, decimal amount, DateTime date);
         bool Delete(Earning entity);
         Earning Update(Earning entity);
     }

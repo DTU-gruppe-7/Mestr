@@ -12,22 +12,28 @@ namespace Mestr.UI.ViewModels
 {
     public class ProjectDetailViewModel : ViewModelBase
     {
+
+        private readonly EarningService _earningService;
+        private readonly ExpenseService _expenseService;
         private readonly MainViewModel _mainViewModel;
         private readonly ProjectService _projectService;
         private readonly Guid _projectId;
         private Project _project = null!;
-        private ObservableCollection<Earning> _earnings = [];
-        private ObservableCollection<Expense> _expenses = [];
+        private ObservableCollection<Earning> _earnings;
+        private ObservableCollection<Expense> _expenses;
 
         public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Completed;
 
         public ObservableCollection<Earning> Earnings
         {
-            get => _earnings;
+            get => _earnings;   
             set
             {
                 _earnings = value;
                 OnPropertyChanged(nameof(Earnings));
+                //kalder profitLoss når en ny indtægt indsættes og udregner balancen
+                OnPropertyChanged(nameof(ProfitLoss));
+
             }
         }
 
@@ -38,6 +44,8 @@ namespace Mestr.UI.ViewModels
             {
                 _expenses = value;
                 OnPropertyChanged(nameof(Expenses));
+                //kalder profitLoss når en ny udgift indsættes og udregner balancen
+                OnPropertyChanged(nameof(ProfitLoss));
             }
         }
 
@@ -63,6 +71,8 @@ namespace Mestr.UI.ViewModels
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectId = projectId;
             _projectService = new ProjectService(); // TODO: Inject this
+            _earningService = new EarningService();
+            _expenseService = new ExpenseService();
 
             SaveProjectDetailsCommand = new RelayCommand(SaveProjectDetails);
             GenerateInvoiceCommand = new RelayCommand(GenerateInvoice);
@@ -77,9 +87,16 @@ namespace Mestr.UI.ViewModels
         private void LoadProject()
         {
             var project = _projectService.GetProjectByUuid(_projectId);
+            var earningsList = _earningService.GetAllByProjectUuid(_projectId);
+            var expensesList = _expenseService.GetAllByProjectUuid(_projectId);
+
             if (project != null)
             {
                 Project = project;
+
+                // Initialize Earnings and Expenses collection
+                Earnings = new ObservableCollection<Earning>(earningsList);
+                Expenses = new ObservableCollection<Expense>(expensesList);
             }
             else
             {
@@ -93,7 +110,15 @@ namespace Mestr.UI.ViewModels
         {
             //Todo: Implement save logic
 
+            //Update the project in the data store
+            if (Project != null)
+            {
+                _projectService.UpdateProject(Project);
+
+            }
+
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
+
 
         }
 
@@ -107,11 +132,22 @@ namespace Mestr.UI.ViewModels
 
         private void ShowEconomyWindow()
         {
-            var economyWindow = new EconomyWindow
+            var economyVm = new EconomyViewModel(
+                _projectId,
+                _earningService,  // Inject services
+                _expenseService);
+
+            var economyWindow = new EconomyWindow()
             {
+                DataContext = economyVm, // VIGTIGT: Ellers er vinduet tomt!
                 Owner = App.Current.MainWindow
             };
+
+            // 2. Vi viser vinduet og venter
             economyWindow.ShowDialog();
+
+            // 3. VIGTIGT: Når vinduet lukkes, skal vi hente data igen!
+            LoadProject();
         }
 
         private void CompleteProject()
@@ -133,7 +169,7 @@ namespace Mestr.UI.ViewModels
                 Project.Status = ProjectStatus.Ongoing;
                 _projectService.UpdateProjectStatus(_projectId, ProjectStatus.Ongoing);
             }
-            else 
+            else
             {
                 Project.Status = ProjectStatus.Completed;
                 _projectService.CompleteProject(_projectId);
@@ -141,6 +177,27 @@ namespace Mestr.UI.ViewModels
 
             OnPropertyChanged(nameof(IsProjectCompleted));
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
+        }
+
+        public decimal ProfitLoss
+        {
+            get
+            {
+                // Start with zero
+                decimal totalIncome = 0;
+                decimal totalExpense = 0;
+
+                // Check for null values
+                if (Earnings != null)
+                    totalIncome = Earnings.Sum(e => e.Amount);
+
+                if (Expenses != null)
+                    totalExpense = Expenses.Sum(e => e.Amount);
+
+                // Result
+                return totalIncome - totalExpense;
+            }
+
         }
     }
 }

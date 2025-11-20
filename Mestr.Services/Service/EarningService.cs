@@ -6,15 +6,16 @@ using System.Threading.Tasks;
 using Mestr.Services.Interface;
 using Mestr.Core.Model;
 using Mestr.Data.Interface;
+using Mestr.Data.Repository;
 
 namespace Mestr.Services.Service
 {
     public class EarningService : IEarningService
     {
         private readonly IRepository<Earning> _earningRepository;
-        public EarningService(IRepository<Earning> earningRepository)
+        public EarningService()
         {
-            _earningRepository = earningRepository;
+            _earningRepository = new EarningRepository();
         }
         public Earning GetByUuid(Guid uuid)
         {
@@ -24,7 +25,7 @@ namespace Mestr.Services.Service
         {
             return _earningRepository.GetAll().Where(e => e.ProjectUuid == projektUuid).ToList();
         }
-        public Earning AddNewExpense(Guid projectUuid, string description, decimal amount, DateTime date)
+        public Earning AddNewEarning(Guid projectUuid, string description, decimal amount, DateTime date)
         {
             var earning = new Earning(Guid.NewGuid(), projectUuid, description, amount, date, false);
             _earningRepository.Add(earning);

@@ -1,4 +1,8 @@
 ﻿using Mestr.Core.Enum;
+using Mestr.Core.Model;
+using Mestr.Data.Repository;
+using Mestr.Services.Service;
+using Mestr.Services.Interface;
 using Mestr.UI.Command;
 using System;
 using System.Collections.ObjectModel;
@@ -9,6 +13,11 @@ namespace Mestr.UI.ViewModels
 {
     internal class EconomyViewModel : ViewModelBase
     {
+        private readonly Guid _projectUuid;
+
+        private readonly IEarningService _earningService;
+        private readonly IExpenseService _expenseService;
+
         private string _selectedTransactionType;
         private string _name;
         private string _description;
@@ -18,8 +27,13 @@ namespace Mestr.UI.ViewModels
         private bool _isPaid;
         private Visibility _categoryVisibility;
 
-        public EconomyViewModel()
+        public EconomyViewModel(Guid projectUuid, IEarningService earningService, IExpenseService expenseService)
         {
+            _projectUuid = projectUuid;
+            _earningService = earningService ?? throw new ArgumentNullException(nameof(earningService));
+            _expenseService = expenseService ?? throw new ArgumentNullException(nameof(expenseService));
+        
+
             // Initialize collections with Danish terms
             TransactionTypes = ["Udgift", "Indtægt"];
             Categories = [];
@@ -177,15 +191,40 @@ namespace Mestr.UI.ViewModels
 
         private void Save()
         {
-            // TODO: Implement save logic with repository
-            // Create Expense or Earning based on SelectedTransactionType
-            // Save to database
-            // Close window
 
-            MessageBox.Show($"Saving {SelectedTransactionType}: {Name} - {Amount:C}", "Save Transaction");
-            
-            // Close the window
-            CloseWindow();
+            try { 
+                MessageBox.Show($"Saving {SelectedTransactionType}: {Name} - {Amount:C}", "Save Transaction");
+
+                // Saving in the database logic 
+
+                if (SelectedTransactionType == "Udgift")
+                {
+                    _expenseService.AddNewExpense(
+                        _projectUuid,
+                        Description,
+                        Amount,
+                        Date,
+                        Enum.Parse<ExpenseCategory>(SelectedCategory)
+                    );
+                }
+
+                else if (SelectedTransactionType == "Indtægt")
+                {
+                    _earningService.AddNewEarning(
+                        _projectUuid,
+                        Description,
+                        Amount,
+                        Date
+                    );
+                }
+                // Close the window
+                CloseWindow();
+            }
+            catch (Exception ex)
+            {
+                // Vis en fejlbesked, hvis noget går galt (f.eks. databaseforbindelse)
+                MessageBox.Show($"Der opstod en fejl ved lagring: {ex.Message}", "Fejl", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Cancel()
