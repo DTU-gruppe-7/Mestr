@@ -113,7 +113,6 @@ namespace Mestr.Data.Repository
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            try { 
             using var command = _connection.CreateCommand();
             command.CommandText = "UPDATE projects " +
                 "SET name = @name, " +
@@ -132,12 +131,6 @@ namespace Mestr.Data.Repository
             command.Parameters.AddWithValue("@description", entity.Description);
             command.Parameters.AddWithValue("@status", GetSqlStatusString(entity.Status));
             command.ExecuteNonQuery();
-            }
-            catch (Microsoft.Data.Sqlite.SqliteException ex)
-            {
-                // Debuggeren stopper nu HER og viser os den rigtige fejl!
-                throw new Exception($"SQLITE FEJL under opdatering: {ex.Message}", ex);
-            }
         }
 
         public void Delete(Guid uuid)
