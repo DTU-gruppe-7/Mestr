@@ -32,7 +32,7 @@ namespace Mestr.Services.Service
                 createdDate: DateTime.Now,
                 startDate: DateTime.Now,
                 description: description,
-                status: ProjectStatus.Planned,
+                status: ProjectStatus.Planlagt,
                 endDate: endDate
             );
 
@@ -54,13 +54,13 @@ namespace Mestr.Services.Service
         public IEnumerable<Project> LoadOngoingProjects() 
         {
             return _projectRepository.GetAll()
-                .Where(p => p.Status == ProjectStatus.Ongoing || p.Status == ProjectStatus.Planned);
+                .Where(p => p.Status == ProjectStatus.Igangværende || p.Status == ProjectStatus.Planlagt);
         }
 
         public IEnumerable<Project> LoadCompletedProjects()
         {
             return _projectRepository.GetAll()
-                .Where(p => p.Status == ProjectStatus.Completed);
+                .Where(p => p.Status == ProjectStatus.Afsluttet);
         }
 
         public void UpdateProject(Project project)
@@ -69,7 +69,6 @@ namespace Mestr.Services.Service
             {
                 throw new ArgumentNullException(nameof(project), "Project must not be null.");
             }
-            // Business Logic: Her kan du tjekke, om navnet er validt osv.
             _projectRepository.Update(project);
         }
 
@@ -82,14 +81,12 @@ namespace Mestr.Services.Service
                 throw new ArgumentException("Project not found.", nameof(projectId));
             }
 
-            
-            if (newStatus == ProjectStatus.Completed)
+            if (newStatus == ProjectStatus.Afsluttet)
             {
-                project.EndDate = DateTime.Now;
-            }
-            else
-            {
-                project.EndDate = null;
+                if (project.EndDate == null)
+                {
+                    project.EndDate = DateTime.Now;
+                }
             }
 
             project.Status = newStatus;
@@ -103,7 +100,7 @@ namespace Mestr.Services.Service
             {
                 throw new ArgumentException("Project not found.", nameof(projectId));
             }
-            project.Status = ProjectStatus.Completed;
+            project.Status = ProjectStatus.Afsluttet;
             project.EndDate= DateTime.Now;
             _projectRepository.Update(project);
         }
