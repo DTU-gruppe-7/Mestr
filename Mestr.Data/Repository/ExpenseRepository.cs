@@ -57,7 +57,7 @@ namespace Mestr.Data.Repository
                     reader.GetDateTime(reader.GetOrdinal("date")),
                     Enum.TryParse<ExpenseCategory>(reader["category"].ToString(), out var status)
                     ? status
-                    : ExpenseCategory.Other, // default fallback value
+                    : ExpenseCategory.Andet, // default fallback value
                     reader.GetBoolean(reader.GetOrdinal("isAccepted"))
                 );
                 return expense;
@@ -84,7 +84,7 @@ namespace Mestr.Data.Repository
                     reader.GetDateTime(reader.GetOrdinal("date")),
                     Enum.TryParse<ExpenseCategory>(reader["category"].ToString(), out var status)
                     ? status
-                    : ExpenseCategory.Other, // default fallback value
+                    : ExpenseCategory.Andet, // default fallback value
                     reader.GetBoolean(reader.GetOrdinal("isAccepted"))
                     );
            
