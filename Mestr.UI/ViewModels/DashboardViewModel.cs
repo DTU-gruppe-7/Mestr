@@ -50,18 +50,62 @@ namespace Mestr.UI.ViewModels
             LoadProjects();
         }
 
-        private void LoadProjects()
-        {
-            var projects = _projectService.LoadOngoingProjects();
-            Projects = new ObservableCollection<Project>(projects);
-            var completedProjects = _projectService.LoadCompletedProjects();
-            CompletedProjects = new ObservableCollection<Project>(completedProjects);
-        }
-
         private void ViewProjectDetails(Guid projectId)
         {
             // Use MainViewModel's parameterized navigation command
             _mainViewModel.NavigateToProjectDetailsCommand.Execute(projectId);
+        }
+
+        private int _sortIndex;
+        public int SortIndex
+        {
+            get => _sortIndex;
+            set
+            {
+                if (_sortIndex != value)
+                {
+                    _sortIndex = value;
+                    OnPropertyChanged(nameof(SortIndex));
+                    ApplySorting();
+                }
+            }
+        }
+
+        private void ApplySorting()
+        {
+            if (Projects == null || Projects.Count == 0)
+                return;
+
+            IEnumerable<Project> sorted = Projects;
+
+            switch (SortIndex)
+            {
+                case 0: // alfabetisk
+                    sorted = Projects.OrderBy(p => p.Name);
+                    break;
+
+                case 1: // tidligst først
+                    sorted = Projects.OrderBy(p => p.EndDate);
+                    break;
+
+                case 2: // senest først
+                    sorted = Projects.OrderByDescending(p => p.EndDate);
+                    break;
+            }
+
+            var sortedList = sorted.ToList();
+            Projects.Clear();
+            foreach (var p in sortedList)
+                Projects.Add(p);
+        }
+
+        private void LoadProjects()
+        {
+            var projects = _projectService.LoadOngoingProjects();
+            Projects = new ObservableCollection<Project>(projects);
+
+            var completedProjects = _projectService.LoadCompletedProjects();
+            CompletedProjects = new ObservableCollection<Project>(completedProjects);
         }
     }
 }
