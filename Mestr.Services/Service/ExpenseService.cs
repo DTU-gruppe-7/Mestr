@@ -15,9 +15,9 @@ namespace Mestr.Services.Service
     public class ExpenseService : IExpenseService
     {
         private readonly IRepository<Expense> _expenseRepository;
-        public ExpenseService(IRepository <Expense> expenseRepository)
+        public ExpenseService()
         {
-            _expenseRepository = expenseRepository;
+            _expenseRepository = new ExpenseRepository();
         }
         public Expense GetByUuid(Guid uuid)
         {
