@@ -178,37 +178,5 @@ namespace Mestr.UI.ViewModels
             // Use MainViewModel's parameterized navigation command
             _mainViewModel.NavigateToProjectDetailsCommand.Execute(projectId);
         }
-
-        public class CompletedProjectViewModel
-        {
-            private readonly Project _project;
-            private readonly EarningService _earningService;
-            private readonly ExpenseService _expenseService;
-
-            public CompletedProjectViewModel(Project project, EarningService earningService, ExpenseService expenseService)
-            {
-                _project = project;
-                _earningService = earningService;
-                _expenseService = expenseService;
-            }
-
-            public Guid Uuid => _project.Uuid;
-            public string Name => _project.Name;
-            public ProjectStatus Status => _project.Status;
-
-            public decimal ProfitLoss
-            {
-                get
-                {
-                    var earnings = _earningService.GetAllByProjectUuid(_project.Uuid);
-                    var expenses = _expenseService.GetAllByProjectUuid(_project.Uuid);
-
-                    decimal totalIncome = earnings?.Sum(e => e.Amount) ?? 0;
-                    decimal totalExpense = expenses?.Sum(e => e.Amount) ?? 0;
-
-                    return totalIncome - totalExpense;
-                }
-            }
-        }
     }
 }
