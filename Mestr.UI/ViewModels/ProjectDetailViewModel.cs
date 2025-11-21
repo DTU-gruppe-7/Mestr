@@ -5,8 +5,10 @@ using Mestr.Services.Service;
 using Mestr.UI.Command;
 using Mestr.UI.View;
 using System;
-using System.Collections.ObjectModel ;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
@@ -22,7 +24,7 @@ namespace Mestr.UI.ViewModels
         private ObservableCollection<Earning> _earnings;
         private ObservableCollection<Expense> _expenses;
 
-        public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Completed;
+        public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Afsluttet;
 
         public ObservableCollection<Earning> Earnings
         {
@@ -61,10 +63,13 @@ namespace Mestr.UI.ViewModels
         public ICommand GenerateInvoiceCommand { get; }
         public ICommand ToggleProjectStatusCommand { get; }
         public ICommand ShowEconomyWindowCommand { get; }
+
         
-        // ? TILF�J DISSE TO NYE COMMANDS
         public ICommand EditEarningCommand { get; }
         public ICommand EditExpenseCommand { get; }
+
+        public ICommand DeleteProjectCommand { get; }
+
 
         public ProjectDetailViewModel(MainViewModel mainViewModel, Guid projectId)
         {
@@ -75,13 +80,16 @@ namespace Mestr.UI.ViewModels
             _expenseService = new ExpenseService();
 
             SaveProjectDetailsCommand = new RelayCommand(SaveProjectDetails);
+
             GenerateInvoiceCommand = new RelayCommand(GenerateInvoice);
             ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow);
             ToggleProjectStatusCommand = new RelayCommand(ToggleProjectStatus);
-            
-            // ? INITIALISER DE NYE COMMANDS
             EditEarningCommand = new RelayCommand<Earning>(EditEarning);
             EditExpenseCommand = new RelayCommand<Expense>(EditExpense);
+            GenerateInvoiceCommand = new RelayCommand(GenerateInvoice); 
+            ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow);
+            ToggleProjectStatusCommand = new RelayCommand(ToggleProjectStatus);
+            DeleteProjectCommand = new RelayCommand(DeleteProject);
 
             LoadProject();
         }
@@ -177,18 +185,19 @@ namespace Mestr.UI.ViewModels
 
             if (IsProjectCompleted)
             {
-                Project.Status = ProjectStatus.Ongoing;
-                _projectService.UpdateProjectStatus(_projectId, ProjectStatus.Ongoing);
+                Project.Status = ProjectStatus.Aktiv;
+                _projectService.UpdateProjectStatus(_projectId, ProjectStatus.Aktiv);
             }
             else
             {
-                Project.Status = ProjectStatus.Completed;
+                Project.Status = ProjectStatus.Afsluttet;
                 _projectService.CompleteProject(_projectId);
             }
 
             OnPropertyChanged(nameof(IsProjectCompleted));
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
+
 
         public decimal ProfitLoss
         {
@@ -204,6 +213,34 @@ namespace Mestr.UI.ViewModels
                     totalExpense = Expenses.Sum(e => e.Amount);
 
                 return totalIncome - totalExpense;
+             }
+          }
+                
+        private void DeleteProject()
+        {
+            if (Project == null || Project.Uuid == Guid.Empty) return;
+
+            var result = MessageBox.Show(
+                $"Er du sikker på, at du vil slette projektet '{Project.Name}'?",
+                "Bekræft sletning",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    _projectService.DeleteProject(_projectId);
+                    _mainViewModel.NavigateToDashboardCommand.Execute(null);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Kunne ikke slette projektet. Fejl: {ex.Message}",
+                        "Sletning mislykkedes",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
             }
         }
     }

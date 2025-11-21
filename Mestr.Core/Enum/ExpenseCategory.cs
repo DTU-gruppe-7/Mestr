@@ -2,11 +2,11 @@
 namespace Mestr.Core.Enum;
 public enum ExpenseCategory
 {
-    Materials,
-    Salary,
+    Materialer,
+    Løn,
     Transport,
-    Tools,
-    Subcontractor,
-    Other
+    Værktøj,
+    Underleverandør,
+    Andet
 }
 
