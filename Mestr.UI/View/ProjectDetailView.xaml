@@ -128,9 +128,9 @@
                       ColumnHeaderStyle="{StaticResource HeaderStyle}"
                       CellStyle="{StaticResource CellStyle}">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Navn" Binding="{Binding name}" Width="2*" />
+                                        <DataGridTextColumn Header="Navn" Binding="{Binding Description}" Width="2*" />
                                         <DataGridTextColumn Header="Estimat" Binding="{Binding Amount, StringFormat=C}" Width="*" />
-                                        <DataGridTextColumn Header="Faktureret beløb" Binding="{Binding FaktureretBeløb, StringFormat=C}" Width="*" />
+                                        <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </StackPanel>
@@ -152,8 +152,7 @@
                                         <DataGridTextColumn Header="Kategori" Binding="{Binding Category}" Width="*" />
                                         <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Description }" Width="*" />
                                         <DataGridTextColumn Header="Beløb" Binding="{Binding Amount, StringFormat=C}" Width="*" />
-                                        <DataGridTextColumn Header="Nuværende forbrug" Binding="{Binding NuværendeForbrug, StringFormat=C}" Width="*"/>
-                                        <DataGridTextColumn Header="Samlet udgift" Binding="{Binding FaktureretBeløb, StringFormat=C}" Width="*" />
+                                        <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </StackPanel>
