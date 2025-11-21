@@ -211,7 +211,7 @@ namespace Mestr.UI.ViewModels
             Categories.Clear();
             if (SelectedTransactionType == "Udgift")
             {
-                foreach (ExpenseCategory category in Enum.GetValues(typeof(ExpenseCategory)))
+                foreach (ExpenseCategory category in Enum.GetValues<ExpenseCategory>())
                 {
                     Categories.Add(category.ToString());
                 }

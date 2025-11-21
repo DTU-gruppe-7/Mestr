@@ -5,7 +5,7 @@ using Mestr.Services.Service;
 using Mestr.UI.Command;
 using Mestr.UI.View;
 using System;
-using System.Collections.ObjectModel    ;
+using System.Collections.ObjectModel ;
 using System.Linq;
 using System.Windows.Input;
 
@@ -139,7 +139,7 @@ namespace Mestr.UI.ViewModels
                 _projectId,
                 _earningService,
                 _expenseService,
-                earning); // Pass earning til edit constructor
+                earning); // Pass earning to edit constructor
 
             var economyWindow = new EconomyWindow()
             {
@@ -159,7 +159,7 @@ namespace Mestr.UI.ViewModels
                 _projectId,
                 _earningService,
                 _expenseService,
-                expense); // Pass expense til edit constructor
+                expense); // Pass expense to edit constructor
 
             var economyWindow = new EconomyWindow()
             {
@@ -168,7 +168,7 @@ namespace Mestr.UI.ViewModels
             };
 
             economyWindow.ShowDialog();
-            LoadProject(); // Refresh data efter lukket dialog
+            LoadProject(); // Refresh data after closing dialog
         }
 
         private void ToggleProjectStatus()
