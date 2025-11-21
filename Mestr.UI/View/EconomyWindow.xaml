@@ -1,7 +1,7 @@
 ﻿<Window x:Class="Mestr.UI.View.EconomyWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Add Transaction"
+        Title="{Binding WindowTitle}"        
         Width="400"
         Background="#F9FAFB"
         WindowStartupLocation="CenterOwner"
@@ -35,6 +35,7 @@
                 <ComboBox Grid.Row="0"
                           ItemsSource="{Binding TransactionTypes}"
                           SelectedItem="{Binding SelectedTransactionType}"
+                          IsEnabled="{Binding IsTypeEnabled}"
                           Style="{StaticResource ModernComboBoxStyle}"
                           Height="30"/>
             </Grid>

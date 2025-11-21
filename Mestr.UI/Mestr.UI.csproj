@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="View\ProjectDetailView.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Mestr.Services\Mestr.Services.csproj" />
   </ItemGroup>
 
