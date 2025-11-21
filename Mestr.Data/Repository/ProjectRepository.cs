@@ -11,9 +11,21 @@ namespace Mestr.Data.Repository
     {
         private readonly SqliteDbContext _dbContext;
         private readonly SqliteConnection _connection;
-        public ProjectRepository() {
+        public ProjectRepository()
+        {
             _dbContext = SqliteDbContext.Instance;
             _connection = _dbContext.GetConnection();
+        }
+        private string GetSqlStatusString(ProjectStatus status)
+        {
+            return status switch
+            {
+                ProjectStatus.Planlagt => "Planlagt",
+                ProjectStatus.Igangværende => "Igangværende",
+                ProjectStatus.Afsluttet => "Afsluttet",
+                ProjectStatus.Annulleret => "Annuleret", // Antager denne findes
+                _ => throw new ArgumentOutOfRangeException(nameof(status), $"Ukendt status: {status}")
+            };
         }
         public void Add(Project entity)
         {
@@ -31,7 +43,7 @@ namespace Mestr.Data.Repository
             command.Parameters.AddWithValue("@startDate", entity.StartDate);
             command.Parameters.AddWithValue("@endDate", entity.EndDate);
             command.Parameters.AddWithValue("@description", entity.Description);
-            command.Parameters.AddWithValue("@status", entity.Status.ToString());
+            command.Parameters.AddWithValue("@status", GetSqlStatusString(entity.Status));
             command.ExecuteNonQuery();
         }
 
@@ -100,6 +112,7 @@ namespace Mestr.Data.Repository
             {
                 throw new ArgumentNullException(nameof(entity));
             }
+
             using var command = _connection.CreateCommand();
             command.CommandText = "UPDATE projects " +
                 "SET name = @name, " +
@@ -116,9 +129,8 @@ namespace Mestr.Data.Repository
                 ? (object)entity.EndDate.Value
                 : DBNull.Value);
             command.Parameters.AddWithValue("@description", entity.Description);
-            command.Parameters.AddWithValue("@status", entity.Status.ToString());
+            command.Parameters.AddWithValue("@status", GetSqlStatusString(entity.Status));
             command.ExecuteNonQuery();
-
         }
 
         public void Delete(Guid uuid)
