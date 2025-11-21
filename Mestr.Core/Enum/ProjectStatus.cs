@@ -1,9 +1,11 @@
 ﻿using System;
-namespace Mestr.Core.Enum;
-public enum ProjectStatus
+namespace Mestr.Core.Enum
 {
-    Planlagt,
-    Aktiv,
-    Afsluttet,
-    Aflyst
+    public enum ProjectStatus
+    {
+        Planlagt,
+        Aktiv,
+        Afsluttet,
+        Aflyst
+    }
 }

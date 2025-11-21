@@ -69,7 +69,6 @@ namespace Mestr.Services.Service
             {
                 throw new ArgumentNullException(nameof(project), "Project must not be null.");
             }
-            // Business Logic: Her kan du tjekke, om navnet er validt osv.
             _projectRepository.Update(project);
         }
 
@@ -81,15 +80,13 @@ namespace Mestr.Services.Service
             {
                 throw new ArgumentException("Project not found.", nameof(projectId));
             }
-
             
             if (newStatus == ProjectStatus.Afsluttet)
             {
-                project.EndDate = DateTime.Now;
-            }
-            else
-            {
-                project.EndDate = null;
+                if (project.EndDate == null)
+                {
+                    project.EndDate = DateTime.Now;
+                }
             }
 
             project.Status = newStatus;
