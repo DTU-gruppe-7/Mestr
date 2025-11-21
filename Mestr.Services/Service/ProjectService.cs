@@ -54,7 +54,7 @@ namespace Mestr.Services.Service
         public IEnumerable<Project> LoadOngoingProjects() 
         {
             return _projectRepository.GetAll()
-                .Where(p => p.Status == ProjectStatus.Igangværende || p.Status == ProjectStatus.Planlagt);
+                .Where(p => p.Status == ProjectStatus.Aktiv || p.Status == ProjectStatus.Planlagt);
         }
 
         public IEnumerable<Project> LoadCompletedProjects()
@@ -80,7 +80,7 @@ namespace Mestr.Services.Service
             {
                 throw new ArgumentException("Project not found.", nameof(projectId));
             }
-
+            
             if (newStatus == ProjectStatus.Afsluttet)
             {
                 if (project.EndDate == null)

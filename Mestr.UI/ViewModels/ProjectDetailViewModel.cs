@@ -130,12 +130,12 @@ namespace Mestr.UI.ViewModels
 
             if (IsProjectCompleted)
             {
-                Project.Status = ProjectStatus.Igangværende;
-                _projectService.UpdateProjectStatus(_projectId, ProjectStatus.Igangværende);
+                Project.Status = ProjectStatus.Aktiv;
+                _projectService.UpdateProjectStatus(_projectId, ProjectStatus.Aktiv);
             }
             else 
             {
-                Project.Status = ProjectStatus.Igangværende;
+                Project.Status = ProjectStatus.Afsluttet;
                 _projectService.CompleteProject(_projectId);
             }
 
