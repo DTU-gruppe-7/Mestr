@@ -156,8 +156,19 @@ namespace Mestr.UI.ViewModels
 
             if (result == MessageBoxResult.Yes)
             {
-                _projectService.DeleteProject(_projectId);
-                _mainViewModel.NavigateToDashboardCommand.Execute(null);
+                try
+                {
+                    _projectService.DeleteProject(_projectId);
+                    _mainViewModel.NavigateToDashboardCommand.Execute(null);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Kunne ikke slette projektet. Fejl: {ex.Message}",
+                        "Sletning mislykkedes",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
             }
         }
     }

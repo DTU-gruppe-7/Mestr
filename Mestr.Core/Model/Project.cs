@@ -34,7 +34,7 @@ public class Project : IProject
     }
 
     // Properties 
-    public Guid Uuid { get => _uuid; set => _uuid = value; }
+    public Guid Uuid { get => _uuid; private set => _uuid = value; }
     public string Name { get => name; set => name = value; }
     public DateTime CreatedDate { get => createdDate; set => createdDate = value; }
     public DateTime StartDate { get => startDate; set => startDate = value; }
