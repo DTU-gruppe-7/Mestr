@@ -115,7 +115,7 @@
                                     </TextBlock>
                                 </Grid>
 
-                                <Button Content="View Details" 
+                                <Button Content="Se Detaljer" 
                                     Command="{Binding DataContext.ViewProjectDetailsCommand, 
                                     RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     CommandParameter="{Binding Uuid}" 
@@ -204,7 +204,7 @@
                                         </TextBlock>
                                     </Grid>
                                     
-                                    <Button Content="View Details" 
+                                    <Button Content="Se Detaljer" 
                                         Command="{Binding DataContext.ViewProjectDetailsCommand, 
                                         RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         CommandParameter="{Binding Uuid}" 
