@@ -1,12 +1,15 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Windows.Input;
 using Mestr.Core.Enum;
 using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
 using Mestr.UI.Command;
 using Mestr.UI.View;
-using System;
-using System.Collections.ObjectModel;
-using System.Windows.Input;
+using Microsoft.Win32;
 
 namespace Mestr.UI.ViewModels
 {
@@ -14,6 +17,7 @@ namespace Mestr.UI.ViewModels
     {
         private readonly MainViewModel _mainViewModel;
         private readonly ProjectService _projectService;
+        private readonly PdfService _pdfService;
         private readonly Guid _projectId;
         private Project _project = null!;
         private ObservableCollection<Earning> _earnings = [];
@@ -63,6 +67,7 @@ namespace Mestr.UI.ViewModels
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectId = projectId;
             _projectService = new ProjectService(); // TODO: Inject this
+            _pdfService = new PdfService();
 
             SaveProjectDetailsCommand = new RelayCommand(SaveProjectDetails);
             GenerateInvoiceCommand = new RelayCommand(GenerateInvoice);
@@ -99,7 +104,33 @@ namespace Mestr.UI.ViewModels
 
         private void GenerateInvoice()
         {
-            //ToDo Implement Invoice logic
+            if (Project == null)
+                return;
+
+            // 1) Gem dialog
+            var dialog = new SaveFileDialog
+            {
+                FileName = $"Invoice_{Project.Name}.pdf",
+                Filter = "PDF Files (*.pdf)|*.pdf"
+            };
+
+            if (dialog.ShowDialog() != true)
+                return;
+
+            string filePath = dialog.FileName;
+
+            // 2) Generer PDF via service
+            var pdfBytes = _pdfService.GenerateInvoice(Project);
+
+            // 3) Gem filen
+            File.WriteAllBytes(filePath, pdfBytes);
+
+            // 4) Åbn PDF
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = filePath,
+                UseShellExecute = true
+            });
 
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
