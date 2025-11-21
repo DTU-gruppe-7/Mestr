@@ -57,7 +57,7 @@ namespace Mestr.Data.Repository
                     reader["description"].ToString()!,
                     Enum.TryParse<ProjectStatus>(reader["status"].ToString(), out var status)
                     ? status
-                    : ProjectStatus.Planned, // default fallback value
+                    : ProjectStatus.Planlagt, // default fallback value
                     reader["endDate"] is DBNull
                     ? (DateTime?)null
                     : reader.GetDateTime(reader.GetOrdinal("endDate"))
@@ -84,7 +84,7 @@ namespace Mestr.Data.Repository
                     reader["description"].ToString()!,
                     Enum.TryParse<ProjectStatus>(reader["status"].ToString(), out var status) 
         ? status 
-        : ProjectStatus.Planned, // default fallback value
+        : ProjectStatus.Planlagt, // default fallback value
                     reader["endDate"] is DBNull
                     ? (DateTime?)null
                     : reader.GetDateTime(reader.GetOrdinal("endDate"))

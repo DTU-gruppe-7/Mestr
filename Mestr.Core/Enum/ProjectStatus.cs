@@ -2,8 +2,8 @@
 namespace Mestr.Core.Enum;
 public enum ProjectStatus
 {
-    Planned,
-    Ongoing,
-    Completed,
-    Cancelled
+    Planlagt,
+    Igangværende,
+    Afsluttet,
+    Annulleret
 }
