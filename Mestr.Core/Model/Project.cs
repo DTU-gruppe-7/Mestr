@@ -7,7 +7,7 @@ using Mestr.Core.Interface;
 namespace Mestr.Core.Model;
 public class Project : IProject
 {
-    private readonly Guid _uuid;
+    private Guid _uuid;
     private string name;
     private DateTime createdDate;
     private DateTime startDate;
@@ -34,7 +34,7 @@ public class Project : IProject
     }
 
     // Properties 
-    public Guid Uuid { get => _uuid;}
+    public Guid Uuid { get => _uuid; set => _uuid = value; }
     public string Name { get => name; set => name = value; }
     public DateTime CreatedDate { get => createdDate; set => createdDate = value; }
     public DateTime StartDate { get => startDate; set => startDate = value; }

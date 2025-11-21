@@ -6,6 +6,7 @@ using Mestr.UI.Command;
 using Mestr.UI.View;
 using System;
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
@@ -57,6 +58,7 @@ namespace Mestr.UI.ViewModels
         public ICommand GenerateInvoiceCommand { get; }
         public ICommand ToggleProjectStatusCommand { get; }
         public ICommand ShowEconomyWindowCommand { get; }
+        public ICommand DeleteProjectCommand { get; }
 
         public ProjectDetailViewModel(MainViewModel mainViewModel, Guid projectId)
         {
@@ -65,11 +67,10 @@ namespace Mestr.UI.ViewModels
             _projectService = new ProjectService(); // TODO: Inject this
 
             SaveProjectDetailsCommand = new RelayCommand(SaveProjectDetails);
-            GenerateInvoiceCommand = new RelayCommand(GenerateInvoice);
-
+            GenerateInvoiceCommand = new RelayCommand(GenerateInvoice); 
             ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow);
-
             ToggleProjectStatusCommand = new RelayCommand(ToggleProjectStatus);
+            DeleteProjectCommand = new RelayCommand(DeleteProject);
 
             LoadProject();
         }
@@ -141,6 +142,23 @@ namespace Mestr.UI.ViewModels
 
             OnPropertyChanged(nameof(IsProjectCompleted));
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
+        }
+
+        private void DeleteProject()
+        {
+            if (Project == null || Project.Uuid == Guid.Empty) return;
+
+            var result = MessageBox.Show(
+                $"Er du sikker på, at du vil slette projektet '{Project.Name}'?",
+                "Bekræft sletning",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _projectService.DeleteProject(_projectId);
+                _mainViewModel.NavigateToDashboardCommand.Execute(null);
+            }
         }
     }
 }

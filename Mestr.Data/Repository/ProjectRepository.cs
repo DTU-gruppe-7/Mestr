@@ -21,9 +21,9 @@ namespace Mestr.Data.Repository
             return status switch
             {
                 ProjectStatus.Planlagt => "Planlagt",
-                ProjectStatus.Igangværende => "Igangværende",
+                ProjectStatus.Aktiv => "Aktiv",
                 ProjectStatus.Afsluttet => "Afsluttet",
-                ProjectStatus.Annulleret => "Annuleret", // Antager denne findes
+                ProjectStatus.Aflyst => "Aflyst", 
                 _ => throw new ArgumentOutOfRangeException(nameof(status), $"Ukendt status: {status}")
             };
         }
