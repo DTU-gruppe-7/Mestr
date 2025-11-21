@@ -61,7 +61,7 @@ namespace Mestr.Data.DbContext
                     startDate DATE NOT NULL,
                     endDate DATE,
                     description TEXT,
-                    status TEXT NOT NULL CHECK (status IN ('Planned', 'Ongoing', 'Completed', 'Cancelled'))
+                    status TEXT NOT NULL CHECK (status IN ('Planlagt', 'Aktiv', 'Afsluttet', 'Aflyst'))
                 );
 
                 CREATE TABLE IF NOT EXISTS Expenses (

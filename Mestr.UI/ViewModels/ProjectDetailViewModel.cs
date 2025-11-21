@@ -19,7 +19,7 @@ namespace Mestr.UI.ViewModels
         private ObservableCollection<Earning> _earnings = [];
         private ObservableCollection<Expense> _expenses = [];
 
-        public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Completed;
+        public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Afsluttet;
 
         public ObservableCollection<Earning> Earnings
         {
@@ -130,12 +130,12 @@ namespace Mestr.UI.ViewModels
 
             if (IsProjectCompleted)
             {
-                Project.Status = ProjectStatus.Ongoing;
-                _projectService.UpdateProjectStatus(_projectId, ProjectStatus.Ongoing);
+                Project.Status = ProjectStatus.Aktiv;
+                _projectService.UpdateProjectStatus(_projectId, ProjectStatus.Aktiv);
             }
             else 
             {
-                Project.Status = ProjectStatus.Completed;
+                Project.Status = ProjectStatus.Afsluttet;
                 _projectService.CompleteProject(_projectId);
             }
 
