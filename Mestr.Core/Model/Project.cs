@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using Mestr.Core.Enum;
+﻿using Mestr.Core.Enum;
 using Mestr.Core.Interface;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Runtime.CompilerServices;
 
 namespace Mestr.Core.Model;
-public class Project : IProject
+public class Project : IProject, INotifyPropertyChanged
 {
     private Guid _uuid;
     private string name;
@@ -16,6 +18,8 @@ public class Project : IProject
     private ProjectStatus status;
     private IList<IExpense> expenses;
     private IList<IEarning> earnings;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public Project(Guid uuid, string name, DateTime createdDate, DateTime startDate, 
                    string description, ProjectStatus status, DateTime? endDate = null)
@@ -47,5 +51,21 @@ public class Project : IProject
     public bool IsFinished()
     {
         return endDate.HasValue && endDate.Value <= DateTime.Now;
+    }
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+        {
+            return false;
+        }
+
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
     }
 }

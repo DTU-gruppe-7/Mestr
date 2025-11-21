@@ -92,7 +92,25 @@ namespace Mestr.UI.ViewModels
 
         private void SaveProjectDetails()
         {
-            //Todo: Implement save logic
+            if (Project == null || Project.Uuid == Guid.Empty) return;
+
+            try
+            {
+                _projectService.UpdateProject(Project);
+                MessageBox.Show(
+                    "Projektet blev gemt succesfuldt.",
+                    "Gem succesfuldt",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Kunne ikke gemme projektet. Fejl: {ex.Message}",
+                    "Gem mislykkedes",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
 
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
 
