@@ -6,6 +6,7 @@ using Mestr.UI.Command;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
 using Mestr.Core.Model;
+using System.Linq;
 
 namespace Mestr.UI.ViewModels
 {
@@ -73,30 +74,48 @@ namespace Mestr.UI.ViewModels
 
         private void ApplySorting()
         {
-            if (Projects == null || Projects.Count == 0)
-                return;
-
-            IEnumerable<Project> sorted = Projects;
-
-            switch (SortIndex)
+            // Sort ongoing projects
+            if (Projects != null && Projects.Count > 0)
             {
-                case 0: // alfabetisk
-                    sorted = Projects.OrderBy(p => p.Name);
-                    break;
-
-                case 1: // tidligst først
-                    sorted = Projects.OrderBy(p => p.EndDate);
-                    break;
-
-                case 2: // senest først
-                    sorted = Projects.OrderByDescending(p => p.EndDate);
-                    break;
+                IEnumerable<Project> sorted = Projects;
+                switch (SortIndex)
+                {
+                    case 0: // alfabetisk
+                        sorted = Projects.OrderBy(p => p.Name);
+                        break;
+                    case 1: // tidligst først
+                        sorted = Projects.OrderBy(p => p.EndDate);
+                        break;
+                    case 2: // senest først
+                        sorted = Projects.OrderByDescending(p => p.EndDate);
+                        break;
+                }
+                var sortedList = sorted.ToList();
+                Projects.Clear();
+                foreach (var p in sortedList)
+                    Projects.Add(p);
             }
-
-            var sortedList = sorted.ToList();
-            Projects.Clear();
-            foreach (var p in sortedList)
-                Projects.Add(p);
+            // Sort completed projects
+            if (CompletedProjects != null && CompletedProjects.Count > 0)
+            {
+                IEnumerable<Project> sortedCompleted = CompletedProjects;
+                switch (SortIndex)
+                {
+                    case 0: // alfabetisk
+                        sortedCompleted = CompletedProjects.OrderBy(p => p.Name);
+                        break;
+                    case 1: // tidligst først
+                        sortedCompleted = CompletedProjects.OrderBy(p => p.EndDate);
+                        break;
+                    case 2: // senest først
+                        sortedCompleted = CompletedProjects.OrderByDescending(p => p.EndDate);
+                        break;
+                }
+                var sortedCompletedList = sortedCompleted.ToList();
+                CompletedProjects.Clear();
+                foreach (var p in sortedCompletedList)
+                    CompletedProjects.Add(p);
+            }
         }
 
         private void LoadProjects()
