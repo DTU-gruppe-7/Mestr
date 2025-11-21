@@ -61,7 +61,7 @@ namespace Mestr.Data.DbContext
                     startDate DATE NOT NULL,
                     endDate DATE,
                     description TEXT,
-                    status TEXT NOT NULL CHECK (status IN ('Planned', 'Ongoing', 'Completed', 'Cancelled'))
+                    status TEXT NOT NULL CHECK (status IN ('Planlagt', 'Aktiv', 'Afsluttet', 'Aflyst'))
                 );
 
                 CREATE TABLE IF NOT EXISTS Expenses (
@@ -72,7 +72,7 @@ namespace Mestr.Data.DbContext
                     date DATE NOT NULL,
                     category TEXT NOT NULL,
                     isAccepted BOOLEAN NOT NULL,
-                    FOREIGN KEY (projectUuid) REFERENCES Projects(uuid)
+                    FOREIGN KEY (projectUuid) REFERENCES Projects(uuid) ON DELETE CASCADE
                 );
 
                 CREATE TABLE IF NOT EXISTS Earnings (
@@ -82,7 +82,7 @@ namespace Mestr.Data.DbContext
                     amount DECIMAL(10,2) NOT NULL,
                     date DATE NOT NULL,
                     isPaid BOOLEAN NOT NULL,
-                    FOREIGN KEY (projectUuid) REFERENCES Projects(uuid)
+                    FOREIGN KEY (projectUuid) REFERENCES Projects(uuid) ON DELETE CASCADE
                 );
             ";
             command.ExecuteNonQuery();
