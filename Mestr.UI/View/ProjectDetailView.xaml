@@ -205,7 +205,7 @@
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal">
                         <TextBlock Text="Gevinst/Tab: " FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding ProfitLoss, StringFormat=C}" FontSize="16" FontWeight="SemiBold" Foreground="#008800" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding ProfitLoss, StringFormat=C}" FontSize="16" FontWeight="SemiBold" Foreground="{Binding ProfitLossColor}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
 

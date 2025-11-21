@@ -34,6 +34,7 @@ namespace Mestr.UI.ViewModels
                 _earnings = value;
                 OnPropertyChanged(nameof(Earnings));
                 OnPropertyChanged(nameof(ProfitLoss));
+                OnPropertyChanged(nameof(ProfitLossColor));
             }
         }
 
@@ -45,6 +46,7 @@ namespace Mestr.UI.ViewModels
                 _expenses = value;
                 OnPropertyChanged(nameof(Expenses));
                 OnPropertyChanged(nameof(ProfitLoss));
+                OnPropertyChanged(nameof(ProfitLossColor));
             }
         }
 
@@ -215,7 +217,21 @@ namespace Mestr.UI.ViewModels
                 return totalIncome - totalExpense;
              }
           }
-                
+
+        public string ProfitLossColor
+        {
+            get
+            {
+                var profitLoss = ProfitLoss;
+                if (profitLoss < 0)
+                    return "#E02020"; // Rød
+                else if (profitLoss > 0)
+                    return "#008800"; // Grøn
+                else
+                    return "#666666"; // Grå/neutral for 0
+            }
+        }
+
         private void DeleteProject()
         {
             if (Project == null || Project.Uuid == Guid.Empty) return;
@@ -243,5 +259,7 @@ namespace Mestr.UI.ViewModels
                 }
             }
         }
+
+
     }
 }
