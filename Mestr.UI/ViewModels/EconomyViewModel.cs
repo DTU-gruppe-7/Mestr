@@ -19,7 +19,6 @@ namespace Mestr.UI.ViewModels
         private readonly IExpenseService _expenseService;
 
         private string _selectedTransactionType;
-        private string _name;
         private string _description;
         private decimal _amount;
         private string _selectedCategory;
@@ -43,7 +42,6 @@ namespace Mestr.UI.ViewModels
             
             // Defaults for create mode
             _selectedTransactionType = "Udgift";
-            _name = string.Empty;
             _description = string.Empty;
             _selectedCategory = string.Empty;
             SelectedTransactionType = "Udgift";
@@ -70,8 +68,7 @@ namespace Mestr.UI.ViewModels
             SelectedTransactionType = "Udgift";
 
             // Populer felter fra eksisterende data
-            Name = expenseToEdit.Description;
-            Description = string.Empty;
+            Description = expenseToEdit.Description;
             Amount = expenseToEdit.Amount;
             Date = expenseToEdit.Date;
             IsPaid = expenseToEdit.IsAccepted;
@@ -91,9 +88,7 @@ namespace Mestr.UI.ViewModels
             _editingId = earningToEdit.Uuid;
             IsTypeEnabled = false;
             SelectedTransactionType = "Indtægt";
-
-            Name = earningToEdit.Description;
-            Description = string.Empty;
+            Description = earningToEdit.Description;
             Amount = earningToEdit.Amount;
             Date = earningToEdit.Date;
             IsPaid = earningToEdit.IsPaid;
@@ -129,25 +124,15 @@ namespace Mestr.UI.ViewModels
             }
         }
 
-        public string Name 
-        { 
-            get => _name; 
-            set 
-            { 
-                _name = value; 
-                OnPropertyChanged(nameof(Name));
-                ValidateName(nameof(Name), value, "Navn");
-                ((RelayCommand)SaveCommand).RaiseCanExecuteChanged(); 
-            } 
-        }
-
         public string Description 
         { 
             get => _description; 
             set 
             { 
                 _description = value; 
-                OnPropertyChanged(nameof(Description)); 
+                OnPropertyChanged(nameof(Description));
+                ValidateText(nameof(Description), value, "Beskrivelse");
+                ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
             } 
         }
 
@@ -233,7 +218,7 @@ namespace Mestr.UI.ViewModels
         private bool CanSave()
         {
             return !HasErrors 
-                   && !string.IsNullOrWhiteSpace(Name) 
+                   && !string.IsNullOrWhiteSpace(Description) 
                    && Amount > 0;
         }
 
@@ -241,10 +226,6 @@ namespace Mestr.UI.ViewModels
         {
             try
             {
-                string fullDescription = string.IsNullOrWhiteSpace(Description) 
-                    ? Name 
-                    : $"{Name} - {Description}";
-
                 if (SelectedTransactionType == "Udgift")
                 {
                     if (!Enum.TryParse(SelectedCategory, out ExpenseCategory categoryEnum))
@@ -260,7 +241,7 @@ namespace Mestr.UI.ViewModels
                         var existingExpense = _expenseService.GetByUuid(_editingId.Value);
                         if (existingExpense != null)
                         {
-                            existingExpense.Description = fullDescription;
+                            existingExpense.Description = Description;
                             existingExpense.Amount = Amount;
                             existingExpense.Date = Date;
                             existingExpense.Category = categoryEnum;
@@ -279,7 +260,7 @@ namespace Mestr.UI.ViewModels
                         // CREATE MODE
                         _expenseService.AddNewExpense(
                             _projectUuid, 
-                            fullDescription, 
+                            Description, 
                             Amount, 
                             Date, 
                             categoryEnum);
@@ -293,7 +274,7 @@ namespace Mestr.UI.ViewModels
                         var existingEarning = _earningService.GetByUuid(_editingId.Value);
                         if (existingEarning != null)
                         {
-                            existingEarning.Description = fullDescription;
+                            existingEarning.Description = Description;
                             existingEarning.Amount = Amount;
                             existingEarning.Date = Date;
                             
@@ -311,7 +292,7 @@ namespace Mestr.UI.ViewModels
                         // CREATE MODE
                         _earningService.AddNewEarning(
                             _projectUuid, 
-                            fullDescription, 
+                            Description, 
                             Amount, 
                             Date);
                     }
