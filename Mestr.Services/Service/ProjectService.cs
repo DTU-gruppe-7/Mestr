@@ -104,6 +104,14 @@ namespace Mestr.Services.Service
             project.EndDate= DateTime.Now;
             _projectRepository.Update(project);
         }
-
+        public void DeleteProject(Guid projectId)
+        {
+            var project = _projectRepository.GetByUuid(projectId);
+            if (project == null)
+            {
+                throw new ArgumentException("Project not found.", nameof(projectId));
+            }
+            _projectRepository.Delete(projectId);
+        }
     }
 }
