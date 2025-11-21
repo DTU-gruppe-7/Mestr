@@ -132,6 +132,7 @@ namespace Mestr.UI.ViewModels
                 _description = value; 
                 OnPropertyChanged(nameof(Description));
                 ValidateText(nameof(Description), value, "Beskrivelse");
+                ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
             } 
         }
 
@@ -225,7 +226,6 @@ namespace Mestr.UI.ViewModels
         {
             try
             {
-               
                 if (SelectedTransactionType == "Udgift")
                 {
                     if (!Enum.TryParse(SelectedCategory, out ExpenseCategory categoryEnum))

@@ -171,7 +171,7 @@
                                           GridLinesVisibility="Horizontal"
                                           HorizontalGridLinesBrush="#EAEBEE"
                                           ColumnHeaderStyle="{StaticResource HeaderStyle}"
-                                          CellStyle="{StaticResource CellStyle}" SelectionChanged="DataGrid_SelectionChanged">
+                                          CellStyle="{StaticResource CellStyle}">
                                     <DataGrid.InputBindings>
                                         <MouseBinding MouseAction="LeftDoubleClick"
                                             Command="{Binding EditExpenseCommand}"

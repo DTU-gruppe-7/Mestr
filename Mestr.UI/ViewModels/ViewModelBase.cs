@@ -89,8 +89,5 @@ namespace Mestr.UI.ViewModels
                 AddError(propertyName, "Deadline skal være en fremtidig dato.");
             }
         }
-
-
-
     }
 }

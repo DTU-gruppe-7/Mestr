@@ -30,7 +30,7 @@
 
             <StackPanel Margin="0,0,0,15">
                 <TextBlock Text="Beskrivelse" FontWeight="SemiBold" FontSize="12" Foreground="#666" Margin="0,0,0,5"/>
-                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                          Style="{StaticResource ModernTextBoxStyle}"
                          Height="35"/>
             </StackPanel>
