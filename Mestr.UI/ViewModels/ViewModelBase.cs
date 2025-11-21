@@ -50,7 +50,7 @@ namespace Mestr.UI.ViewModels
         }
 
         // Validation logic
-        protected void ValidateName(string propertyName, string value, string displayName)
+        protected void ValidateText(string propertyName, string value, string displayName)
         {
             ClearErrors(propertyName);
             if (string.IsNullOrWhiteSpace(value))
@@ -89,5 +89,8 @@ namespace Mestr.UI.ViewModels
                 AddError(propertyName, "Deadline skal være en fremtidig dato.");
             }
         }
+
+
+
     }
 }
