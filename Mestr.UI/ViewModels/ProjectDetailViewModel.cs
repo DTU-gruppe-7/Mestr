@@ -43,8 +43,6 @@ namespace Mestr.UI.ViewModels
             {
                 _earnings = value;
                 OnPropertyChanged(nameof(Earnings));
-                OnPropertyChanged(nameof(ProfitLoss));
-                //OnPropertyChanged(nameof(ProfitLossColor));
             }
         }
 
@@ -55,8 +53,6 @@ namespace Mestr.UI.ViewModels
             {
                 _expenses = value;
                 OnPropertyChanged(nameof(Expenses));
-                OnPropertyChanged(nameof(ProfitLoss));
-                //OnPropertyChanged(nameof(ProfitLossColor));
             }
         }
 
@@ -331,17 +327,7 @@ namespace Mestr.UI.ViewModels
             OnPropertyChanged(nameof(IsProjectCompleted));
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
-
-        public decimal ProfitLoss
-        {
-            get
-            {
-                decimal totalIncome = Earnings?.Sum(e => e.Amount) ?? 0;
-                decimal totalExpense = Expenses?.Sum(e => e.Amount) ?? 0;
-                return totalIncome - totalExpense;
-            }
-        }
-                
+        
         private void DeleteProject()
         {
             if (Project == null || Project.Uuid == Guid.Empty) return;

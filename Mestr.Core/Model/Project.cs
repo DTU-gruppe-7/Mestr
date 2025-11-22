@@ -75,4 +75,16 @@ public class Project : IProject
             return totalEarnings - totalExpenses;
         }
     }
+    public String ResultColor
+    {
+        get
+        {
+            if (Result > 0)
+                return "#22C55E";
+            else if (Result < 0)
+                return "#EF4444";
+            else 
+                return "#6B7280";
+        }
+    }
 }

@@ -360,14 +360,36 @@
                                           CommandParameter="{Binding SelectedItem.Uuid, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
                         </DataGrid.InputBindings>
 
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
-                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" SortMemberPath="Status" Width="*" />
-                            <DataGridTextColumn Header="Resultat" Binding="{Binding Result, Mode=OneWay}" SortMemberPath="Result" Width="*" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-            </Border>
-        </Grid>
+                <DataGrid Grid.Row="2"
+                          ItemsSource="{Binding CompletedProjects}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserSortColumns="True"
+                          BorderThickness="0"
+                          Background="Transparent"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#EAEBEE"
+                          ColumnHeaderStyle="{StaticResource HeaderStyleCompleted}"
+                          CellStyle="{StaticResource CellStyleCompleted}"
+                          RowStyle="{StaticResource RowStyleCompleted}"
+                          Margin="15,0,15,15">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" SortMemberPath="Status" Width="*" />
+                        <DataGridTemplateColumn Header="Resultat" SortMemberPath="Result" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Result, StringFormat='{}{0:N2} kr.'}" 
+                                               Foreground="{Binding ResultColor}"
+                                               FontWeight="SemiBold"
+                                               />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>
