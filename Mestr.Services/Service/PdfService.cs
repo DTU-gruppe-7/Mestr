@@ -10,20 +10,43 @@ using Mestr.Services.Interface;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 using System.IO;
+using Mestr.Services.Service;
 
 public class PdfService : IPdfService
 {
+    private readonly IProjectService _projectService;
+
+    public PdfService()
+    {
+        _projectService = new ProjectService();
+    }
+
     public byte[] GeneratePdfInvoice(Project project)
     {
         if (project == null)
             throw new ArgumentNullException(nameof(project));
 
-        // Earnings total
-        decimal earningsTotal = project.Earnings?.Sum(e => e.Amount) ?? 0;
+        // Get only unpaid earnings that will be included in this invoice
+        var unpaidEarnings = project.Earnings?.Where(e => !e.IsPaid).ToList() ?? new List<Earning>();
+
+        // Earnings total (only unpaid)
+        decimal earningsTotal = unpaidEarnings.Sum(e => e.Amount);
 
         // VAT + total with VAT
         decimal vat = earningsTotal * 0.25m;
         decimal totalWithVat = earningsTotal + vat;
+
+        // Mark all unpaid earnings as paid
+        if (unpaidEarnings.Any())
+        {
+            foreach (var earning in unpaidEarnings)
+            {
+                earning.MarkAsPaid(DateTime.Now);
+            }
+            
+            // Update project in database
+            _projectService.UpdateProject(project);
+        }
 
         // Create PDF
         return Document.Create(container =>
@@ -136,11 +159,11 @@ public class PdfService : IPdfService
                             header.Cell().Element(HeaderCellStyle).AlignRight().Text("Beløb (DKK)").Bold();
                         });
 
-                        // Earnings rows
-                        if (project.Earnings != null && project.Earnings.Any())
+                        // Earnings rows (only unpaid ones)
+                        if (unpaidEarnings.Any())
                         {
                             int index = 1;
-                            foreach (var e in project.Earnings)
+                            foreach (var e in unpaidEarnings)
                             {
                                 table.Cell().Element(CellStyle).Text(index.ToString());
                                 table.Cell().Element(CellStyle).Text(e.Description);
