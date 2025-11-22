@@ -102,12 +102,11 @@ namespace Mestr.UI.ViewModels
 
         }
 
-        private void GenerateInvoice()
+        private async void GenerateInvoice()
         {
             if (Project == null)
                 return;
 
-            // 1) Gem dialog
             var dialog = new SaveFileDialog
             {
                 FileName = $"Invoice_{Project.Name}.pdf",
@@ -119,21 +118,25 @@ namespace Mestr.UI.ViewModels
 
             string filePath = dialog.FileName;
 
-            // 2) Generer PDF via service
-            var pdfBytes = _pdfService.GenerateInvoice(Project);
-
-            // 3) Gem filen
-            File.WriteAllBytes(filePath, pdfBytes);
-
-            // 4) Åbn PDF
-            Process.Start(new ProcessStartInfo
+            try
             {
-                FileName = filePath,
-                UseShellExecute = true
-            });
+                // PDF-generering og filskrivning på baggrundstråd
+                var pdfBytes = await Task.Run(() => _pdfService.GeneratePdfInvoice(Project));
+                await Task.Run(() => File.WriteAllBytes(filePath, pdfBytes));
 
-            _mainViewModel.NavigateToDashboardCommand.Execute(null);
+                // Åbn PDF på UI-tråden
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = filePath,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Fejl ved generering af PDF: {ex.Message}");
+            }
         }
+
 
 
         private void ShowEconomyWindow()

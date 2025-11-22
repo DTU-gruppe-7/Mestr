@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Mestr.Core.Interface;
 using Mestr.Core.Model;
+using QuestPDF.Helpers;
 using Mestr.Services.Interface;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
@@ -13,70 +14,110 @@ using System.Linq;
 
 public class PdfService : IPdfService
 {
-    public byte[] GenerateInvoice(Project project)
+    public byte[] GeneratePdfInvoice(Project project)
     {
-        // Selve PDF genereringen
-        return Document.Create(document =>
-        {
-            document.Page(page =>
-            {
-                page.Margin(20);
+        if (project == null)
+            throw new ArgumentNullException(nameof(project));
 
-                page.Header().Text($"Faktura - {project.Name}")
-                    .FontSize(20)
-                    .SemiBold();
+        // Earnings total
+        decimal earningsTotal = project.Earnings.Sum(e => e.Amount);
+
+        // VAT + total with VAT
+        decimal vat = earningsTotal * 0.25m;
+        decimal totalWithVat = earningsTotal + vat;
+
+        // Create PDF
+        return Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Margin(40);
+
+                page.Header().Text($"FAKTURA — {project.Name}")
+                    .FontSize(22)
+                    .Bold();
 
                 page.Content().Column(col =>
                 {
-                    // Basic info
-                    col.Item().Text($"Projekt ID: {project.Uuid}");
-                    col.Item().Text($"Dato: {DateTime.Now:dd/MM/yyyy}");
+                    col.Spacing(20);
 
-                    col.Item().PaddingVertical(10).LineHorizontal(1);
+                    // Projektinfo
+                    col.Item().Text($"Kunde: {"project.CustomerName"}")
+                        .FontSize(12);
 
-                    // Earnings
-                    col.Item().Text("Indtjeninger").FontSize(16).SemiBold();
+                    col.Item().Text($"Dato: {DateTime.Now:dd-MM-yyyy}")
+                        .FontSize(12);
 
-                    if (project.Earnings != null && project.Earnings.Any())
-                    {
-                        foreach (var earning in project.Earnings)
-                            col.Item().Text($"{earning.Description} - {earning.Amount} kr.");
-                    }
-                    else
-                    {
-                        col.Item().Text("Ingen indtjeninger registreret");
-                    }
+                    col.Item().LineHorizontal(1);
 
-                    col.Item().PaddingVertical(10).LineHorizontal(1);
-
-                    // Expenses
-                    col.Item().Text("Udgifter").FontSize(16).SemiBold();
-
-                    if (project.Expenses != null && project.Expenses.Any())
-                    {
-                        foreach (var expense in project.Expenses)
-                            col.Item().Text($"{expense.Description} - {expense.Amount} kr.");
-                    }
-                    else
-                    {
-                        col.Item().Text("Ingen udgifter registreret");
-                    }
-
-                    col.Item().PaddingVertical(10).LineHorizontal(1);
-
-                    // Totals
-                    decimal totalEarn = project.Earnings?.Sum(x => x.Amount) ?? 0;
-                    decimal totalExp = project.Expenses?.Sum(x => x.Amount) ?? 0;
-                    decimal total = totalEarn - totalExp;
-
-                    col.Item().Text($"Total indtjening: {totalEarn} kr.");
-                    col.Item().Text($"Total udgifter: {totalExp} kr.");
-                    col.Item().Text($"Resultat: {total} kr.")
+                    // Earnings overview
+                    col.Item().Text("Ydelser:")
                         .FontSize(16)
-                        .SemiBold();
+                        .Bold();
+
+                    // Table
+                    col.Item().Table(table =>
+                    {
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.RelativeColumn(3);
+                            columns.RelativeColumn(1);
+                        });
+
+                        // Header row
+                        table.Header(header =>
+                        {
+                            header.Cell().Element(CellStyle).Text("Beskrivelse").Bold();
+                            header.Cell().Element(CellStyle).Text("Pris (DKK)").Bold();
+                        });
+
+                        // Earnings rows
+                        foreach (var e in project.Earnings)
+                        {
+                            table.Cell().Element(CellStyle).Text(e.Description);
+                            table.Cell().Element(CellStyle).Text($"{e.Amount:N2}");
+                        }
+
+                        static IContainer CellStyle(IContainer container)
+                        {
+                            return container.PaddingVertical(5);
+                        }
+                    });
+
+                    col.Item().LineHorizontal(1);
+
+                    // VAT + totals
+                    col.Item().Column(c =>
+                    {
+                        c.Spacing(5);
+
+                        c.Item().Text($"Subtotal (uden moms): {earningsTotal:N2} DKK");
+
+                        c.Item().Text($"Moms (25%): {vat:N2} DKK");
+
+                        c.Item().Text($"Total (inkl. moms): {totalWithVat:N2} DKK")
+                            .FontSize(14)
+                            .Bold();
+
+                        c.Item().Text($"Moms udgør 25% ({vat:N2} kr.) af subtotallen.");
+                    });
+
+                    col.Item().LineHorizontal(1);
+
+                    // Payment info
+                    col.Item().Text("Betalingsinformation:")
+                        .Bold();
+                    col.Item().Text("Reg.nr: 0000");
+                    col.Item().Text("Konto: 00000000");
                 });
+
+                page.Footer()
+                    .AlignCenter()
+                    .Text("Tak for samarbejdet!")
+                    .FontSize(10);
             });
-        }).GeneratePdf(); // <-- PDF’en returneres som byte-array
+        })
+        .GeneratePdf();
     }
 }
 

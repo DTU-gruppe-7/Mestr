@@ -13,6 +13,6 @@ namespace Mestr.Services.Interface
 {
     public interface IPdfService
     {
-        public byte[] GenerateInvoice(Project project);
+        public byte[] GeneratePdfInvoice(Project project);
     }
 }
