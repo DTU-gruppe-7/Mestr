@@ -47,6 +47,7 @@ namespace Mestr.UI.ViewModels
 
             SaveCommand = new RelayCommand(Save, CanSave);
             CancelCommand = new RelayCommand(Cancel);
+            DeleteCommand = new RelayCommand(Delete, CanDelete);
             LoadCategories();
         }
 
@@ -86,6 +87,10 @@ namespace Mestr.UI.ViewModels
         public string WindowTitle => _editingId.HasValue 
             ? "Rediger transaktion" 
             : "Tilføj ny transaktion";
+
+        public Visibility DeleteButtonVisibility => _editingId.HasValue 
+            ? Visibility.Visible 
+            : Visibility.Collapsed;
 
         public ObservableCollection<string> TransactionTypes { get; }
         public ObservableCollection<string> Categories { get; }
@@ -178,6 +183,7 @@ namespace Mestr.UI.ViewModels
 
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
+        public ICommand DeleteCommand { get; }
 
         private void LoadCategories()
         {
@@ -293,6 +299,62 @@ namespace Mestr.UI.ViewModels
             catch (Exception ex)
             {
                 MessageBox.Show($"Fejl ved gemning: {ex.Message}", "Fejl", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private bool CanDelete()
+        {
+            return _editingId.HasValue;
+        }
+
+        private void Delete()
+        {
+            var result = MessageBox.Show(
+                $"Er du sikker på, at du vil slette denne {(SelectedTransactionType == "Udgift" ? "udgift" : "indtægt")}?",
+                "Bekræft sletning",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                if (SelectedTransactionType == "Udgift")
+                {
+                    var expense = _expenseService.GetByUuid(_editingId!.Value);
+                    if (expense != null)
+                    {
+                        _expenseService.Delete(expense);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Udgiften blev ikke fundet.", "Fejl",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+                else // Indtægt
+                {
+                    var earning = _earningService.GetByUuid(_editingId!.Value);
+                    if (earning != null)
+                    {
+                        _earningService.Delete(earning);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Indtægten blev ikke fundet.", "Fejl",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+
+                CloseWindow();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fejl ved sletning: {ex.Message}", "Fejl",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
