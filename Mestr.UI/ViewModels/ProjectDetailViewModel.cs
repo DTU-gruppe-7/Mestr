@@ -10,12 +10,8 @@ using Mestr.Services.Service;
 using Mestr.UI.Command;
 using Mestr.UI.View;
 using Microsoft.Win32;
-using System;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Collections.ObjectModel;
 using System.Windows;
-using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
 {
@@ -30,6 +26,9 @@ namespace Mestr.UI.ViewModels
         private Project _project = null!;
         private ObservableCollection<Earning> _earnings;
         private ObservableCollection<Expense> _expenses;
+        private bool _hasUnsavedChanges = false;
+        private string _originalProjectName;
+        private string _originalProjectDescription;
 
         public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Afsluttet;
 
@@ -62,12 +61,24 @@ namespace Mestr.UI.ViewModels
             get => _project;
             set
             {
+
+                if (_project != null)
+                {
+                    _project.PropertyChanged -= Project_PropertyChanged;
+                }
+
                 _project = value;
+
+                if (_project != null)
+                {
+                    _project.PropertyChanged += Project_PropertyChanged;
+                }
+
                 OnPropertyChanged(nameof(Project));
             }
         }
 
-        public ICommand NavigateToDashboardCommand => _mainViewModel.NavigateToDashboardCommand;
+        public ICommand NavigateToDashboardCommand { get; }
         public ICommand SaveProjectDetailsCommand { get; }
         public ICommand GenerateInvoiceCommand { get; }
         public ICommand ToggleProjectStatusCommand { get; }
@@ -89,8 +100,8 @@ namespace Mestr.UI.ViewModels
             _earningService = new EarningService();
             _expenseService = new ExpenseService();
 
+            NavigateToDashboardCommand = new RelayCommand(NavigateToDashboardWithWarning);
             SaveProjectDetailsCommand = new RelayCommand(SaveProjectDetails);
-
             GenerateInvoiceCommand = new RelayCommand(GenerateInvoice);
             ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow);
             ToggleProjectStatusCommand = new RelayCommand(ToggleProjectStatus);
@@ -104,6 +115,43 @@ namespace Mestr.UI.ViewModels
             LoadProject();
         }
 
+        private void Project_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            // Track changes to Name and Description
+            if (e.PropertyName == nameof(Project.Name) || e.PropertyName == nameof(Project.Description))
+            {
+                CheckForUnsavedChanges();
+            }
+        }
+
+        private void CheckForUnsavedChanges()
+        {
+            if (Project == null) return;
+
+            _hasUnsavedChanges = Project.Name != _originalProjectName ||
+                                 Project.Description != _originalProjectDescription;
+        }
+
+        private void NavigateToDashboardWithWarning()
+        {
+            if (_hasUnsavedChanges)
+            {
+                var result = MessageBox.Show(
+                    "Du har ugemte ændringer. Vil du forlade siden uden at gemme?",
+                    "Ugemte ændringer",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.No)
+                {
+                    return; // Stay on the page
+                }
+            }
+
+            // Navigate away
+            _mainViewModel.NavigateToDashboardCommand.Execute(null);
+        }
+
         private void LoadProject()
         {
             var project = _projectService.GetProjectByUuid(_projectId);
@@ -115,6 +163,10 @@ namespace Mestr.UI.ViewModels
                 Project = project;
                 Earnings = new ObservableCollection<Earning>(earningsList);
                 Expenses = new ObservableCollection<Expense>(expensesList);
+
+                _originalProjectName = project.Name;
+                _originalProjectDescription = project.Description;
+                _hasUnsavedChanges = false;
             }
         }
 
@@ -125,6 +177,10 @@ namespace Mestr.UI.ViewModels
             try
             {
                 _projectService.UpdateProject(Project);
+                _originalProjectName = Project.Name;
+                _originalProjectDescription = Project.Description;
+                _hasUnsavedChanges = false;
+
                 MessageBox.Show(
                     "Projektet blev gemt succesfuldt.",
                     "Gem succesfuldt",
@@ -319,7 +375,5 @@ namespace Mestr.UI.ViewModels
                 }
             }
         }
-
-
     }
 }
