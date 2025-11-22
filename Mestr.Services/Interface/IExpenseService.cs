@@ -11,7 +11,6 @@ namespace Mestr.Services.Interface
     public interface IExpenseService
     {
         Expense GetByUuid(Guid uuid);
-        IEnumerable<Expense> GetAllByProjectUuid(Guid projektUuid);
         Expense AddNewExpense(Guid projectUuid, string description, decimal amount, DateTime date, ExpenseCategory category);
         bool Delete(Expense entity);
         Expense Update(Expense entity);

@@ -3,146 +3,161 @@ using Mestr.Core.Interface;
 using Mestr.Core.Model;
 using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
-using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mestr.Data.Repository
 {
     public class ProjectRepository : IRepository<Project>
     {
-        private readonly SqliteDbContext _dbContext;
-        private readonly SqliteConnection _connection;
-        public ProjectRepository()
-        {
-            _dbContext = SqliteDbContext.Instance;
-            _connection = _dbContext.GetConnection();
-        }
-        private string GetSqlStatusString(ProjectStatus status)
-        {
-            return status switch
-            {
-                ProjectStatus.Planlagt => "Planlagt",
-                ProjectStatus.Aktiv => "Aktiv",
-                ProjectStatus.Afsluttet => "Afsluttet",
-                ProjectStatus.Aflyst => "Aflyst", 
-                _ => throw new ArgumentOutOfRangeException(nameof(status), $"Ukendt status: {status}")
-            };
-        }
         public void Add(Project entity)
         {
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            using var command = _connection.CreateCommand();
-            command.CommandText = "INSERT INTO Projects (uuid, name,createdDate, startDate, endDate, description, status)" +
-                "VALUES (@uuid, @name, @createdDate, @startDate, @endDate, @description, @status);";
-            command.Parameters.AddWithValue("@uuid", entity.Uuid);
-            command.Parameters.AddWithValue("@name", entity.Name);
-            command.Parameters.AddWithValue("@createdDate", entity.CreatedDate);
-            command.Parameters.AddWithValue("@startDate", entity.StartDate);
-            command.Parameters.AddWithValue("@endDate", entity.EndDate);
-            command.Parameters.AddWithValue("@description", entity.Description);
-            command.Parameters.AddWithValue("@status", GetSqlStatusString(entity.Status));
-            command.ExecuteNonQuery();
+            dbContext.DatabaseLock.Wait();
+            try
+            {
+                // Check if the client already exists in the database
+                var existingClient = dbContext.Instance.Clients.Find(entity.Client.Uuid);
+                if (existingClient != null)
+                {
+                    // Attach the existing client as unchanged
+                    entity.Client = existingClient;
+                }
+                else
+                {
+                    // Mark the client as Added if it doesn't exist
+                    dbContext.Instance.Clients.Add(entity.Client);
+                }
+
+                dbContext.Instance.Projects.Add(entity);
+                dbContext.Instance.SaveChanges();
+            }
+            finally
+            {
+                dbContext.DatabaseLock.Release();
+            }
         }
 
         public Project? GetByUuid(Guid uuid)
         {
-            if (uuid == Guid.Empty)
+            if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
+
+            dbContext.DatabaseLock.Wait();
+            try
             {
-                throw new ArgumentNullException(nameof(uuid));
+                return dbContext.Instance.Projects
+                    .Include(p => p.Client)
+                    .Include(p => p.Expenses)
+                    .Include(p => p.Earnings)
+                    .FirstOrDefault(p => p.Uuid == uuid);
             }
-
-            using var command = _connection.CreateCommand();
-            command.CommandText = "SELECT * FROM projects WHERE uuid = @uuid";
-            
-            command.Parameters.AddWithValue("@uuid", uuid);
-
-            using var reader = command.ExecuteReader();
-            while (reader.Read()) {
-                var project = new Project(
-                    Guid.Parse(reader["uuid"].ToString()!),
-                    reader["name"].ToString()!,
-                    reader.GetDateTime(reader.GetOrdinal("createdDate")),
-                    reader.GetDateTime(reader.GetOrdinal("startDate")),
-                    reader["description"].ToString()!,
-                    Enum.TryParse<ProjectStatus>(reader["status"].ToString(), out var status)
-                    ? status
-                    : ProjectStatus.Planlagt, // default fallback value
-                    reader["endDate"] is DBNull
-                    ? (DateTime?)null
-                    : reader.GetDateTime(reader.GetOrdinal("endDate"))
-                    );
-                return project;
+            finally
+            {
+                dbContext.DatabaseLock.Release();
             }
-            return null;
         }
+
         public IEnumerable<Project> GetAll()
         {
-            var projects = new List<Project>();
-
-            using var command = _connection.CreateCommand();
-            command.CommandText = "SELECT * FROM Projects";
-
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
+            dbContext.DatabaseLock.Wait();
+            try
             {
-                var project = new Project(
-                    Guid.Parse(reader["uuid"].ToString()!),
-                    reader["name"].ToString()!,
-                    reader.GetDateTime(reader.GetOrdinal("createdDate")),
-                    reader.GetDateTime(reader.GetOrdinal("startDate")),
-                    reader["description"].ToString()!,
-                    Enum.TryParse<ProjectStatus>(reader["status"].ToString(), out var status) 
-        ? status 
-        : ProjectStatus.Planlagt, // default fallback value
-                    reader["endDate"] is DBNull
-                    ? (DateTime?)null
-                    : reader.GetDateTime(reader.GetOrdinal("endDate"))
-                    );
-                projects.Add(project);
+                return dbContext.Instance.Projects
+                    .Include(p => p.Client)
+                    .Include(p => p.Expenses)
+                    .Include(p => p.Earnings)
+                    .AsNoTracking()
+                    .ToList();
             }
-            return projects;
+            finally
+            {
+                dbContext.DatabaseLock.Release();
+            }
         }
 
         public void Update(Project entity)
         {
-            if (entity == null)
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+
+            dbContext.DatabaseLock.Wait();
+            try
             {
-                throw new ArgumentNullException(nameof(entity));
+                // Reload the entity from the database with tracking
+                var existingProject = dbContext.Instance.Projects
+                    .Include(p => p.Client)
+                    .Include(p => p.Expenses)
+                    .Include(p => p.Earnings)
+                    .FirstOrDefault(p => p.Uuid == entity.Uuid);
+
+                if (existingProject != null)
+                {
+                    // Update scalar properties
+                    dbContext.Instance.Entry(existingProject).CurrentValues.SetValues(entity);
+                    
+                    // Update client if changed
+                    if (existingProject.Client.Uuid != entity.Client.Uuid)
+                    {
+                        existingProject.Client = entity.Client;
+                    }
+                    
+                    // Update expenses collection
+                    UpdateCollection(existingProject.Expenses, entity.Expenses, dbContext.Instance);
+                    
+                    // Update earnings collection
+                    UpdateCollection(existingProject.Earnings, entity.Earnings, dbContext.Instance);
+                    
+                    dbContext.Instance.SaveChanges();
+                }
+            }
+            finally
+            {
+                dbContext.DatabaseLock.Release();
+            }
+        }
+
+        private void UpdateCollection<T>(IList<T> existingCollection, IList<T> newCollection, dbContext context) 
+            where T : class
+        {
+            // Remove items that are no longer in the collection
+            var itemsToRemove = existingCollection.Except(newCollection).ToList();
+            foreach (var item in itemsToRemove)
+            {
+                existingCollection.Remove(item);
+                context.Entry(item).State = EntityState.Deleted;
             }
 
-            using var command = _connection.CreateCommand();
-            command.CommandText = "UPDATE projects " +
-                "SET name = @name, " +
-                "startDate = @startDate, " +
-                "endDate = @endDate, " +
-                "description = @description, " +
-                "status = @status " +
-                "WHERE uuid = @uuid";
+            // Add new items
+            var itemsToAdd = newCollection.Except(existingCollection).ToList();
+            foreach (var item in itemsToAdd)
+            {
+                existingCollection.Add(item);
+            }
 
-            command.Parameters.AddWithValue("@uuid", entity.Uuid);
-            command.Parameters.AddWithValue("@name", entity.Name);
-            command.Parameters.AddWithValue("@startDate", entity.StartDate);
-            command.Parameters.AddWithValue("@endDate", entity.EndDate.HasValue
-                ? (object)entity.EndDate.Value
-                : DBNull.Value);
-            command.Parameters.AddWithValue("@description", entity.Description);
-            command.Parameters.AddWithValue("@status", GetSqlStatusString(entity.Status));
-            command.ExecuteNonQuery();
+            // Update existing items
+            foreach (var item in newCollection.Intersect(existingCollection))
+            {
+                context.Entry(item).CurrentValues.SetValues(item);
+            }
         }
 
         public void Delete(Guid uuid)
         {
-            if (uuid == Guid.Empty)
+            if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
+
+            dbContext.DatabaseLock.Wait();
+            try
             {
-                throw new ArgumentNullException(nameof(uuid));
+                var project = dbContext.Instance.Projects.FirstOrDefault(p => p.Uuid == uuid);
+                if (project != null)
+                {
+                    dbContext.Instance.Projects.Remove(project);
+                    dbContext.Instance.SaveChanges();
+                }
             }
-            using var command = _connection.CreateCommand();
-            command.CommandText = "DELETE FROM projects WHERE uuid = @uuid";
-            command.Parameters.AddWithValue("@uuid", uuid);
-            command.ExecuteNonQuery();
+            finally
+            {
+                dbContext.DatabaseLock.Release();
+            }
         }
     }
 }

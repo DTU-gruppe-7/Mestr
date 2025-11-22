@@ -9,6 +9,7 @@ namespace Mestr.Core.Interface
     {
         Guid Uuid { get; }
         string Name { get; set; }
+        IClient Client { get; set; }
         DateTime CreatedDate { get; set; }
         DateTime StartDate { get; set; }
         DateTime? EndDate { get; set; }

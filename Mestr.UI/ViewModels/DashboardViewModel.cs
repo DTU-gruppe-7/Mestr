@@ -1,13 +1,16 @@
-﻿using System;
+
+using Mestr.Core.Interface;
+using Mestr.Core.Model;
+using Mestr.Services.Interface;
+using Mestr.Services.Service;
+using Mestr.UI.Command;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
-using Mestr.UI.Command;
-using Mestr.Services.Interface;
-using Mestr.Services.Service;
-using Mestr.Core.Model;
 using Mestr.Core.Enum;
+
 
 namespace Mestr.UI.ViewModels
 {

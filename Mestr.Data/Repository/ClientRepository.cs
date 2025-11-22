@@ -1,21 +1,21 @@
-﻿using Mestr.Data.DbContext;
-using Mestr.Data.Interface;
+using Mestr.Core.Interface;
 using Mestr.Core.Model;
-using Mestr.Core.Enum;
+using Mestr.Data.DbContext;
+using Mestr.Data.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace Mestr.Data.Repository
 {
-    public class ExpenseRepository : IRepository<Expense>
+    public class ClientRepository : IRepository<Client>
     {
-        public void Add(Expense entity)
+        public void Add(Client entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
             dbContext.DatabaseLock.Wait();
             try
             {
-                dbContext.Instance.Expenses.Add(entity);
+                dbContext.Instance.Clients.Add(entity);
                 dbContext.Instance.SaveChanges();
             }
             finally
@@ -24,16 +24,16 @@ namespace Mestr.Data.Repository
             }
         }
 
-        public Expense? GetByUuid(Guid uuid)
+        public Client? GetByUuid(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
             dbContext.DatabaseLock.Wait();
             try
             {
-                return dbContext.Instance.Expenses
-                    .Include(e => e.Project)
-                    .FirstOrDefault(e => e.Uuid == uuid);
+                return dbContext.Instance.Clients
+                    .Include(c => c.Projects)
+                    .FirstOrDefault(c => c.Uuid == uuid);
             }
             finally
             {
@@ -41,13 +41,13 @@ namespace Mestr.Data.Repository
             }
         }
 
-        public IEnumerable<Expense> GetAll()
+        public IEnumerable<Client> GetAll()
         {
             dbContext.DatabaseLock.Wait();
             try
             {
-                return dbContext.Instance.Expenses
-                    .Include(e => e.Project)
+                return dbContext.Instance.Clients
+                    .Include(c => c.Projects)
                     .AsNoTracking()
                     .ToList();
             }
@@ -57,14 +57,14 @@ namespace Mestr.Data.Repository
             }
         }
 
-        public void Update(Expense entity)
+        public void Update(Client entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
             dbContext.DatabaseLock.Wait();
             try
             {
-                dbContext.Instance.Expenses.Update(entity);
+                dbContext.Instance.Clients.Update(entity);
                 dbContext.Instance.SaveChanges();
             }
             finally
@@ -80,10 +80,10 @@ namespace Mestr.Data.Repository
             dbContext.DatabaseLock.Wait();
             try
             {
-                var expense = dbContext.Instance.Expenses.FirstOrDefault(e => e.Uuid == uuid);
-                if (expense != null)
+                var client = dbContext.Instance.Clients.FirstOrDefault(c => c.Uuid == uuid);
+                if (client != null)
                 {
-                    dbContext.Instance.Expenses.Remove(expense);
+                    dbContext.Instance.Clients.Remove(client);
                     dbContext.Instance.SaveChanges();
                 }
             }

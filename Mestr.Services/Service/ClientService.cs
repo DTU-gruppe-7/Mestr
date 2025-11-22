@@ -1,4 +1,4 @@
-﻿using Mestr.Core.Model;
+using Mestr.Core.Model;
 using Mestr.Data.Interface;
 using Mestr.Data.Repository;
 using Mestr.Services.Interface;
@@ -16,13 +16,19 @@ namespace Mestr.Services.Service
             _clientRepository = new ClientRepository();
         }
 
-        public Client CreateClient(string name, string email, string phoneNumber, string address,
+        public Client CreateClient(string companyName,string contactName, string email, string phoneNumber, string address,
                                    string postalAddress, string city, string? cvr = null)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(companyName))
             {
-                throw new ArgumentException("Client name cannot be null or empty.", nameof(name));
+                throw new ArgumentException("Client name cannot be null or empty.", nameof(companyName));
             }
+
+            if (string.IsNullOrWhiteSpace(contactName))
+            {
+                throw new ArgumentException("Client name cannot be null or empty.", nameof(contactName));
+            }
+
 
             if (string.IsNullOrWhiteSpace(email))
             {
@@ -35,14 +41,15 @@ namespace Mestr.Services.Service
             }
 
             var newClient = new Client(
-                uuid: Guid.NewGuid(),
-                name: name,
-                email: email,
-                phoneNumber: phoneNumber,
-                address: address ?? string.Empty,
-                postalAddress: postalAddress ?? string.Empty,
-                city: city ?? string.Empty,
-                cvr: cvr
+                Guid.NewGuid(),
+                companyName,
+                contactName,
+                email,
+                phoneNumber,
+                address,
+                postalAddress,
+                city,
+                cvr
             );
 
             _clientRepository.Add(newClient);
@@ -78,5 +85,6 @@ namespace Mestr.Services.Service
             }
             _clientRepository.Delete(clientId);
         }
+
     }
 }
