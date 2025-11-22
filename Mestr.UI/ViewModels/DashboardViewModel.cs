@@ -25,7 +25,6 @@ namespace Mestr.UI.ViewModels
         // Filter properties
         private bool _showPlanlagt = true;
         private bool _showAktiv = true;
-        private bool _showAfsluttet = false;
         private bool _showAflyst = false;
         private string _showAllButtonText = "Vis alle";
 
@@ -84,18 +83,6 @@ namespace Mestr.UI.ViewModels
             }
         }
 
-        public bool ShowAfsluttet
-        {
-            get => _showAfsluttet;
-            set
-            {
-                _showAfsluttet = value;
-                OnPropertyChanged(nameof(ShowAfsluttet));
-                ApplyFilter();
-                UpdateShowAllButtonText();
-            }
-        }
-
         public bool ShowAflyst
         {
             get => _showAflyst;
@@ -143,21 +130,19 @@ namespace Mestr.UI.ViewModels
             {
                 ShowPlanlagt = false;
                 ShowAktiv = false;
-                ShowAfsluttet = false;
                 ShowAflyst = false;
             }
             else
             {
-                ShowPlanlagt = true;
                 ShowAktiv = true;
-                ShowAfsluttet = true;
+                ShowPlanlagt = true;
                 ShowAflyst = true;
             }
         }
 
         private bool AreAllFiltersSelected()
         {
-            return ShowPlanlagt && ShowAktiv && ShowAfsluttet && ShowAflyst;
+            return ShowPlanlagt && ShowAktiv && ShowAflyst;
         }
 
         private void UpdateShowAllButtonText()
@@ -170,7 +155,6 @@ namespace Mestr.UI.ViewModels
             var filteredProjects = _allOngoingProjects.Where(p =>
                 (p.Status == ProjectStatus.Planlagt && ShowPlanlagt) ||
                 (p.Status == ProjectStatus.Aktiv && ShowAktiv) ||
-                (p.Status == ProjectStatus.Afsluttet && ShowAfsluttet) ||
                 (p.Status == ProjectStatus.Aflyst && ShowAflyst)
             ).ToList();
 

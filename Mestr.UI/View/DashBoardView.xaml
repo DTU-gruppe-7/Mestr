@@ -98,12 +98,6 @@
                                   VerticalAlignment="Center"
                                   Foreground="#1E293B"/>
 
-                        <CheckBox Content="Afsluttet" 
-                                  IsChecked="{Binding ShowAfsluttet}"
-                                  Margin="0,0,10,0"
-                                  VerticalAlignment="Center"
-                                  Foreground="#1E293B"/>
-
                         <CheckBox Content="Aflyst" 
                                   IsChecked="{Binding ShowAflyst}"
                                   Margin="0,0,15,0"
@@ -240,6 +234,7 @@
 
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Projekt Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
+                            <DataGridTextColumn Header="Kunde" Binding="{Binding Client.Name}" SortMemberPath="Client.Name" Width="*" />
                             <DataGridTextColumn Header="Status" Binding="{Binding Status}" SortMemberPath="Status" Width="*" />
                             <DataGridTextColumn Header="Deadline" Binding="{Binding EndDate, StringFormat={}{0:dd-MM-yyyy}}" SortMemberPath="EndDate" Width="*" />
                         </DataGrid.Columns>
@@ -360,7 +355,8 @@
                                           CommandParameter="{Binding SelectedItem.Uuid, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
                         </DataGrid.InputBindings>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
+                            <DataGridTextColumn Header="Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="*" />
+                            <DataGridTextColumn Header="Kunde" Binding="{Binding Client.Name}" SortMemberPath="Client.Name" Width="*" />
                             <DataGridTextColumn Header="Status" Binding="{Binding Status}" SortMemberPath="Status" Width="*" />
                             <DataGridTemplateColumn Header="Resultat" SortMemberPath="Result" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
