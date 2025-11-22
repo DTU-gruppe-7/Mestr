@@ -27,8 +27,10 @@ namespace Mestr.UI.ViewModels
         private ObservableCollection<Earning> _earnings;
         private ObservableCollection<Expense> _expenses;
         private bool _hasUnsavedChanges = false;
-        private string _originalProjectName;
-        private string _originalProjectDescription;
+        private string _originalProjectName = string.Empty;
+        private string _originalProjectDescription = string.Empty;
+        private bool _disposed = false;
+        private bool _isLoadingProject = false;
 
         public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Afsluttet;
 
@@ -83,11 +85,8 @@ namespace Mestr.UI.ViewModels
         public ICommand GenerateInvoiceCommand { get; }
         public ICommand ToggleProjectStatusCommand { get; }
         public ICommand ShowEconomyWindowCommand { get; }
-
-        
         public ICommand EditEarningCommand { get; }
         public ICommand EditExpenseCommand { get; }
-
         public ICommand DeleteProjectCommand { get; }
 
 
@@ -107,9 +106,6 @@ namespace Mestr.UI.ViewModels
             ToggleProjectStatusCommand = new RelayCommand(ToggleProjectStatus);
             EditEarningCommand = new RelayCommand<Earning>(EditEarning);
             EditExpenseCommand = new RelayCommand<Expense>(EditExpense);
-            GenerateInvoiceCommand = new RelayCommand(GenerateInvoice); 
-            ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow);
-            ToggleProjectStatusCommand = new RelayCommand(ToggleProjectStatus);
             DeleteProjectCommand = new RelayCommand(DeleteProject);
 
             LoadProject();
@@ -117,7 +113,8 @@ namespace Mestr.UI.ViewModels
 
         private void Project_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            // Track changes to Name and Description
+            if (_isLoadingProject) return;
+
             if (e.PropertyName == nameof(Project.Name) || e.PropertyName == nameof(Project.Description))
             {
                 CheckForUnsavedChanges();
@@ -155,18 +152,35 @@ namespace Mestr.UI.ViewModels
         private void LoadProject()
         {
             var project = _projectService.GetProjectByUuid(_projectId);
+
+            if (project == null)
+            {
+                MessageBox.Show(
+                    "Projektet kunne ikke findes.",
+                    "Fejl",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                _mainViewModel.NavigateToDashboardCommand.Execute(null);
+                return;
+            }
+
             var earningsList = _earningService.GetAllByProjectUuid(_projectId);
             var expensesList = _expenseService.GetAllByProjectUuid(_projectId);
+            _isLoadingProject = true;
 
-            if (project != null)
+            try
             {
+                _originalProjectName = project.Name ?? string.Empty;
+                _originalProjectDescription = project.Description ?? string.Empty;
                 Project = project;
                 Earnings = new ObservableCollection<Earning>(earningsList);
                 Expenses = new ObservableCollection<Expense>(expensesList);
-
-                _originalProjectName = project.Name;
-                _originalProjectDescription = project.Description;
                 _hasUnsavedChanges = false;
+            }
+            finally
+            {
+                _isLoadingProject = false;
             }
         }
 
@@ -177,8 +191,8 @@ namespace Mestr.UI.ViewModels
             try
             {
                 _projectService.UpdateProject(Project);
-                _originalProjectName = Project.Name;
-                _originalProjectDescription = Project.Description;
+                _originalProjectName = Project.Name ?? string.Empty;
+                _originalProjectDescription = Project.Description ?? string.Empty;
                 _hasUnsavedChanges = false;
 
                 MessageBox.Show(
@@ -374,6 +388,33 @@ namespace Mestr.UI.ViewModels
                         MessageBoxImage.Error);
                 }
             }
+        }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                // Unsubscribe from events
+                if (_project != null)
+                {
+                    _project.PropertyChanged -= Project_PropertyChanged;
+                }
+            }
+
+            _disposed = true;
+        }
+
+        ~ProjectDetailViewModel()
+        {
+            Dispose(false);
         }
     }
 }
