@@ -11,11 +11,8 @@ using Mestr.UI.Command;
 using Mestr.UI.View;
 using Microsoft.Win32;
 using System;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Collections.ObjectModel;
 using System.Windows;
-using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
 {

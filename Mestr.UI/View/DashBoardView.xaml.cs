@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Mestr.Core.Model;
+using Mestr.UI.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +25,25 @@ namespace Mestr.UI.View
         public DashboardView()
         {
             InitializeComponent();
+        }
+        private void ProjectRow_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            // 1. Tjek at vi har fat i en række
+            if (sender is DataGridRow row)
+            {
+                // 2. Hent data fra rækken (det projekt man trykkede på)
+                if (row.DataContext is Project clickedProject)
+                {
+                    // 3. Hent ViewModel og kør kommandoen
+                    if (this.DataContext is DashboardViewModel vm)
+                    {
+                        if (vm.ViewProjectDetailsCommand.CanExecute(clickedProject.Uuid))
+                        {
+                            vm.ViewProjectDetailsCommand.Execute(clickedProject.Uuid);
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -132,27 +132,24 @@
                                     <Setter Property="BorderThickness" Value="0"/>
                                     <Setter Property="Padding" Value="0,10,5,5"/>
                                 </Style>
+
                                 <Style x:Key="CellStyle" TargetType="DataGridCell">
                                     <Setter Property="Padding" Value="0,5,5,5" />
                                     <Setter Property="BorderThickness" Value="0" />
-                                    <Setter Property="Cursor" Value="Hand" />
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#F0F4F8" />
-                                        </Trigger>
-                                    </Style.Triggers>
                                 </Style>
-
+                                
                                 <!-- ✅ NY: Row style med hånd-cursor og hover-effekt -->
                                 <Style x:Key="RowStyle" TargetType="DataGridRow">
                                     <Setter Property="Cursor" Value="Hand" />
+                                    <EventSetter Event="MouseLeftButtonUp" Handler="Row_MouseLeftButtonUp"/>
+
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter Property="Background" Value="#F0F4F8" />
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
-
+                                
                                 <Style x:Key="ListTitle" TargetType="TextBlock">
                                     <Setter Property="FontSize" Value="18"/>
                                     <Setter Property="FontWeight" Value="SemiBold"/>
@@ -167,21 +164,16 @@
                                     <StackPanel Width="440" Margin="0,0,20,0">
                                         <TextBlock Text="Indtægter" Style="{StaticResource ListTitle}"/>
                                         <DataGrid ItemsSource="{Binding Earnings}"
-                              AutoGenerateColumns="False"
-                              IsReadOnly="True"
-                              BorderThickness="0"
-                              Background="Transparent"
-                              HeadersVisibility="Column"
-                              GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#EAEBEE"
-                              ColumnHeaderStyle="{StaticResource HeaderStyle}"
-                              CellStyle="{StaticResource CellStyle}">
-                                            <DataGrid.InputBindings>
-                                                <MouseBinding MouseAction="LeftDoubleClick"
-                                            Command="{Binding EditEarningCommand}"
-                                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                            </DataGrid.InputBindings>
-
+                                              AutoGenerateColumns="False"
+                                              IsReadOnly="True"
+                                              BorderThickness="0"
+                                              Background="Transparent"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="Horizontal"
+                                              HorizontalGridLinesBrush="#EAEBEE"
+                                              ColumnHeaderStyle="{StaticResource HeaderStyle}"
+                                              CellStyle="{StaticResource CellStyle}"
+                                              RowStyle="{StaticResource RowStyle}">
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="Navn" Binding="{Binding Description}" Width="2*" />
                                                 <DataGridTextColumn Header="Estimat" Binding="{Binding Amount, StringFormat=C}" Width="*" />
@@ -194,22 +186,16 @@
                                     <StackPanel Width="440">
                                         <TextBlock Text="Udgifter" Style="{StaticResource ListTitle}" Margin="0,0,0,8"/>
                                         <DataGrid ItemsSource="{Binding Expenses}"
-                              AutoGenerateColumns="False"
-                              IsReadOnly="True"
-                              BorderThickness="0"
-                              Background="Transparent"
-                              HeadersVisibility="Column"
-                              GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#EAEBEE"
-                              ColumnHeaderStyle="{StaticResource HeaderStyle}"
-                              CellStyle="{StaticResource CellStyle}">
-                                            <DataGrid.InputBindings>
-                                                <MouseBinding MouseAction="LeftDoubleClick"
-                                            Command="{Binding EditExpenseCommand}"
-                                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                            </DataGrid.InputBindings>
-
-
+                                                AutoGenerateColumns="False"
+                                                IsReadOnly="True"
+                                                BorderThickness="0"
+                                                Background="Transparent"
+                                                HeadersVisibility="Column"
+                                                GridLinesVisibility="Horizontal"
+                                                HorizontalGridLinesBrush="#EAEBEE"
+                                                ColumnHeaderStyle="{StaticResource HeaderStyle}"
+                                                CellStyle="{StaticResource CellStyle}"
+                                                RowStyle="{StaticResource RowStyle}">
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="Kategori" Binding="{Binding Category}" Width="*" />
                                                 <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Description}" Width="*" />
