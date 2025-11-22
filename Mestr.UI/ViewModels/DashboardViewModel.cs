@@ -109,6 +109,7 @@ namespace Mestr.UI.ViewModels
         }
 
         public ICommand NavigateToProjectCommand => _mainViewModel.NavigateToProjectCommand;
+        public ICommand NavigateToClientsCommand => _mainViewModel.NavigateToClientsCommand;
         public ICommand ViewProjectDetailsCommand { get; }
         public ICommand ShowAllCommand { get; }
 
