@@ -1,8 +1,10 @@
-﻿using Mestr.Services.Interface;
+﻿using Mestr.Core.Model;
+using Mestr.Services.Interface;
 using Mestr.Services.Service;
 using Mestr.UI.Command;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -15,17 +17,34 @@ namespace Mestr.UI.ViewModels
     {
         private readonly MainViewModel _mainViewModel;
         private readonly IProjectService _projectService;
+        private readonly IClientService _clientService;
         private string _projectName = string.Empty;
 
         public ICommand CreateProjectCommand { get; }
         public ICommand NavigateToDashboardCommand => _mainViewModel.NavigateToDashboardCommand;
 
-        public AddNewProjectViewModel(MainViewModel mainViewModel, IProjectService projectService)
+        public AddNewProjectViewModel(MainViewModel mainViewModel, IProjectService projectService, IClientService clientService)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
+            _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
             CreateProjectCommand = new RelayCommand(CreateProject, CanCreateProject);
+            
+            LoadClients();
         }
+
+        public ObservableCollection<Client> Clients { get; } = new ObservableCollection<Client>();
+
+        private void LoadClients()
+        {
+            var clients = _clientService.GetAllClients();
+            Clients.Clear();
+            foreach (var client in clients)
+            {
+                Clients.Add(client);
+            }
+        }
+
         public string ProjectName
         {
             get { return _projectName; }
@@ -40,15 +59,15 @@ namespace Mestr.UI.ViewModels
         }
 
 
-        private string _clientName = string.Empty;
-        public string ClientName
+        private Client? _selectedClient;
+        public Client? SelectedClient
         {
-            get { return _clientName; }
+            get { return _selectedClient; }
             set
             {
-                _clientName = value;
-                OnPropertyChanged(nameof(ClientName));
-                ValidateText(nameof(ClientName), value, "Kundenavn");
+                _selectedClient = value;
+                OnPropertyChanged(nameof(SelectedClient));
+                ValidateSelectedClient(nameof(SelectedClient), value);
                 ((RelayCommand)CreateProjectCommand).RaiseCanExecuteChanged();
             }
         }
@@ -79,11 +98,18 @@ namespace Mestr.UI.ViewModels
 
         }
 
-        
+        private void ValidateSelectedClient(string propertyName, Client? client)
+        {
+            ClearErrors(propertyName);
+            if (client == null)
+            {
+                AddError(propertyName, "Vælg venligst en kunde.");
+            }
+        }
 
         private void CreateProject()
         {
-            var project = _projectService.CreateProject(ProjectName, ClientName, Description, Deadline);
+            var project = _projectService.CreateProject(ProjectName, SelectedClient!, Description, Deadline);
             
             // Option 1: Navigate to dashboard
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
@@ -95,7 +121,7 @@ namespace Mestr.UI.ViewModels
         {
             return !HasErrors
                 && !string.IsNullOrWhiteSpace(ProjectName)
-                && !string.IsNullOrWhiteSpace(ClientName);
+                && SelectedClient != null;
         }
 
     }

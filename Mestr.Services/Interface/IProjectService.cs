@@ -9,7 +9,7 @@ namespace Mestr.Services.Interface
 {
     public interface IProjectService
     {
-        Project CreateProject(string name, string client, string description, DateTime? endDate);
+        Project CreateProject(string name, Client client, string description, DateTime? endDate);
         Project? GetProjectByUuid(Guid uuid);
         IEnumerable<Project> LoadAllProjects();
         IEnumerable<Project> LoadOngoingProjects();

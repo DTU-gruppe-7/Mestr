@@ -43,7 +43,11 @@
                     <Run Text="Status: "/>
                     <Run Text="{Binding Project.Status, FallbackValue='N/A'}" 
                             FontWeight="SemiBold"/>
-                        </TextBlock>
+                </TextBlock>
+                <TextBlock FontSize="14" Foreground="#555" HorizontalAlignment="Center">
+                    <Run Text="Kunde: "/>
+                    <Run Text="{Binding Project.Client.Name}"/>
+                </TextBlock>
             </StackPanel>
 
             <Button Grid.Column="2"

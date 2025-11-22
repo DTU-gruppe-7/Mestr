@@ -54,7 +54,7 @@ namespace Mestr.UI.ViewModels
 
         private void NavigateToAddNewProject()
         {
-            CurrentViewModel = new AddNewProjectViewModel(this, _projectService);
+            CurrentViewModel = new AddNewProjectViewModel(this, _projectService, _clientService);
         }
 
         private void NavigateToDashboard()

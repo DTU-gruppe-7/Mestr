@@ -18,32 +18,19 @@ namespace Mestr.Services.Service
             _clientRepository = new ClientRepository();
         }
 
-        public Project CreateProject(string name, string client, string description, DateTime? endDate)
+        public Project CreateProject(string name, Client client, string description, DateTime? endDate)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Project name cannot be null or empty.", nameof(name));
-            if (string.IsNullOrWhiteSpace(client))
-                throw new ArgumentException("Client name cannot be null or empty.", nameof(client));
+            if (client == null)
+                throw new ArgumentException("There must be a client when adding a new project", nameof(client));
             
             description ??= string.Empty;
-
-            // TODO: Dette opretter stadig en dummy client - overvej at tilføje client management
-            var newClient = new Client(
-                Guid.NewGuid(), 
-                client, 
-                "Kontaktperson", 
-                "kontakt@example.com", 
-                "12345678", 
-                "Adresse", 
-                "1234", 
-                "By", 
-                null
-            );
 
             var newProject = new Project(
                 Guid.NewGuid(),
                 name,
-                newClient,
+                client,
                 DateTime.Now,
                 DateTime.Now,
                 description,
