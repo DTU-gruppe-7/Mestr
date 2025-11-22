@@ -12,69 +12,53 @@ namespace Mestr.Core.Model;
 public class Project : IProject, INotifyPropertyChanged
 {
     private Guid _uuid;
-    private string _name;
-    private DateTime _createdDate;
-    private DateTime _startDate;
-    private DateTime? _endDate;
-    private string _description;
-    private ProjectStatus _status;
-    private IList<IExpense> _expenses;
-    private IList<IEarning> _earnings;
+    private string name = string.Empty;
+    private Client client = null!;
+    private DateTime createdDate;
+    private DateTime startDate;
+    private DateTime? endDate; 
+    private string description = string.Empty;
+    private ProjectStatus status;
+    private IList<Expense> expenses = new List<Expense>();
+    private IList<Earning> earnings = new List<Earning>();
 
-    public event PropertyChangedEventHandler? PropertyChanged;
+    // EF Core requires a parameterless constructor
+    private Project()
+    {
+    }
 
-    public Project(Guid uuid, string name, DateTime createdDate, DateTime startDate, 
-                   string description, ProjectStatus status, DateTime? endDate = null)
+    public Project(Guid uuid, string name, IClient client, DateTime createdDate, DateTime startDate, 
+                   string description, ProjectStatus status, DateTime? endDate = null,
+                   IList<IExpense>? expenses = null, IList<IEarning>? earnings = null)
     {
         this._uuid = uuid;
-        this._name = name;
-        this._createdDate = createdDate;
-        this._startDate = startDate;
-        this._description = description;
-        this._status = status;
-        this._endDate = endDate;
+        this.name = name;
+        this.client = (Client)client;
+        this.createdDate = createdDate;
+        this.startDate = startDate;
+        this.description = description;
+        this.status = status;
+        this.endDate = endDate;
 
-        this._expenses = new List<IExpense>();
-        this._earnings = new List<IEarning>();
-
+        this.expenses = expenses?.Select(e => (Expense)e).ToList() ?? new List<Expense>();
+        this.earnings = earnings?.Select(e => (Earning)e).ToList() ?? new List<Earning>();
     }
 
-    // Properties 
+    // Properties - use concrete types for EF Core
     public Guid Uuid { get => _uuid; private set => _uuid = value; }
-
-    public string Name
-    {
-        get => _name; set => SetProperty(ref _name, value); 
-    }
-    public DateTime CreatedDate
-    {
-        get => _createdDate; set => SetProperty(ref _createdDate, value); 
-    }
-    public DateTime StartDate
-    {
-        get => _startDate; set => SetProperty(ref _startDate, value); 
-    }
-    public DateTime? EndDate
-    {
-        get => _endDate;  set => SetProperty(ref _endDate, value);
-    }
-    public string Description
-    {
-        get => _description; set => SetProperty(ref _description, value); 
-    }
-    public ProjectStatus Status
-    {
-        get => _status; set => SetProperty(ref _status, value); 
-    }
-    public IList<IExpense> Expenses
-    {
-        get => _expenses; set => SetProperty(ref _expenses, value);
-    }
-    public IList<IEarning> Earnings
-    {
-        get => _earnings; set => SetProperty(ref _earnings, value); 
-    }
-
+    public string Name { get => name; set => name = value; }
+    public Client Client { get => client; set => client = value; }
+    IClient IProject.Client { get => client; set => client = (Client)value; }
+    public DateTime CreatedDate { get => createdDate; set => createdDate = value; }
+    public DateTime StartDate { get => startDate; set => startDate = value; }
+    public DateTime? EndDate { get => endDate; set => endDate = value; }
+    public string Description { get => description; set => description = value; }
+    public ProjectStatus Status { get => status; set => status = value; }
+    public IList<Expense> Expenses { get => expenses; set => expenses = value; }
+    IList<IExpense> IProject.Expenses { get => expenses.Cast<IExpense>().ToList(); set => expenses = value.Select(e => (Expense)e).ToList(); }
+    public IList<Earning> Earnings { get => earnings; set => earnings = value; }
+    IList<IEarning> IProject.Earnings { get => earnings.Cast<IEarning>().ToList(); set => earnings = value.Select(e => (Earning)e).ToList(); }
+    
     public bool IsFinished()
     {
         return _endDate.HasValue && _endDate.Value <= DateTime.Now;
@@ -94,5 +78,16 @@ public class Project : IProject, INotifyPropertyChanged
         field = value;
         OnPropertyChanged(propertyName);
         return true;
+    }
+    public decimal Result
+    {
+        get
+        {
+            decimal totalEarnings = earnings?.Sum(e => e.Amount) ?? 0;
+            Console.WriteLine("The earnings sum op to: " + totalEarnings );
+            decimal totalExpenses = expenses?.Sum(e => e.Amount) ?? 0;
+            Console.WriteLine("The expenses sum op to: " + totalExpenses);
+            return totalEarnings - totalExpenses;
+        }
     }
 }
