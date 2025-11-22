@@ -60,7 +60,6 @@ namespace Mestr.UI.ViewModels
             IsTypeEnabled = false;
             SelectedTransactionType = "Udgift";
 
-            Name = expenseToEdit.Description;
             Description = string.Empty;
             Amount = expenseToEdit.Amount;
             Date = expenseToEdit.Date;

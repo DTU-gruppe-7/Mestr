@@ -39,7 +39,7 @@ namespace Mestr.UI.ViewModels
                 _earnings = value;
                 OnPropertyChanged(nameof(Earnings));
                 OnPropertyChanged(nameof(ProfitLoss));
-                OnPropertyChanged(nameof(ProfitLossColor));
+                //OnPropertyChanged(nameof(ProfitLossColor));
             }
         }
 
@@ -51,7 +51,7 @@ namespace Mestr.UI.ViewModels
                 _expenses = value;
                 OnPropertyChanged(nameof(Expenses));
                 OnPropertyChanged(nameof(ProfitLoss));
-                OnPropertyChanged(nameof(ProfitLossColor));
+                //OnPropertyChanged(nameof(ProfitLossColor));
             }
         }
 

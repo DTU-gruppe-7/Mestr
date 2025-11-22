@@ -321,6 +321,7 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
                         <DataGridTextColumn Header="Status" Binding="{Binding Status}" SortMemberPath="Status" Width="*" />
+                        <DataGridTextColumn Header="Resultat" Binding="{Binding Result, Mode=OneWay}" SortMemberPath="Result" Width="*" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

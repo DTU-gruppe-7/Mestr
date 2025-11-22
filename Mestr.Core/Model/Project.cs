@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
 namespace Mestr.Core.Model;
-public class Project : IProject, INotifyPropertyChanged
+public class Project : IProject
 {
     private Guid _uuid;
     private string name = string.Empty;
@@ -61,24 +61,9 @@ public class Project : IProject, INotifyPropertyChanged
     
     public bool IsFinished()
     {
-        return _endDate.HasValue && _endDate.Value <= DateTime.Now;
-    }
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return endDate.HasValue && endDate.Value <= DateTime.Now;
     }
 
-    protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value))
-        {
-            return false;
-        }
-
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
-    }
     public decimal Result
     {
         get
