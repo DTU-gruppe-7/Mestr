@@ -28,7 +28,7 @@ namespace Mestr.UI.ViewModels
             }
         }
 
-        public ICommand NavigateToProjectCommand { get; }
+        public ICommand NavigateToAddNewProjectCommand { get; }
         public ICommand NavigateToDashboardCommand { get; }
         public ICommand NavigateToProjectDetailsCommand { get; }
         public ICommand NavigateToClientsCommand { get; }
@@ -41,7 +41,7 @@ namespace Mestr.UI.ViewModels
             _clientService = new ClientService();
 
             // Non-parameterized navigation
-            NavigateToProjectCommand = new RelayCommand(NavigateToProject);
+            NavigateToAddNewProjectCommand = new RelayCommand(NavigateToAddNewProject);
             NavigateToDashboardCommand = new RelayCommand(NavigateToDashboard);
             NavigateToClientsCommand = new RelayCommand(NavigateToClients);
 
@@ -52,9 +52,9 @@ namespace Mestr.UI.ViewModels
             CurrentViewModel = new DashboardViewModel(this, _projectService);
         }
 
-        private void NavigateToProject()
+        private void NavigateToAddNewProject()
         {
-            CurrentViewModel = new ProjectViewModel(this, _projectService);
+            CurrentViewModel = new AddNewProjectViewModel(this, _projectService);
         }
 
         private void NavigateToDashboard()

@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace Mestr.UI.View
 {
     /// <summary>
-    /// Interaction logic for ProjectView.xaml
+    /// Interaction logic for AddNewProjectView.xaml
     /// </summary>
-    public partial class ProjectView : UserControl
+    public partial class AddNewProjectView : UserControl
     {
-        public ProjectView()
+        public AddNewProjectView()
         {
             InitializeComponent();
         }
