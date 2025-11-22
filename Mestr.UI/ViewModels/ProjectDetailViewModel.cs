@@ -100,27 +100,19 @@ namespace Mestr.UI.ViewModels
             LoadProject();
         }
 
-        private void Project_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (_isLoadingProject) return;
 
-            if (e.PropertyName == nameof(Project.Name) || e.PropertyName == nameof(Project.Description))
-            {
-                CheckForUnsavedChanges();
-            }
+
+        private bool HasUnsavedChanges()
+        {
+            if (Project == null) return false;
+
+            return Project.Name != _originalProjectName ||
+                   Project.Description != _originalProjectDescription;
         }
 
-        private void CheckForUnsavedChanges()
+        private bool ConfirmNavigationIfUnsaved()
         {
-            if (Project == null) return;
-
-            _hasUnsavedChanges = Project.Name != _originalProjectName ||
-                                 Project.Description != _originalProjectDescription;
-        }
-
-        private void NavigateToDashboardWithWarning()
-        {
-            if (_hasUnsavedChanges)
+            if (HasUnsavedChanges())
             {
                 var result = MessageBox.Show(
                     "Du har ugemte ændringer. Vil du forlade siden uden at gemme?",
@@ -128,10 +120,35 @@ namespace Mestr.UI.ViewModels
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Warning);
 
-                if (result == MessageBoxResult.No)
+                if (result == MessageBoxResult.Yes)
                 {
-                    return; // Stay on the page
+                    // Restore original values before navigating away
+                    RevertUnsavedChanges();
+                    return true;
                 }
+
+                return false;
+
+            }
+
+            return true; // No unsaved changes, allow navigation
+        }
+        private void RevertUnsavedChanges()
+        {
+            if (Project == null) return;
+
+            // Restore original values
+            Project.Name = _originalProjectName;
+            Project.Description = _originalProjectDescription;
+
+            // Notify UI of changes
+            OnPropertyChanged(nameof(Project));
+        }
+        private void NavigateToDashboardWithWarning()
+        {
+            if (!ConfirmNavigationIfUnsaved())
+            {
+                return; // User chose to stay on the page
             }
 
             // Navigate away
