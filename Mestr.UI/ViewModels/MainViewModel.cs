@@ -12,7 +12,8 @@ namespace Mestr.UI.ViewModels
     {
         private ViewModelBase? _currentViewModel;
         private readonly IProjectService _projectService;
-        
+        private readonly IClientService _clientService;
+
         public ViewModelBase CurrentViewModel 
         { 
             get => _currentViewModel!;
@@ -33,7 +34,8 @@ namespace Mestr.UI.ViewModels
             
             // Initialize services with dependencies
             _projectService = new ProjectService();
-            
+            _clientService = new ClientService();
+
             // Non-parameterized navigation
             NavigateToProjectCommand = new RelayCommand(NavigateToProject);
             NavigateToDashboardCommand = new RelayCommand(NavigateToDashboard);
@@ -58,7 +60,7 @@ namespace Mestr.UI.ViewModels
 
         private void NavigateToClients()
         {
-            CurrentViewModel = new ClientViewModel(this, new ClientService());
+            CurrentViewModel = new ClientViewModel(this, _clientService);
         }
 
         private void NavigateToProjectDetails(Guid projectUuid)
