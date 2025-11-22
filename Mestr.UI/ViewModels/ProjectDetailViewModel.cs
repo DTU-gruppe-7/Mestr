@@ -64,20 +64,8 @@ namespace Mestr.UI.ViewModels
         {
             get => _project;
             set
-            {
-
-                if (_project != null)
-                {
-                    _project.PropertyChanged -= Project_PropertyChanged;
-                }
-
+            { 
                 _project = value;
-
-                if (_project != null)
-                {
-                    _project.PropertyChanged += Project_PropertyChanged;
-                }
-
                 OnPropertyChanged(nameof(Project));
             }
         }
@@ -380,33 +368,6 @@ namespace Mestr.UI.ViewModels
                         MessageBoxImage.Error);
                 }
             }
-        }
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
-
-            if (disposing)
-            {
-                // Unsubscribe from events
-                if (_project != null)
-                {
-                    _project.PropertyChanged -= Project_PropertyChanged;
-                }
-            }
-
-            _disposed = true;
-        }
-
-        ~ProjectDetailViewModel()
-        {
-            Dispose(false);
         }
     }
 }
