@@ -134,6 +134,7 @@ namespace Mestr.UI.ViewModels
             }
             else
             {
+                ShowAktiv = true;
                 ShowPlanlagt = true;
                 ShowAflyst = true;
             }
