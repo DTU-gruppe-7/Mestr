@@ -1,9 +1,10 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
-using Mestr.UI.ViewModels;
-using QuestPDF.Infrastructure;
+﻿using Mestr.UI.ViewModels;
 using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
+using System.Configuration;
+using System.Data;
+using System.Globalization;
+using System.Windows;
 
 namespace Mestr.UI
 {
@@ -23,7 +24,19 @@ namespace Mestr.UI
             MainWindow.Show();
 
             base.OnStartup(e);
-            
+
+            var cultureInfo = new CultureInfo("da-DK");
+
+            // Sæt det som standard for hele tråden (logik) og UI (visning)
+            Thread.CurrentThread.CurrentCulture = cultureInfo;
+            Thread.CurrentThread.CurrentUICulture = cultureInfo;
+
+            // VIGTIGT for WPF bindings:
+            FrameworkElement.LanguageProperty.OverrideMetadata(
+                typeof(FrameworkElement),
+                new FrameworkPropertyMetadata(
+                    System.Windows.Markup.XmlLanguage.GetLanguage(cultureInfo.IetfLanguageTag)));
+
         }
     }
 

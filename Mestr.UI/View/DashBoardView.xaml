@@ -321,7 +321,16 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
                         <DataGridTextColumn Header="Status" Binding="{Binding Status}" SortMemberPath="Status" Width="*" />
-                        <DataGridTextColumn Header="Resultat" Binding="{Binding Result, Mode=OneWay}" SortMemberPath="Result" Width="*" />
+                        <DataGridTemplateColumn Header="Resultat" SortMemberPath="Result" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Result, StringFormat='{}{0:N2} kr.'}" 
+                                               Foreground="{Binding ResultColor}"
+                                               FontWeight="SemiBold"
+                                               />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
