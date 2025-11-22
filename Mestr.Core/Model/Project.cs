@@ -8,44 +8,66 @@ namespace Mestr.Core.Model;
 public class Project : IProject
 {
     private Guid _uuid;
-    private string name;
+    private string name = string.Empty;
+    private Client client = null!;
     private DateTime createdDate;
     private DateTime startDate;
     private DateTime? endDate; 
-    private string description;
+    private string description = string.Empty;
     private ProjectStatus status;
-    private IList<IExpense> expenses;
-    private IList<IEarning> earnings;
+    private IList<Expense> expenses = new List<Expense>();
+    private IList<Earning> earnings = new List<Earning>();
 
-    public Project(Guid uuid, string name, DateTime createdDate, DateTime startDate, 
-                   string description, ProjectStatus status, DateTime? endDate = null)
+    // EF Core requires a parameterless constructor
+    private Project()
+    {
+    }
+
+    public Project(Guid uuid, string name, IClient client, DateTime createdDate, DateTime startDate, 
+                   string description, ProjectStatus status, DateTime? endDate = null,
+                   IList<IExpense>? expenses = null, IList<IEarning>? earnings = null)
     {
         this._uuid = uuid;
         this.name = name;
+        this.client = (Client)client;
         this.createdDate = createdDate;
         this.startDate = startDate;
         this.description = description;
         this.status = status;
         this.endDate = endDate;
 
-        this.expenses = new List<IExpense>();
-        this.earnings = new List<IEarning>();
-
+        this.expenses = expenses?.Select(e => (Expense)e).ToList() ?? new List<Expense>();
+        this.earnings = earnings?.Select(e => (Earning)e).ToList() ?? new List<Earning>();
     }
 
-    // Properties 
+    // Properties - use concrete types for EF Core
     public Guid Uuid { get => _uuid; private set => _uuid = value; }
     public string Name { get => name; set => name = value; }
+    public Client Client { get => client; set => client = value; }
+    IClient IProject.Client { get => client; set => client = (Client)value; }
     public DateTime CreatedDate { get => createdDate; set => createdDate = value; }
     public DateTime StartDate { get => startDate; set => startDate = value; }
     public DateTime? EndDate { get => endDate; set => endDate = value; }
     public string Description { get => description; set => description = value; }
     public ProjectStatus Status { get => status; set => status = value; }
-    public IList<IExpense> Expenses { get => expenses; set => expenses = value; }
-    public IList<IEarning> Earnings { get => earnings; set => earnings = value; }
+    public IList<Expense> Expenses { get => expenses; set => expenses = value; }
+    IList<IExpense> IProject.Expenses { get => expenses.Cast<IExpense>().ToList(); set => expenses = value.Select(e => (Expense)e).ToList(); }
+    public IList<Earning> Earnings { get => earnings; set => earnings = value; }
+    IList<IEarning> IProject.Earnings { get => earnings.Cast<IEarning>().ToList(); set => earnings = value.Select(e => (Earning)e).ToList(); }
     
     public bool IsFinished()
     {
         return endDate.HasValue && endDate.Value <= DateTime.Now;
+    }
+    public decimal Result
+    {
+        get
+        {
+            decimal totalEarnings = earnings?.Sum(e => e.Amount) ?? 0;
+            Console.WriteLine("The earnings sum op to: " + totalEarnings );
+            decimal totalExpenses = expenses?.Sum(e => e.Amount) ?? 0;
+            Console.WriteLine("The expenses sum op to: " + totalExpenses);
+            return totalEarnings - totalExpenses;
+        }
     }
 }

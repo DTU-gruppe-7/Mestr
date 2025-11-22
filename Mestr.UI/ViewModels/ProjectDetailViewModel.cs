@@ -2,12 +2,12 @@ using Mestr.Core.Enum;
 using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
+using Mestr.Data.Repository;
 using Mestr.UI.Command;
 using Mestr.UI.View;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 
@@ -15,14 +15,14 @@ namespace Mestr.UI.ViewModels
 {
     public class ProjectDetailViewModel : ViewModelBase
     {
-        private readonly EarningService _earningService;
-        private readonly ExpenseService _expenseService;
+        private readonly IEarningService _earningService;
+        private readonly IExpenseService _expenseService;
         private readonly MainViewModel _mainViewModel;
-        private readonly ProjectService _projectService;
+        private readonly IProjectService _projectService;
         private readonly Guid _projectId;
         private Project _project = null!;
-        private ObservableCollection<Earning> _earnings;
-        private ObservableCollection<Expense> _expenses;
+        private ObservableCollection<Earning> _earnings = new();
+        private ObservableCollection<Expense> _expenses = new();
 
         public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Afsluttet;
 
@@ -63,32 +63,28 @@ namespace Mestr.UI.ViewModels
         public ICommand GenerateInvoiceCommand { get; }
         public ICommand ToggleProjectStatusCommand { get; }
         public ICommand ShowEconomyWindowCommand { get; }
-
-        
         public ICommand EditEarningCommand { get; }
         public ICommand EditExpenseCommand { get; }
-
         public ICommand DeleteProjectCommand { get; }
-
 
         public ProjectDetailViewModel(MainViewModel mainViewModel, Guid projectId)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectId = projectId;
+                
+            
+            // Initialize services with correct dependencies
             _projectService = new ProjectService();
             _earningService = new EarningService();
             _expenseService = new ExpenseService();
 
+            // Initialize commands
             SaveProjectDetailsCommand = new RelayCommand(SaveProjectDetails);
-
             GenerateInvoiceCommand = new RelayCommand(GenerateInvoice);
             ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow);
             ToggleProjectStatusCommand = new RelayCommand(ToggleProjectStatus);
             EditEarningCommand = new RelayCommand<Earning>(EditEarning);
             EditExpenseCommand = new RelayCommand<Expense>(EditExpense);
-            GenerateInvoiceCommand = new RelayCommand(GenerateInvoice); 
-            ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow);
-            ToggleProjectStatusCommand = new RelayCommand(ToggleProjectStatus);
             DeleteProjectCommand = new RelayCommand(DeleteProject);
 
             LoadProject();
@@ -97,14 +93,16 @@ namespace Mestr.UI.ViewModels
         private void LoadProject()
         {
             var project = _projectService.GetProjectByUuid(_projectId);
-            var earningsList = _earningService.GetAllByProjectUuid(_projectId);
-            var expensesList = _expenseService.GetAllByProjectUuid(_projectId);
 
             if (project != null)
             {
                 Project = project;
-                Earnings = new ObservableCollection<Earning>(earningsList);
-                Expenses = new ObservableCollection<Expense>(expensesList);
+                Earnings = project.Earnings != null
+                    ? new ObservableCollection<Earning>(project.Earnings)
+                    : new ObservableCollection<Earning>();
+                Expenses = project.Expenses != null
+                    ? new ObservableCollection<Expense>(project.Expenses)
+                    : new ObservableCollection<Expense>();
             }
         }
 
@@ -112,6 +110,10 @@ namespace Mestr.UI.ViewModels
         {
             if (Project != null)
             {
+                // Sync collections back to Project before saving
+                Project.Earnings = Earnings.ToList();
+                Project.Expenses = Expenses.ToList();
+                
                 _projectService.UpdateProject(Project);
             }
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
@@ -124,6 +126,7 @@ namespace Mestr.UI.ViewModels
 
         private void ShowEconomyWindow()
         {
+            // RETTELSE: Brug korrekt constructor med services først
             var economyVm = new EconomyViewModel(
                 _projectId,
                 _earningService,
@@ -143,11 +146,12 @@ namespace Mestr.UI.ViewModels
         {
             if (earning == null) return;
 
+            // RETTELSE: Brug constructor med Earning parameter
             var economyVm = new EconomyViewModel(
-                _projectId,
-                _earningService,
-                _expenseService,
-                earning); // Pass earning to edit constructor
+                projectUuid: _projectId,
+                earningService: _earningService,
+                expenseService: _expenseService,
+                earningToEdit: earning);
 
             var economyWindow = new EconomyWindow()
             {
@@ -156,18 +160,19 @@ namespace Mestr.UI.ViewModels
             };
 
             economyWindow.ShowDialog();
-            LoadProject(); // Refresh data efter lukket dialog
+            LoadProject();
         }
 
         private void EditExpense(Expense? expense)
         {
             if (expense == null) return;
 
+            // RETTELSE: Brug constructor med Expense parameter
             var economyVm = new EconomyViewModel(
-                _projectId,
-                _earningService,
-                _expenseService,
-                expense); // Pass expense to edit constructor
+                projectUuid: _projectId,
+                earningService: _earningService,
+                expenseService: _expenseService,
+                expenseToEdit: expense);
 
             var economyWindow = new EconomyWindow()
             {
@@ -176,7 +181,7 @@ namespace Mestr.UI.ViewModels
             };
 
             economyWindow.ShowDialog();
-            LoadProject(); // Refresh data after closing dialog
+            LoadProject();
         }
 
         private void ToggleProjectStatus()
@@ -198,23 +203,15 @@ namespace Mestr.UI.ViewModels
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
 
-
         public decimal ProfitLoss
         {
             get
             {
-                decimal totalIncome = 0;
-                decimal totalExpense = 0;
-
-                if (Earnings != null)
-                    totalIncome = Earnings.Sum(e => e.Amount);
-
-                if (Expenses != null)
-                    totalExpense = Expenses.Sum(e => e.Amount);
-
+                decimal totalIncome = Earnings?.Sum(e => e.Amount) ?? 0;
+                decimal totalExpense = Expenses?.Sum(e => e.Amount) ?? 0;
                 return totalIncome - totalExpense;
-             }
-          }
+            }
+        }
                 
         private void DeleteProject()
         {

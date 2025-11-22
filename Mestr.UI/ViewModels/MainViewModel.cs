@@ -1,6 +1,8 @@
 ﻿using Mestr.UI.View;
 using Mestr.UI.Command;
 using Mestr.Services.Service;
+using Mestr.Services.Interface;
+using Mestr.Data.Repository;
 using System;
 using System.Windows.Input;
 
@@ -8,7 +10,8 @@ namespace Mestr.UI.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
-        private ViewModelBase? _currentViewModel; // Make nullable to satisfy CS8618
+        private ViewModelBase? _currentViewModel;
+        private readonly IProjectService _projectService;
         
         public ViewModelBase CurrentViewModel 
         { 
@@ -26,6 +29,10 @@ namespace Mestr.UI.ViewModels
 
         public MainViewModel()
         {
+            
+            // Initialize services with dependencies
+            _projectService = new ProjectService();
+            
             // Non-parameterized navigation
             NavigateToProjectCommand = new RelayCommand(NavigateToProject);
             NavigateToDashboardCommand = new RelayCommand(NavigateToDashboard);
@@ -34,24 +41,22 @@ namespace Mestr.UI.ViewModels
             NavigateToProjectDetailsCommand = new RelayCommand<Guid>(NavigateToProjectDetails);
             
             // Set initial ViewModel
-            CurrentViewModel = new DashboardViewModel(this, new ProjectService());
+            CurrentViewModel = new DashboardViewModel(this, _projectService);
         }
 
         private void NavigateToProject()
         {
-            CurrentViewModel = new ProjectViewModel(this, new ProjectService());
+            CurrentViewModel = new ProjectViewModel(this, _projectService);
         }
 
         private void NavigateToDashboard()
         {
-            CurrentViewModel = new DashboardViewModel(this, new ProjectService());
+            CurrentViewModel = new DashboardViewModel(this, _projectService);
         }
 
         private void NavigateToProjectDetails(Guid projectUuid)
         {
             CurrentViewModel = new ProjectDetailViewModel(this, projectUuid);
         }
-
-        
     }
 }

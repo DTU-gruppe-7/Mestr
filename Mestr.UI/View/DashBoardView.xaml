@@ -214,7 +214,7 @@
                                                    FontSize="14"
                                                    Foreground="Black">
                                             <Run Text="Overskud: " FontWeight="Bold"/>
-                                            <Run Text="{Binding Status}"/>
+                                            <Run Text="{Binding Result, Mode=OneWay}"/>
                                         </TextBlock>
                                     </Grid>
 
