@@ -230,6 +230,8 @@ namespace Mestr.UI.ViewModels
                 foreach ( var earning in Earnings)
                 {
                     earning.MarkAsPaid(DateTime.Now);
+                    _earningService.Update(earning);
+
                 }
 
                 // Synkronisér tilbage til Project før PDF-generering
