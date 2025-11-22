@@ -18,6 +18,10 @@ namespace Mestr.UI.ViewModels
             get => _currentViewModel!;
             set
             {
+                if (_currentViewModel is IDisposable disposable)
+                { 
+                    disposable.Dispose();
+                }
                 _currentViewModel = value;
                 OnPropertyChanged(nameof(CurrentViewModel));
             }
