@@ -26,7 +26,6 @@ namespace Mestr.UI.View
         public EconomyWindow()
         {
             InitializeComponent();
-            DataContext = new EconomyViewModel();
         }
         private void AmountBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {

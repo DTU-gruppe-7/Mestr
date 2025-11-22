@@ -34,7 +34,7 @@ namespace Mestr.UI.ViewModels
             {
                 _projectName = value;
                 OnPropertyChanged(nameof(ProjectName));
-                ValidateName(nameof(ProjectName), value, "Projektnavn");
+                ValidateText(nameof(ProjectName), value, "Projektnavn");
                 ((RelayCommand)CreateProjectCommand).RaiseCanExecuteChanged();
             }
         }
@@ -48,7 +48,7 @@ namespace Mestr.UI.ViewModels
             {
                 _clientName = value;
                 OnPropertyChanged(nameof(ClientName));
-                ValidateName(nameof(ClientName), value, "Kundenavn");
+                ValidateText(nameof(ClientName), value, "Kundenavn");
                 ((RelayCommand)CreateProjectCommand).RaiseCanExecuteChanged();
             }
         }

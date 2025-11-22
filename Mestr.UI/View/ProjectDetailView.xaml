@@ -42,8 +42,8 @@
                 <TextBlock FontSize="14" Foreground="#555" HorizontalAlignment="Center">
                     <Run Text="Status: "/>
                     <Run Text="{Binding Project.Status, FallbackValue='N/A'}" 
-                         FontWeight="SemiBold"/>
-                </TextBlock>
+                            FontWeight="SemiBold"/>
+                        </TextBlock>
             </StackPanel>
 
             <Button Grid.Column="2"

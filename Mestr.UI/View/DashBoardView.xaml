@@ -2,9 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:viewmodels="clr-namespace:Mestr.UI.ViewModels" 
-             d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:viewmodels="clr-namespace:Mestr.UI.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="900"
              Background="#F5F7FA">
@@ -19,25 +17,86 @@
             <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
 
-        <Button Grid.Row="0" Grid.Column="0" 
-                Content="Tilføj projekt" 
-                Command="{Binding NavigateToProjectCommand}"
-                HorizontalAlignment="Left" 
-                Margin="0,0,0,15"
-                Background="#0057E8" 
-                Foreground="White" 
-                BorderThickness="0" 
-                Padding="14,8" 
-                FontWeight="SemiBold"
-                Cursor="Hand">
-            <Button.Resources>
-                <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="8"/>
-                </Style>
-            </Button.Resources>
-        </Button>
+        <!-- Button and Filter panel -->
+        <StackPanel Grid.Row="0" Grid.Column="0" 
+                    Orientation="Horizontal" 
+                    Margin="0,0,0,15">
 
-        <!-- Mine projekter -->
+            <Button Content="Tilføj projekt" 
+                    Command="{Binding NavigateToProjectCommand}"
+                    HorizontalAlignment="Left" 
+                    Margin="0,0,20,0"
+                    Background="#0057E8" 
+                    Foreground="White" 
+                    BorderThickness="0" 
+                    Padding="14,8" 
+                    FontWeight="SemiBold"
+                    Cursor="Hand">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="8"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <!-- Filter Section -->
+            <Border Background="White" 
+                    CornerRadius="8" 
+                    BorderBrush="#E0E0E0" 
+                    BorderThickness="1"
+                    Padding="12,6">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Vis status:" 
+                               FontWeight="SemiBold" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,12,0"
+                               Foreground="#1E293B"/>
+
+                    <CheckBox Content="Planlagt" 
+                              IsChecked="{Binding ShowPlanlagt}"
+                              Margin="0,0,10,0"
+                              VerticalAlignment="Center"
+                              Foreground="#1E293B"/>
+
+                    <CheckBox Content="Aktiv" 
+                              IsChecked="{Binding ShowAktiv}"
+                              Margin="0,0,10,0"
+                              VerticalAlignment="Center"
+                              Foreground="#1E293B"/>
+
+                    <CheckBox Content="Afsluttet" 
+                              IsChecked="{Binding ShowAfsluttet}"
+                              Margin="0,0,10,0"
+                              VerticalAlignment="Center"
+                              Foreground="#1E293B"/>
+
+                    <CheckBox Content="Aflyst" 
+                              IsChecked="{Binding ShowAflyst}"
+                              Margin="0,0,15,0"
+                              VerticalAlignment="Center"
+                              Foreground="#1E293B"/>
+
+                    <!-- Toggle button - teksten ændrer sig dynamisk -->
+                    <Button Content="{Binding ShowAllButtonText}" 
+                            Command="{Binding ShowAllCommand}"
+                            Background="#0057E8" 
+                            Foreground="White" 
+                            BorderThickness="0" 
+                            Padding="10,5" 
+                            FontWeight="SemiBold"
+                            Cursor="Hand"
+                            VerticalAlignment="Center">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+
         <Border Grid.Row="1" Grid.Column="0" 
                 Background="White" 
                 CornerRadius="8" 
@@ -60,12 +119,71 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <!-- Titel -->
-                    <RowDefinition Height="Auto" />
-                    <!-- Sortering -->
                     <RowDefinition Height="*" />
-                    <!-- Liste -->
                 </Grid.RowDefinitions>
+
+                <Grid.Resources>
+                    <Style x:Key="HeaderStyle" TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="#1E293B"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="10,10,5,5"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="DataGridColumnHeader">
+                                    <Grid>
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ContentPresenter VerticalAlignment="Center"/>
+                                                <Path x:Name="SortArrow"
+                                                      Margin="5,0,0,0"
+                                                      VerticalAlignment="Center"
+                                                      Width="8"
+                                                      Height="10"
+                                                      Stretch="Fill"
+                                                      Visibility="Collapsed"
+                                                      Fill="#1E293B"
+                                                      Data="M 0 4 L 4 0 L 8 4 Z"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="SortDirection" Value="Ascending">
+                                            <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                            <Setter TargetName="SortArrow" Property="Data" Value="M 0 4 L 4 0 L 8 4 Z"/>
+                                        </Trigger>
+                                        <Trigger Property="SortDirection" Value="Descending">
+                                            <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                            <Setter TargetName="SortArrow" Property="Data" Value="M 0 0 L 4 4 L 8 0 Z"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                    <Style x:Key="CellStyle" TargetType="DataGridCell">
+                        <Setter Property="Padding" Value="10,8,5,8" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F0F4F8" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                    <Style x:Key="RowStyle" TargetType="DataGridRow">
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F0F4F8" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Resources>
 
                 <TextBlock Grid.Row="0"
                            Text="Mine projekter" 
@@ -74,75 +192,35 @@
                            Margin="15,20,0,10" 
                            Foreground="#1E293B"/>
 
-                <!-- NY: sortering efter deadline -->
-                <ComboBox Grid.Row="1"
-                          Margin="15,0,15,10"
-                          HorizontalAlignment="Right"
-                          Width="220"
-                          SelectedIndex="{Binding SortIndex}">
-                    <ComboBoxItem Content="Alfabetisk efter projektnavn" />
-                    <ComboBoxItem Content="Deadline: tidligst først" />
-                    <ComboBoxItem Content="Deadline: senest først" />
-                </ComboBox>
+                <DataGrid Grid.Row="1" 
+                          ItemsSource="{Binding Projects}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserSortColumns="True"
+                          BorderThickness="0"
+                          Background="Transparent"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#EAEBEE"
+                          ColumnHeaderStyle="{StaticResource HeaderStyle}"
+                          CellStyle="{StaticResource CellStyle}"
+                          RowStyle="{StaticResource RowStyle}"
+                          Margin="15,0,15,15">
+                    <DataGrid.InputBindings>
+                        <MouseBinding MouseAction="LeftDoubleClick"
+                                      Command="{Binding ViewProjectDetailsCommand}"
+                                      CommandParameter="{Binding SelectedItem.Uuid, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                    </DataGrid.InputBindings>
 
-                <ListBox Grid.Row="2" 
-                         ItemsSource="{Binding Projects}"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         BorderThickness="0"
-                         Background="Transparent">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Margin="5">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <TextBlock Grid.Column="0"
-                                               FontSize="14"
-                                               VerticalAlignment="Center"
-                                               Margin="0,0,10,0"
-                                               TextTrimming="CharacterEllipsis"
-                                               ToolTip="{Binding Name}">
-                                        <Run Text="Projekt Navn: " FontWeight="Bold"/>
-                                        <Run Text="{Binding Name}"/>
-                                    </TextBlock>
-
-                                    <TextBlock Grid.Column="1"
-                                               FontSize="14" 
-                                               Foreground="Black"
-                                               TextWrapping="Wrap"
-                                               Margin="0,0,10,0">
-                                        <Run Text="Status: " FontWeight="Bold"/>
-                                        <Run Text="{Binding Status}"/>
-                                    </TextBlock>
-
-                                    <TextBlock Grid.Column="2"
-                                               FontSize="14" 
-                                               Foreground="Black"
-                                               TextWrapping="Wrap"
-                                               Margin="0,0,10,0">
-                                        <Run Text="Deadline: " FontWeight="Bold"/>
-                                        <Run Text="{Binding EndDate}"/>
-                                    </TextBlock>
-                                </Grid>
-
-                                <Button Content="Se Detaljer" 
-                                        Command="{Binding DataContext.ViewProjectDetailsCommand, 
-                                                          RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding Uuid}" 
-                                        Margin="0,5,0,0"
-                                        HorizontalAlignment="Left"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Projekt Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" SortMemberPath="Status" Width="*" />
+                        <DataGridTextColumn Header="Deadline" Binding="{Binding EndDate, StringFormat={}{0:dd-MM-yyyy}}" SortMemberPath="EndDate" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
         </Border>
 
-        <!-- Afsluttede projekter -->
         <Border Grid.Row="1" Grid.Column="1" 
                 Background="White" 
                 CornerRadius="8" 
@@ -164,6 +242,69 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
+                <Grid.Resources>
+                    <Style x:Key="HeaderStyleCompleted" TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="#1E293B"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="10,10,5,5"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="DataGridColumnHeader">
+                                    <Grid>
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ContentPresenter VerticalAlignment="Center"/>
+                                                <Path x:Name="SortArrow"
+                                                      Margin="5,0,0,0"
+                                                      VerticalAlignment="Center"
+                                                      Width="8"
+                                                      Height="10"
+                                                      Stretch="Fill"
+                                                      Visibility="Collapsed"
+                                                      Fill="#1E293B"
+                                                      Data="M 0 4 L 4 0 L 8 4 Z"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="SortDirection" Value="Ascending">
+                                            <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                            <Setter TargetName="SortArrow" Property="Data" Value="M 0 4 L 4 0 L 8 4 Z"/>
+                                        </Trigger>
+                                        <Trigger Property="SortDirection" Value="Descending">
+                                            <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                            <Setter TargetName="SortArrow" Property="Data" Value="M 0 0 L 4 4 L 8 0 Z"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                    <Style x:Key="CellStyleCompleted" TargetType="DataGridCell">
+                        <Setter Property="Padding" Value="10,8,5,8" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F0F4F8" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                    <Style x:Key="RowStyleCompleted" TargetType="DataGridRow">
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F0F4F8" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Resources>
+
                 <TextBlock Grid.Row="0"
                            Text="Afsluttede projekter" 
                            FontSize="22" 
@@ -175,60 +316,31 @@
                            Background="#EAEBEE"
                            Margin="15,0,15,10"/>
 
-                <ScrollViewer Grid.Row="2"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
-                    <ListBox 
-                        ItemsSource="{Binding CompletedProjects}"
-                        BorderThickness="0"
-                        Background="Transparent"
-                        ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="5">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+                <DataGrid Grid.Row="2"
+                          ItemsSource="{Binding CompletedProjects}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserSortColumns="True"
+                          BorderThickness="0"
+                          Background="Transparent"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#EAEBEE"
+                          ColumnHeaderStyle="{StaticResource HeaderStyleCompleted}"
+                          CellStyle="{StaticResource CellStyleCompleted}"
+                          RowStyle="{StaticResource RowStyleCompleted}"
+                          Margin="15,0,15,15">
+                    <DataGrid.InputBindings>
+                        <MouseBinding MouseAction="LeftDoubleClick"
+                                      Command="{Binding ViewProjectDetailsCommand}"
+                                      CommandParameter="{Binding SelectedItem.Uuid, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                    </DataGrid.InputBindings>
 
-                                        <TextBlock Grid.Column="0"
-                                                   Margin="2,5" 
-                                                   FontSize="14"
-                                                   Foreground="Black">
-                                            <Run Text="Projekt Navn: " FontWeight="Bold"/>
-                                            <Run Text="{Binding Name}"/>
-                                        </TextBlock>
-
-                                        <TextBlock Grid.Column="1"
-                                                   Margin="15,5" 
-                                                   FontSize="14"
-                                                   Foreground="Black">
-                                            <Run Text="Status: " FontWeight="Bold"/>
-                                            <Run Text="{Binding Status}"/>
-                                        </TextBlock>
-
-                                        <TextBlock Grid.Column="2"
-                                                   Margin="15,5" 
-                                                   FontSize="14"
-                                                   Foreground="Black">
-                                            <Run Text="Overskud: " FontWeight="Bold"/>
-                                            <Run Text="{Binding Status}"/>
-                                        </TextBlock>
-                                    </Grid>
-
-                                    <Button Content="Se Detaljer" 
-                                            Command="{Binding DataContext.ViewProjectDetailsCommand, 
-                                                              RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding Uuid}" 
-                                            Margin="2,5,0,0"
-                                            HorizontalAlignment="Left"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </ScrollViewer>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" SortMemberPath="Status" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
         </Border>
     </Grid>
