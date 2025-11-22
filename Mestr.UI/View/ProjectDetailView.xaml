@@ -394,7 +394,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="Telefon:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.Phone}" Foreground="#1E293B" FontSize="14"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.PhoneNumber}" Foreground="#1E293B" FontSize="14"/>
                                 </Grid>
 
                                 <Grid Margin="0,0,0,15">
@@ -417,7 +417,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="CVR:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.CVR}" Foreground="#1E293B" FontSize="14"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.Cvr}" Foreground="#1E293B" FontSize="14"/>
                                 </Grid>
                             </StackPanel>
                         </Grid>
