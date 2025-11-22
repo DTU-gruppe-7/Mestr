@@ -28,10 +28,16 @@
                     VerticalAlignment="Center"/>
 
             <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                <TextBlock Text="{Binding Project.Name, FallbackValue='Projekt Navn'}"
-                           FontSize="24" FontWeight="SemiBold"
-                           Foreground="#1E293B"
-                           HorizontalAlignment="Center"/>
+                <TextBox Text="{Binding Project.Name, UpdateSourceTrigger=PropertyChanged, FallbackValue='Projekt Navn'}"
+                 FontSize="24" 
+                 FontWeight="SemiBold"
+                 Foreground="#1E293B"
+                 HorizontalAlignment="Center"
+                 HorizontalContentAlignment="Center"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 BorderBrush="Gray"
+                 MinWidth="200"/>
 
                 <TextBlock FontSize="14" Foreground="#555" HorizontalAlignment="Center">
                     <Run Text="Status: "/>
@@ -72,7 +78,6 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0"
@@ -130,7 +135,24 @@
                                 <Style x:Key="CellStyle" TargetType="DataGridCell">
                                     <Setter Property="Padding" Value="0,5,5,5" />
                                     <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Cursor" Value="Hand" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#F0F4F8" />
+                                        </Trigger>
+                                    </Style.Triggers>
                                 </Style>
+
+                                <!-- ✅ NY: Row style med hånd-cursor og hover-effekt -->
+                                <Style x:Key="RowStyle" TargetType="DataGridRow">
+                                    <Setter Property="Cursor" Value="Hand" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#F0F4F8" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+
                                 <Style x:Key="ListTitle" TargetType="TextBlock">
                                     <Setter Property="FontSize" Value="18"/>
                                     <Setter Property="FontWeight" Value="SemiBold"/>
@@ -139,12 +161,12 @@
                                 </Style>
                             </Grid.Resources>
 
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                                 <StackPanel Orientation="Horizontal">
                                     <!-- Indtægter -->
                                     <StackPanel Width="440" Margin="0,0,20,0">
                                         <TextBlock Text="Indtægter" Style="{StaticResource ListTitle}"/>
-                                        <DataGrid ItemsSource="{Binding IndtægtsLinjer}"
+                                        <DataGrid ItemsSource="{Binding Earnings}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               BorderThickness="0"
@@ -154,10 +176,16 @@
                               HorizontalGridLinesBrush="#EAEBEE"
                               ColumnHeaderStyle="{StaticResource HeaderStyle}"
                               CellStyle="{StaticResource CellStyle}">
+                                            <DataGrid.InputBindings>
+                                                <MouseBinding MouseAction="LeftDoubleClick"
+                                            Command="{Binding EditEarningCommand}"
+                                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                            </DataGrid.InputBindings>
+
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Navn" Binding="{Binding Navn}" Width="2*" />
-                                                <DataGridTextColumn Header="Estimat" Binding="{Binding EstimatBeløb, StringFormat=C}" Width="*" />
-                                                <DataGridTextColumn Header="Faktureret beløb" Binding="{Binding FaktureretBeløb, StringFormat=C}" Width="*" />
+                                                <DataGridTextColumn Header="Navn" Binding="{Binding Description}" Width="2*" />
+                                                <DataGridTextColumn Header="Estimat" Binding="{Binding Amount, StringFormat=C}" Width="*" />
+                                                <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </StackPanel>
@@ -165,7 +193,7 @@
                                     <!-- Udgifter -->
                                     <StackPanel Width="440">
                                         <TextBlock Text="Udgifter" Style="{StaticResource ListTitle}" Margin="0,0,0,8"/>
-                                        <DataGrid ItemsSource="{Binding UdgiftsLinjer}"
+                                        <DataGrid ItemsSource="{Binding Expenses}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               BorderThickness="0"
@@ -175,17 +203,42 @@
                               HorizontalGridLinesBrush="#EAEBEE"
                               ColumnHeaderStyle="{StaticResource HeaderStyle}"
                               CellStyle="{StaticResource CellStyle}">
+                                            <DataGrid.InputBindings>
+                                                <MouseBinding MouseAction="LeftDoubleClick"
+                                            Command="{Binding EditExpenseCommand}"
+                                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                            </DataGrid.InputBindings>
+
+
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="*" />
-                                                <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Navn}" Width="*" />
-                                                <DataGridTextColumn Header="Estimat" Binding="{Binding EstimatAmount, StringFormat=C}" Width="*" />
-                                                <DataGridTextColumn Header="Nuværende forbrug" Binding="{Binding NuværendeForbrug, StringFormat=C}" Width="*"/>
-                                                <DataGridTextColumn Header="Samlet udgift" Binding="{Binding FaktureretBeløb, StringFormat=C}" Width="*" />
+                                                <DataGridTextColumn Header="Kategori" Binding="{Binding Category}" Width="*" />
+                                                <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Description}" Width="*" />
+                                                <DataGridTextColumn Header="Beløb" Binding="{Binding Amount, StringFormat=C}" Width="*" />
+                                                <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </StackPanel>
                                 </StackPanel>
                             </ScrollViewer>
+
+                            <Grid Grid.Row="1" Margin="0,15,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Grid.Column="0"
+                                        Content="Tilføj ny post..."
+                                        Style="{StaticResource LinkButton}"
+                                        Command="{Binding ShowEconomyWindowCommand}"
+                                        HorizontalAlignment="Left"/>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <TextBlock Text="Gevinst/Tab: " FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding ProfitLoss, StringFormat=C}" FontSize="16" FontWeight="SemiBold" Foreground="{Binding ProfitLossColor}" VerticalAlignment="Center" Margin="0,0,20,0"/>
+                                </StackPanel>
+                            </Grid>
                         </Grid>
                     </TabItem>
 
@@ -263,12 +316,6 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
-                <Button Content="Tilføj ny post..."
-                        Style="{StaticResource LinkButton}"
-                        Command="{Binding ShowEconomyWindowCommand}"
-                        HorizontalAlignment="Left"
-                        Margin="0,0,15,0"/>
-
                 <Button Content="Generer faktura"
                         Style="{StaticResource ModernButtonStyle}"
                         Command="{Binding GenerateInvoiceCommand}"
@@ -281,11 +328,6 @@
                         Command="{Binding DeleteProjectCommand}"
                         HorizontalAlignment="Left"
                         Padding="14,8"/>
-            </StackPanel>
-
-            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock Text="Gevinst/Tab: " FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding ProfitLoss, StringFormat=C}" FontSize="16" FontWeight="SemiBold" Foreground="#008800" VerticalAlignment="Center"/>
             </StackPanel>
 
             <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
