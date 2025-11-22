@@ -6,342 +6,376 @@
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="900"
              Background="#F5F7FA">
-    <Grid Margin="20">
+    <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="5*" />
-            <ColumnDefinition Width="3*" />
-        </Grid.ColumnDefinitions>
+        <!-- Navigation Top Bar -->
+        <Border Grid.Row="0" 
+                Background="White" 
+                BorderBrush="#E0E0E0" 
+                BorderThickness="0,0,0,1"
+                Padding="20,0">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" 
+                                  Direction="270" 
+                                  ShadowDepth="2" 
+                                  Opacity="0.1" 
+                                  BlurRadius="8"/>
+            </Border.Effect>
+            
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Dashboard" 
+                        Style="{StaticResource NavTabButtonStyle}"
+                        Tag="Active"/>
+                
+                <Button Content="Klienter" 
+                        Style="{StaticResource NavTabButtonStyle}"
+                        Command="{Binding NavigateToClientsCommand}"/>
+            </StackPanel>
+        </Border>
 
-        <!-- Button and Filter panel -->
-        <StackPanel Grid.Row="0" Grid.Column="0" 
-                    Orientation="Horizontal" 
-                    Margin="0,0,0,15">
+        <!-- Main Content -->
+        <Grid Grid.Row="1" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-            <Button Content="Tilføj projekt" 
-                    Command="{Binding NavigateToProjectCommand}"
-                    HorizontalAlignment="Left" 
-                    Margin="0,0,20,0"
-                    Background="#0057E8" 
-                    Foreground="White" 
-                    BorderThickness="0" 
-                    Padding="14,8" 
-                    FontWeight="SemiBold"
-                    Cursor="Hand">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="8"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
 
-            <!-- Filter Section -->
-            <Border Background="White" 
+            <!-- Button and Filter panel -->
+            <StackPanel Grid.Row="0" Grid.Column="0" 
+                        Orientation="Horizontal" 
+                        Margin="0,0,0,15">
+
+                <Button Content="Tilføj projekt" 
+                        Command="{Binding NavigateToProjectCommand}"
+                        HorizontalAlignment="Left" 
+                        Margin="0,0,20,0"
+                        Background="#0057E8" 
+                        Foreground="White" 
+                        BorderThickness="0" 
+                        Padding="14,8" 
+                        FontWeight="SemiBold"
+                        Cursor="Hand">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <!-- Filter Section -->
+                <Border Background="White" 
+                        CornerRadius="8" 
+                        BorderBrush="#E0E0E0" 
+                        BorderThickness="1"
+                        Padding="12,6">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Vis status:" 
+                                   FontWeight="SemiBold" 
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,12,0"
+                                   Foreground="#1E293B"/>
+
+                        <CheckBox Content="Planlagt" 
+                                  IsChecked="{Binding ShowPlanlagt}"
+                                  Margin="0,0,10,0"
+                                  VerticalAlignment="Center"
+                                  Foreground="#1E293B"/>
+
+                        <CheckBox Content="Aktiv" 
+                                  IsChecked="{Binding ShowAktiv}"
+                                  Margin="0,0,10,0"
+                                  VerticalAlignment="Center"
+                                  Foreground="#1E293B"/>
+
+                        <CheckBox Content="Afsluttet" 
+                                  IsChecked="{Binding ShowAfsluttet}"
+                                  Margin="0,0,10,0"
+                                  VerticalAlignment="Center"
+                                  Foreground="#1E293B"/>
+
+                        <CheckBox Content="Aflyst" 
+                                  IsChecked="{Binding ShowAflyst}"
+                                  Margin="0,0,15,0"
+                                  VerticalAlignment="Center"
+                                  Foreground="#1E293B"/>
+
+                        <!-- Toggle button - teksten ændrer sig dynamisk -->
+                        <Button Content="{Binding ShowAllButtonText}" 
+                                Command="{Binding ShowAllCommand}"
+                                Background="#0057E8" 
+                                Foreground="White" 
+                                BorderThickness="0" 
+                                Padding="10,5" 
+                                FontWeight="SemiBold"
+                                Cursor="Hand"
+                                VerticalAlignment="Center">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+
+            <Border Grid.Row="1" Grid.Column="0" 
+                    Background="White" 
                     CornerRadius="8" 
                     BorderBrush="#E0E0E0" 
                     BorderThickness="1"
-                    Padding="12,6">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Vis status:" 
+                    Margin="0,0,10,0">
+                <Border.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="80"/>
+                    </Style>
+                </Border.Resources>
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" 
+                                      Direction="270" 
+                                      ShadowDepth="5" 
+                                      Opacity="0.25" 
+                                      BlurRadius="20"/>
+                </Border.Effect>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.Resources>
+                        <Style x:Key="HeaderStyle" TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="#1E293B"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="10,10,5,5"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridColumnHeader">
+                                        <Grid>
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <ContentPresenter VerticalAlignment="Center"/>
+                                                    <Path x:Name="SortArrow"
+                                                          Margin="5,0,0,0"
+                                                          VerticalAlignment="Center"
+                                                          Width="8"
+                                                          Height="10"
+                                                          Stretch="Fill"
+                                                          Visibility="Collapsed"
+                                                          Fill="#1E293B"
+                                                          Data="M 0 4 L 4 0 L 8 4 Z"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="SortDirection" Value="Ascending">
+                                                <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                                <Setter TargetName="SortArrow" Property="Data" Value="M 0 4 L 4 0 L 8 4 Z"/>
+                                            </Trigger>
+                                            <Trigger Property="SortDirection" Value="Descending">
+                                                <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                                <Setter TargetName="SortArrow" Property="Data" Value="M 0 0 L 4 4 L 8 0 Z"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                        <Style x:Key="CellStyle" TargetType="DataGridCell">
+                            <Setter Property="Padding" Value="10,8,5,8" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F0F4F8" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style x:Key="RowStyle" TargetType="DataGridRow">
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F0F4F8" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Resources>
+
+                    <TextBlock Grid.Row="0"
+                               Text="Mine projekter" 
+                               FontSize="25" 
                                FontWeight="SemiBold" 
-                               VerticalAlignment="Center"
-                               Margin="0,0,12,0"
+                               Margin="15,20,0,10" 
                                Foreground="#1E293B"/>
 
-                    <CheckBox Content="Planlagt" 
-                              IsChecked="{Binding ShowPlanlagt}"
-                              Margin="0,0,10,0"
-                              VerticalAlignment="Center"
-                              Foreground="#1E293B"/>
+                    <DataGrid Grid.Row="1" 
+                              ItemsSource="{Binding Projects}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserSortColumns="True"
+                              BorderThickness="0"
+                              Background="Transparent"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#EAEBEE"
+                              ColumnHeaderStyle="{StaticResource HeaderStyle}"
+                              CellStyle="{StaticResource CellStyle}"
+                              RowStyle="{StaticResource RowStyle}"
+                              Margin="15,0,15,15">
+                        <DataGrid.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick"
+                                          Command="{Binding ViewProjectDetailsCommand}"
+                                          CommandParameter="{Binding SelectedItem.Uuid, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                        </DataGrid.InputBindings>
 
-                    <CheckBox Content="Aktiv" 
-                              IsChecked="{Binding ShowAktiv}"
-                              Margin="0,0,10,0"
-                              VerticalAlignment="Center"
-                              Foreground="#1E293B"/>
-
-                    <CheckBox Content="Afsluttet" 
-                              IsChecked="{Binding ShowAfsluttet}"
-                              Margin="0,0,10,0"
-                              VerticalAlignment="Center"
-                              Foreground="#1E293B"/>
-
-                    <CheckBox Content="Aflyst" 
-                              IsChecked="{Binding ShowAflyst}"
-                              Margin="0,0,15,0"
-                              VerticalAlignment="Center"
-                              Foreground="#1E293B"/>
-
-                    <!-- Toggle button - teksten ændrer sig dynamisk -->
-                    <Button Content="{Binding ShowAllButtonText}" 
-                            Command="{Binding ShowAllCommand}"
-                            Background="#0057E8" 
-                            Foreground="White" 
-                            BorderThickness="0" 
-                            Padding="10,5" 
-                            FontWeight="SemiBold"
-                            Cursor="Hand"
-                            VerticalAlignment="Center">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="6"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
-                </StackPanel>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Projekt Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" SortMemberPath="Status" Width="*" />
+                            <DataGridTextColumn Header="Deadline" Binding="{Binding EndDate, StringFormat={}{0:dd-MM-yyyy}}" SortMemberPath="EndDate" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
             </Border>
 
-        </StackPanel>
+            <Border Grid.Row="1" Grid.Column="1" 
+                    Background="White" 
+                    CornerRadius="8" 
+                    BorderBrush="#E0E0E0" 
+                    BorderThickness="1"
+                    Margin="10,0,0,0">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" 
+                                      Direction="270" 
+                                      ShadowDepth="5" 
+                                      Opacity="0.25" 
+                                      BlurRadius="20"/>
+                </Border.Effect>
 
-        <Border Grid.Row="1" Grid.Column="0" 
-                Background="White" 
-                CornerRadius="8" 
-                BorderBrush="#E0E0E0" 
-                BorderThickness="1"
-                Margin="0,0,10,0">
-            <Border.Resources>
-                <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="80"/>
-                </Style>
-            </Border.Resources>
-            <Border.Effect>
-                <DropShadowEffect Color="Black" 
-                                  Direction="270" 
-                                  ShadowDepth="5" 
-                                  Opacity="0.25" 
-                                  BlurRadius="20"/>
-            </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+                    <Grid.Resources>
+                        <Style x:Key="HeaderStyleCompleted" TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="#1E293B"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="10,10,5,5"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridColumnHeader">
+                                        <Grid>
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <ContentPresenter VerticalAlignment="Center"/>
+                                                    <Path x:Name="SortArrow"
+                                                          Margin="5,0,0,0"
+                                                          VerticalAlignment="Center"
+                                                          Width="8"
+                                                          Height="10"
+                                                          Stretch="Fill"
+                                                          Visibility="Collapsed"
+                                                          Fill="#1E293B"
+                                                          Data="M 0 4 L 4 0 L 8 4 Z"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="SortDirection" Value="Ascending">
+                                                <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                                <Setter TargetName="SortArrow" Property="Data" Value="M 0 4 L 4 0 L 8 4 Z"/>
+                                            </Trigger>
+                                            <Trigger Property="SortDirection" Value="Descending">
+                                                <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                                <Setter TargetName="SortArrow" Property="Data" Value="M 0 0 L 4 4 L 8 0 Z"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                        <Style x:Key="CellStyleCompleted" TargetType="DataGridCell">
+                            <Setter Property="Padding" Value="10,8,5,8" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F0F4F8" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style x:Key="RowStyleCompleted" TargetType="DataGridRow">
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F0F4F8" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Resources>
 
-                <Grid.Resources>
-                    <Style x:Key="HeaderStyle" TargetType="DataGridColumnHeader">
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="Foreground" Value="#1E293B"/>
-                        <Setter Property="FontWeight" Value="SemiBold"/>
-                        <Setter Property="BorderThickness" Value="0"/>
-                        <Setter Property="Padding" Value="10,10,5,5"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="DataGridColumnHeader">
-                                    <Grid>
-                                        <Border Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                Padding="{TemplateBinding Padding}">
-                                            <StackPanel Orientation="Horizontal">
-                                                <ContentPresenter VerticalAlignment="Center"/>
-                                                <Path x:Name="SortArrow"
-                                                      Margin="5,0,0,0"
-                                                      VerticalAlignment="Center"
-                                                      Width="8"
-                                                      Height="10"
-                                                      Stretch="Fill"
-                                                      Visibility="Collapsed"
-                                                      Fill="#1E293B"
-                                                      Data="M 0 4 L 4 0 L 8 4 Z"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </Grid>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="SortDirection" Value="Ascending">
-                                            <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
-                                            <Setter TargetName="SortArrow" Property="Data" Value="M 0 4 L 4 0 L 8 4 Z"/>
-                                        </Trigger>
-                                        <Trigger Property="SortDirection" Value="Descending">
-                                            <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
-                                            <Setter TargetName="SortArrow" Property="Data" Value="M 0 0 L 4 4 L 8 0 Z"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                    <Style x:Key="CellStyle" TargetType="DataGridCell">
-                        <Setter Property="Padding" Value="10,8,5,8" />
-                        <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="Cursor" Value="Hand" />
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F0F4F8" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                    <Style x:Key="RowStyle" TargetType="DataGridRow">
-                        <Setter Property="Cursor" Value="Hand" />
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F0F4F8" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Resources>
+                    <TextBlock Grid.Row="0"
+                               Text="Afsluttede projekter" 
+                               FontSize="22" 
+                               FontWeight="SemiBold" 
+                               Margin="15,20,0,0" 
+                               Foreground="#333"/>
 
-                <TextBlock Grid.Row="0"
-                           Text="Mine projekter" 
-                           FontSize="25" 
-                           FontWeight="SemiBold" 
-                           Margin="15,20,0,10" 
-                           Foreground="#1E293B"/>
+                    <Separator Grid.Row="1"
+                               Background="#EAEBEE"
+                               Margin="15,0,15,10"/>
 
-                <DataGrid Grid.Row="1" 
-                          ItemsSource="{Binding Projects}"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          CanUserSortColumns="True"
-                          BorderThickness="0"
-                          Background="Transparent"
-                          HeadersVisibility="Column"
-                          GridLinesVisibility="Horizontal"
-                          HorizontalGridLinesBrush="#EAEBEE"
-                          ColumnHeaderStyle="{StaticResource HeaderStyle}"
-                          CellStyle="{StaticResource CellStyle}"
-                          RowStyle="{StaticResource RowStyle}"
-                          Margin="15,0,15,15">
-                    <DataGrid.InputBindings>
-                        <MouseBinding MouseAction="LeftDoubleClick"
-                                      Command="{Binding ViewProjectDetailsCommand}"
-                                      CommandParameter="{Binding SelectedItem.Uuid, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                    </DataGrid.InputBindings>
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding CompletedProjects}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserSortColumns="True"
+                              BorderThickness="0"
+                              Background="Transparent"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#EAEBEE"
+                              ColumnHeaderStyle="{StaticResource HeaderStyleCompleted}"
+                              CellStyle="{StaticResource CellStyleCompleted}"
+                              RowStyle="{StaticResource RowStyleCompleted}"
+                              Margin="15,0,15,15">
+                        <DataGrid.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick"
+                                          Command="{Binding ViewProjectDetailsCommand}"
+                                          CommandParameter="{Binding SelectedItem.Uuid, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                        </DataGrid.InputBindings>
 
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Projekt Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
-                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" SortMemberPath="Status" Width="*" />
-                        <DataGridTextColumn Header="Deadline" Binding="{Binding EndDate, StringFormat={}{0:dd-MM-yyyy}}" SortMemberPath="EndDate" Width="*" />
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
-        </Border>
-
-        <Border Grid.Row="1" Grid.Column="1" 
-                Background="White" 
-                CornerRadius="8" 
-                BorderBrush="#E0E0E0" 
-                BorderThickness="1"
-                Margin="10,0,0,0">
-            <Border.Effect>
-                <DropShadowEffect Color="Black" 
-                                  Direction="270" 
-                                  ShadowDepth="5" 
-                                  Opacity="0.25" 
-                                  BlurRadius="20"/>
-            </Border.Effect>
-
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-
-                <Grid.Resources>
-                    <Style x:Key="HeaderStyleCompleted" TargetType="DataGridColumnHeader">
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="Foreground" Value="#1E293B"/>
-                        <Setter Property="FontWeight" Value="SemiBold"/>
-                        <Setter Property="BorderThickness" Value="0"/>
-                        <Setter Property="Padding" Value="10,10,5,5"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="DataGridColumnHeader">
-                                    <Grid>
-                                        <Border Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                Padding="{TemplateBinding Padding}">
-                                            <StackPanel Orientation="Horizontal">
-                                                <ContentPresenter VerticalAlignment="Center"/>
-                                                <Path x:Name="SortArrow"
-                                                      Margin="5,0,0,0"
-                                                      VerticalAlignment="Center"
-                                                      Width="8"
-                                                      Height="10"
-                                                      Stretch="Fill"
-                                                      Visibility="Collapsed"
-                                                      Fill="#1E293B"
-                                                      Data="M 0 4 L 4 0 L 8 4 Z"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </Grid>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="SortDirection" Value="Ascending">
-                                            <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
-                                            <Setter TargetName="SortArrow" Property="Data" Value="M 0 4 L 4 0 L 8 4 Z"/>
-                                        </Trigger>
-                                        <Trigger Property="SortDirection" Value="Descending">
-                                            <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
-                                            <Setter TargetName="SortArrow" Property="Data" Value="M 0 0 L 4 4 L 8 0 Z"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                    <Style x:Key="CellStyleCompleted" TargetType="DataGridCell">
-                        <Setter Property="Padding" Value="10,8,5,8" />
-                        <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="Cursor" Value="Hand" />
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F0F4F8" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                    <Style x:Key="RowStyleCompleted" TargetType="DataGridRow">
-                        <Setter Property="Cursor" Value="Hand" />
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F0F4F8" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Resources>
-
-                <TextBlock Grid.Row="0"
-                           Text="Afsluttede projekter" 
-                           FontSize="22" 
-                           FontWeight="SemiBold" 
-                           Margin="15,20,0,0" 
-                           Foreground="#333"/>
-
-                <Separator Grid.Row="1"
-                           Background="#EAEBEE"
-                           Margin="15,0,15,10"/>
-
-                <DataGrid Grid.Row="2"
-                          ItemsSource="{Binding CompletedProjects}"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          CanUserSortColumns="True"
-                          BorderThickness="0"
-                          Background="Transparent"
-                          HeadersVisibility="Column"
-                          GridLinesVisibility="Horizontal"
-                          HorizontalGridLinesBrush="#EAEBEE"
-                          ColumnHeaderStyle="{StaticResource HeaderStyleCompleted}"
-                          CellStyle="{StaticResource CellStyleCompleted}"
-                          RowStyle="{StaticResource RowStyleCompleted}"
-                          Margin="15,0,15,15">
-                    <DataGrid.InputBindings>
-                        <MouseBinding MouseAction="LeftDoubleClick"
-                                      Command="{Binding ViewProjectDetailsCommand}"
-                                      CommandParameter="{Binding SelectedItem.Uuid, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                    </DataGrid.InputBindings>
-
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
-                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" SortMemberPath="Status" Width="*" />
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
-        </Border>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" SortMemberPath="Status" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
