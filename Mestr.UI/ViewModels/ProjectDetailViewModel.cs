@@ -112,11 +112,27 @@ namespace Mestr.UI.ViewModels
 
         private void SaveProjectDetails()
         {
-            if (Project != null)
+            if (Project == null || Project.Uuid == Guid.Empty) return;
+
+            try
             {
                 _projectService.UpdateProject(Project);
+                MessageBox.Show(
+                    "Projektet blev gemt succesfuldt.",
+                    "Gem succesfuldt",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+
+                    _mainViewModel.NavigateToDashboardCommand.Execute(null);
             }
-            _mainViewModel.NavigateToDashboardCommand.Execute(null);
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Kunne ikke gemme projektet. Fejl: {ex.Message}",
+                    "Gem mislykkedes",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
 
         private void GenerateInvoice()

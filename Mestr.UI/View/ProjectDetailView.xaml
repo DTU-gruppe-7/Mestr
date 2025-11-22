@@ -48,7 +48,6 @@
 
             <Button Grid.Column="2"
                     VerticalAlignment="Center"
-                    
                    Command="{Binding ToggleProjectStatusCommand}">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource LinkButton}">
@@ -56,7 +55,6 @@
 
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsProjectCompleted}" Value="True">
-
                                 <Setter Property="Content" Value="Genåbn projekt"/>
                             </DataTrigger>
                         </Style.Triggers>
@@ -80,7 +78,6 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0"
@@ -90,143 +87,241 @@
                            Foreground="#888"
                            Margin="0,0,0,10"/>
 
-                <Grid Grid.Row="1">
+                <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0">
+                    <TabItem Header="Indtægter &amp; Udgifter" IsSelected="True">
+                        <TabItem.Style>
+                            <Style TargetType="TabItem">
+                                <Setter Property="Foreground" Value="#1E293B"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Padding" Value="15,10"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="TabItem">
+                                            <Grid>
+                                                <Border Name="Border"
+                                                        Background="#F5F7FA"
+                                                        BorderBrush="#E0E0E0"
+                                                        BorderThickness="0,0,0,2"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter ContentSource="Header"
+                                                                      HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#1E293B"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TabItem.Style>
 
-                    <Grid.Resources>
-                        <Style x:Key="HeaderStyle" TargetType="DataGridColumnHeader">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="Foreground" Value="#1E293B"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="0,10,5,5"/>
-                        </Style>
-                        <Style x:Key="CellStyle" TargetType="DataGridCell">
-                            <Setter Property="Padding" Value="0,5,5,5" />
-                            <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="Cursor" Value="Hand" />
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#F0F4F8" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.Resources>
+                                <Style x:Key="HeaderStyle" TargetType="DataGridColumnHeader">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="#1E293B"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Padding" Value="0,10,5,5"/>
+                                </Style>
+                                <Style x:Key="CellStyle" TargetType="DataGridCell">
+                                    <Setter Property="Padding" Value="0,5,5,5" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Cursor" Value="Hand" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#F0F4F8" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
 
-                        <!-- ✅ NY: Row style med hånd-cursor og hover-effekt -->
-                        <Style x:Key="RowStyle" TargetType="DataGridRow">
-                            <Setter Property="Cursor" Value="Hand" />
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#F0F4F8" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                        
-                        <Style x:Key="ListTitle" TargetType="TextBlock">
-                            <Setter Property="FontSize" Value="18"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="Foreground" Value="#333"/>
-                            <Setter Property="Margin" Value="0,0,0,8"/>
-                        </Style>
-                    </Grid.Resources>
+                                <!-- ✅ NY: Row style med hånd-cursor og hover-effekt -->
+                                <Style x:Key="RowStyle" TargetType="DataGridRow">
+                                    <Setter Property="Cursor" Value="Hand" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#F0F4F8" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
 
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                        <StackPanel Orientation="Horizontal">
-                            <!-- Indtægter -->
-                            <StackPanel Width="440" Margin="0,0,20,0">
-                                <TextBlock Text="Indtægter" Style="{StaticResource ListTitle}"/>
-                                <DataGrid ItemsSource="{Binding Earnings}"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      BorderThickness="0"
-                      Background="Transparent"
-                      HeadersVisibility="Column"
-                      GridLinesVisibility="Horizontal"
-                      HorizontalGridLinesBrush="#EAEBEE"
-                      ColumnHeaderStyle="{StaticResource HeaderStyle}"
-                      CellStyle="{StaticResource CellStyle}">
-                                    <DataGrid.InputBindings>
-                                        <MouseBinding MouseAction="LeftDoubleClick"
+                                <Style x:Key="ListTitle" TargetType="TextBlock">
+                                    <Setter Property="FontSize" Value="18"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="Foreground" Value="#333"/>
+                                    <Setter Property="Margin" Value="0,0,0,8"/>
+                                </Style>
+                            </Grid.Resources>
+
+                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                <StackPanel Orientation="Horizontal">
+                                    <!-- Indtægter -->
+                                    <StackPanel Width="440" Margin="0,0,20,0">
+                                        <TextBlock Text="Indtægter" Style="{StaticResource ListTitle}"/>
+                                        <DataGrid ItemsSource="{Binding Earnings}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              BorderThickness="0"
+                              Background="Transparent"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#EAEBEE"
+                              ColumnHeaderStyle="{StaticResource HeaderStyle}"
+                              CellStyle="{StaticResource CellStyle}">
+                                            <DataGrid.InputBindings>
+                                                <MouseBinding MouseAction="LeftDoubleClick"
                                             Command="{Binding EditEarningCommand}"
                                             CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                    </DataGrid.InputBindings>
+                                            </DataGrid.InputBindings>
 
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Navn" Binding="{Binding Description}" Width="2*" />
-                                        <DataGridTextColumn Header="Estimat" Binding="{Binding Amount, StringFormat=C}" Width="*" />
-                                        <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
-                                    </DataGrid.Columns>
-                                </DataGrid>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Navn" Binding="{Binding Description}" Width="2*" />
+                                                <DataGridTextColumn Header="Estimat" Binding="{Binding Amount, StringFormat=C}" Width="*" />
+                                                <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </StackPanel>
 
-                            </StackPanel>
-
-                            <!-- Udgifter -->
-                            <StackPanel Width="440">
-                                <TextBlock Text="Udgifter" Style="{StaticResource ListTitle}" Margin="0,0,0,8"/>
-                                    <DataGrid ItemsSource="{Binding Expenses}"
-                                          AutoGenerateColumns="False"
-                                          IsReadOnly="True"
-                                          BorderThickness="0"
-                                          Background="Transparent"
-                                          HeadersVisibility="Column"
-                                          GridLinesVisibility="Horizontal"
-                                          HorizontalGridLinesBrush="#EAEBEE"
-                                          ColumnHeaderStyle="{StaticResource HeaderStyle}"
-                                          CellStyle="{StaticResource CellStyle}">
-                                    <DataGrid.InputBindings>
-                                        <MouseBinding MouseAction="LeftDoubleClick"
+                                    <!-- Udgifter -->
+                                    <StackPanel Width="440">
+                                        <TextBlock Text="Udgifter" Style="{StaticResource ListTitle}" Margin="0,0,0,8"/>
+                                        <DataGrid ItemsSource="{Binding Expenses}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              BorderThickness="0"
+                              Background="Transparent"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#EAEBEE"
+                              ColumnHeaderStyle="{StaticResource HeaderStyle}"
+                              CellStyle="{StaticResource CellStyle}">
+                                            <DataGrid.InputBindings>
+                                                <MouseBinding MouseAction="LeftDoubleClick"
                                             Command="{Binding EditExpenseCommand}"
                                             CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                    </DataGrid.InputBindings>
+                                            </DataGrid.InputBindings>
 
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Kategori" Binding="{Binding Category}" Width="*" />
-                                        <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Description}" Width="*" />
-                                        <DataGridTextColumn Header="Beløb" Binding="{Binding Amount, StringFormat=C}" Width="*" />
-                                        <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </StackPanel>
-                        </StackPanel>
-                    </ScrollViewer>
-                </Grid>
 
-                <Grid Grid.Row="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Kategori" Binding="{Binding Category}" Width="*" />
+                                                <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Description}" Width="*" />
+                                                <DataGridTextColumn Header="Beløb" Binding="{Binding Amount, StringFormat=C}" Width="*" />
+                                                <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
 
-                    <Button Grid.Column="0"
-                            Content="Tilføj ny post..."
-                            Style="{StaticResource LinkButton}"
-                            Command="{Binding ShowEconomyWindowCommand}"
-                            HorizontalAlignment="Left"/>
+                            <Grid Grid.Row="1" Margin="0,15,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="2" Orientation="Horizontal">
-                        <TextBlock Text="Gevinst/Tab: " FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding ProfitLoss, StringFormat=C}" FontSize="16" FontWeight="SemiBold" Foreground="{Binding ProfitLossColor}" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Grid>
+                                <Button Grid.Column="0"
+                                        Content="Tilføj ny post..."
+                                        Style="{StaticResource LinkButton}"
+                                        Command="{Binding ShowEconomyWindowCommand}"
+                                        HorizontalAlignment="Left"/>
 
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <TextBlock Text="Gevinst/Tab: " FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding ProfitLoss, StringFormat=C}" FontSize="16" FontWeight="SemiBold" Foreground="{Binding ProfitLossColor}" VerticalAlignment="Center" Margin="0,0,20,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="Beskrivelse">
+                        <TabItem.Style>
+                            <Style TargetType="TabItem">
+                                <Setter Property="Foreground" Value="#1E293B"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Padding" Value="15,10"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="TabItem">
+                                            <Grid>
+                                                <Border Name="Border"
+                                                        Background="#F5F7FA"
+                                                        BorderBrush="#E0E0E0"
+                                                        BorderThickness="0,0,0,2"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter ContentSource="Header"
+                                                                      HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#1E293B"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TabItem.Style>
+
+                        <Grid Margin="0,15,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0"
+                                       Text="Projektbeskrivelse"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="#333"
+                                       Margin="0,0,0,12"/>
+
+                            <TextBox Grid.Row="1"
+                                     Text="{Binding Project.Description, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="White"
+                                     Foreground="#1E293B"
+                                     BorderBrush="#E0E0E0"
+                                     BorderThickness="1"
+                                     Padding="12"
+                                     FontSize="14"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     AcceptsReturn="True"
+                                     MinHeight="300"/>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
             </Grid>
         </Border>
 
 
         <Grid Grid.Row="2" Margin="0,20,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Horizontal">
+            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
                 <Button Content="Generer faktura"
                         Style="{StaticResource ModernButtonStyle}"
                         Command="{Binding GenerateInvoiceCommand}"
-                        Margin="0,0,10,0"
                         HorizontalAlignment="Left"
-                        Padding="14,8"/>
+                        Padding="14,8"
+                        Margin="0,0,10,0"/>
 
                 <Button Content="Slet Projekt"
                         Style="{StaticResource ModernButtonStyle}"
@@ -235,7 +330,7 @@
                         Padding="14,8"/>
             </StackPanel>
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal">
+            <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
                 <Button Content="Annuller"
                         Style="{StaticResource LinkButton}"
                         Command="{Binding NavigateToDashboardCommand}"
