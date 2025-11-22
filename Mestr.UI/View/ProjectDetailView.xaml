@@ -115,6 +115,10 @@
                         </TabItem.Style>
 
                         <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
                             <Grid.Resources>
                                 <Style x:Key="HeaderStyle" TargetType="DataGridColumnHeader">
                                     <Setter Property="Background" Value="Transparent"/>
@@ -182,11 +186,6 @@
                                     </StackPanel>
                                 </StackPanel>
                             </ScrollViewer>
-
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
                         </Grid>
                     </TabItem>
 

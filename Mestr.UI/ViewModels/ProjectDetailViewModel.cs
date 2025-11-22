@@ -102,6 +102,8 @@ namespace Mestr.UI.ViewModels
                     "Gem succesfuldt",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
+
+                    _mainViewModel.NavigateToDashboardCommand.Execute(null);
             }
             catch (Exception ex)
             {
@@ -111,9 +113,6 @@ namespace Mestr.UI.ViewModels
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
-
-            _mainViewModel.NavigateToDashboardCommand.Execute(null);
-
         }
 
         private void GenerateInvoice()

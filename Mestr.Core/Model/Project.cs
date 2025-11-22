@@ -4,20 +4,22 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 
 namespace Mestr.Core.Model;
 public class Project : IProject, INotifyPropertyChanged
 {
     private Guid _uuid;
-    private string name;
-    private DateTime createdDate;
-    private DateTime startDate;
-    private DateTime? endDate; 
-    private string description;
-    private ProjectStatus status;
-    private IList<IExpense> expenses;
-    private IList<IEarning> earnings;
+    private string _name;
+    private DateTime _createdDate;
+    private DateTime _startDate;
+    private DateTime? _endDate;
+    private string _description;
+    private ProjectStatus _status;
+    private IList<IExpense> _expenses;
+    private IList<IEarning> _earnings;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -25,32 +27,57 @@ public class Project : IProject, INotifyPropertyChanged
                    string description, ProjectStatus status, DateTime? endDate = null)
     {
         this._uuid = uuid;
-        this.name = name;
-        this.createdDate = createdDate;
-        this.startDate = startDate;
-        this.description = description;
-        this.status = status;
-        this.endDate = endDate;
+        this._name = name;
+        this._createdDate = createdDate;
+        this._startDate = startDate;
+        this._description = description;
+        this._status = status;
+        this._endDate = endDate;
 
-        this.expenses = new List<IExpense>();
-        this.earnings = new List<IEarning>();
+        this._expenses = new List<IExpense>();
+        this._earnings = new List<IEarning>();
 
     }
 
     // Properties 
     public Guid Uuid { get => _uuid; private set => _uuid = value; }
-    public string Name { get => name; set => name = value; }
-    public DateTime CreatedDate { get => createdDate; set => createdDate = value; }
-    public DateTime StartDate { get => startDate; set => startDate = value; }
-    public DateTime? EndDate { get => endDate; set => endDate = value; }
-    public string Description { get => description; set => description = value; }
-    public ProjectStatus Status { get => status; set => status = value; }
-    public IList<IExpense> Expenses { get => expenses; set => expenses = value; }
-    public IList<IEarning> Earnings { get => earnings; set => earnings = value; }
-    
+
+    public string Name
+    {
+        get => _name; set => SetProperty(ref _name, value); 
+    }
+    public DateTime CreatedDate
+    {
+        get => _createdDate; set => SetProperty(ref _createdDate, value); 
+    }
+    public DateTime StartDate
+    {
+        get => _startDate; set => SetProperty(ref _startDate, value); 
+    }
+    public DateTime? EndDate
+    {
+        get => _endDate;  set => SetProperty(ref _endDate, value);
+    }
+    public string Description
+    {
+        get => _description; set => SetProperty(ref _description, value); 
+    }
+    public ProjectStatus Status
+    {
+        get => _status; set => SetProperty(ref _status, value); 
+    }
+    public IList<IExpense> Expenses
+    {
+        get => _expenses; set => SetProperty(ref _expenses, value);
+    }
+    public IList<IEarning> Earnings
+    {
+        get => _earnings; set => SetProperty(ref _earnings, value); 
+    }
+
     public bool IsFinished()
     {
-        return endDate.HasValue && endDate.Value <= DateTime.Now;
+        return _endDate.HasValue && _endDate.Value <= DateTime.Now;
     }
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
