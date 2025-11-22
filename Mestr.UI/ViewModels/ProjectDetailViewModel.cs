@@ -1,3 +1,8 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Windows.Input;
 using Mestr.Core.Enum;
 using Mestr.Core.Model;
 using Mestr.Services.Interface;
@@ -5,11 +10,10 @@ using Mestr.Services.Service;
 using Mestr.Data.Repository;
 using Mestr.UI.Command;
 using Mestr.UI.View;
+using Microsoft.Win32;
 using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
-using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
 {
@@ -18,7 +22,8 @@ namespace Mestr.UI.ViewModels
         private readonly IEarningService _earningService;
         private readonly IExpenseService _expenseService;
         private readonly MainViewModel _mainViewModel;
-        private readonly IProjectService _projectService;
+        private readonly ProjectService _projectService;
+        private readonly PdfService _pdfService;
         private readonly Guid _projectId;
         private Project _project = null!;
         private ObservableCollection<Earning> _earnings = new();
@@ -34,6 +39,7 @@ namespace Mestr.UI.ViewModels
                 _earnings = value;
                 OnPropertyChanged(nameof(Earnings));
                 OnPropertyChanged(nameof(ProfitLoss));
+                OnPropertyChanged(nameof(ProfitLossColor));
             }
         }
 
@@ -45,6 +51,7 @@ namespace Mestr.UI.ViewModels
                 _expenses = value;
                 OnPropertyChanged(nameof(Expenses));
                 OnPropertyChanged(nameof(ProfitLoss));
+                OnPropertyChanged(nameof(ProfitLossColor));
             }
         }
 
@@ -71,9 +78,10 @@ namespace Mestr.UI.ViewModels
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectId = projectId;
-                
-            
+                  
             // Initialize services with correct dependencies
+            _pdfService = new PdfService();
+
             _projectService = new ProjectService();
             _earningService = new EarningService();
             _expenseService = new ExpenseService();
@@ -108,21 +116,73 @@ namespace Mestr.UI.ViewModels
 
         private void SaveProjectDetails()
         {
-            if (Project != null)
+            if (Project == null || Project.Uuid == Guid.Empty) return;
+
+            try
             {
                 // Sync collections back to Project before saving
                 Project.Earnings = Earnings.ToList();
                 Project.Expenses = Expenses.ToList();
                 
                 _projectService.UpdateProject(Project);
+                MessageBox.Show(
+                    "Projektet blev gemt succesfuldt.",
+                    "Gem succesfuldt",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+
+                    _mainViewModel.NavigateToDashboardCommand.Execute(null);
             }
-            _mainViewModel.NavigateToDashboardCommand.Execute(null);
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Kunne ikke gemme projektet. Fejl: {ex.Message}",
+                    "Gem mislykkedes",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
 
         private void GenerateInvoice()
         {
+            if (Project == null)
+                return;
+
+            var dialog = new SaveFileDialog
+            {
+                FileName = $"Invoice_{Project.Name}.pdf",
+                Filter = "PDF Files (*.pdf)|*.pdf"
+            };
+
+            if (dialog.ShowDialog() != true)
+                return;
+
+            string filePath = dialog.FileName;
+
+            try
+            {
+                // Generer PDF som byte-array
+                var pdfBytes = _pdfService.GeneratePdfInvoice(Project);
+
+                // Gem filen synkront
+                File.WriteAllBytes(filePath, pdfBytes);
+
+                // �bn filen
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = filePath,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Fejl ved generering af PDF: {ex.Message}");
+            }
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
+
+
+
 
         private void ShowEconomyWindow()
         {
@@ -240,5 +300,7 @@ namespace Mestr.UI.ViewModels
                 }
             }
         }
+
+
     }
 }

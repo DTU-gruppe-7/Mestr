@@ -1,11 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using Mestr.Core.Enum;
+﻿using Mestr.Core.Enum;
 using Mestr.Core.Interface;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 
 namespace Mestr.Core.Model;
-public class Project : IProject
+public class Project : IProject, INotifyPropertyChanged
 {
     private Guid _uuid;
     private string name = string.Empty;
@@ -57,7 +61,23 @@ public class Project : IProject
     
     public bool IsFinished()
     {
-        return endDate.HasValue && endDate.Value <= DateTime.Now;
+        return _endDate.HasValue && _endDate.Value <= DateTime.Now;
+    }
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+        {
+            return false;
+        }
+
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
     }
     public decimal Result
     {

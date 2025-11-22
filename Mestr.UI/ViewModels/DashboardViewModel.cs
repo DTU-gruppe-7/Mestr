@@ -1,4 +1,5 @@
-﻿using Mestr.Core.Interface;
+
+using Mestr.Core.Interface;
 using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
@@ -8,6 +9,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using Mestr.Core.Enum;
+
 
 namespace Mestr.UI.ViewModels
 {
@@ -17,6 +20,14 @@ namespace Mestr.UI.ViewModels
         private readonly IProjectService _projectService;
         private ObservableCollection<Project> _projects = [];
         private ObservableCollection<Project> _completedProjects = [];
+        private ObservableCollection<Project> _allOngoingProjects = [];
+        
+        // Filter properties
+        private bool _showPlanlagt = true;
+        private bool _showAktiv = true;
+        private bool _showAfsluttet = false;
+        private bool _showAflyst = false;
+        private string _showAllButtonText = "Vis alle";
 
         public ObservableCollection<Project> Projects
         {
@@ -28,7 +39,7 @@ namespace Mestr.UI.ViewModels
             }
         }
 
-        public ObservableCollection<Project>CompletedProjects
+        public ObservableCollection<Project> CompletedProjects
         {
             get => _completedProjects;
             set
@@ -38,8 +49,68 @@ namespace Mestr.UI.ViewModels
             }
         }
 
+        public string ShowAllButtonText
+        {
+            get => _showAllButtonText;
+            set
+            {
+                _showAllButtonText = value;
+                OnPropertyChanged(nameof(ShowAllButtonText));
+            }
+        }
+
+        // Filter toggle properties
+        public bool ShowPlanlagt
+        {
+            get => _showPlanlagt;
+            set
+            {
+                _showPlanlagt = value;
+                OnPropertyChanged(nameof(ShowPlanlagt));
+                ApplyFilter();
+                UpdateShowAllButtonText();
+            }
+        }
+
+        public bool ShowAktiv
+        {
+            get => _showAktiv;
+            set
+            {
+                _showAktiv = value;
+                OnPropertyChanged(nameof(ShowAktiv));
+                ApplyFilter();
+                UpdateShowAllButtonText();
+            }
+        }
+
+        public bool ShowAfsluttet
+        {
+            get => _showAfsluttet;
+            set
+            {
+                _showAfsluttet = value;
+                OnPropertyChanged(nameof(ShowAfsluttet));
+                ApplyFilter();
+                UpdateShowAllButtonText();
+            }
+        }
+
+        public bool ShowAflyst
+        {
+            get => _showAflyst;
+            set
+            {
+                _showAflyst = value;
+                OnPropertyChanged(nameof(ShowAflyst));
+                ApplyFilter();
+                UpdateShowAllButtonText();
+            }
+        }
+
         public ICommand NavigateToProjectCommand => _mainViewModel.NavigateToProjectCommand;
         public ICommand ViewProjectDetailsCommand { get; }
+        public ICommand ShowAllCommand { get; }
 
         public DashboardViewModel(MainViewModel mainViewModel, IProjectService projectService)
         {
@@ -48,84 +119,67 @@ namespace Mestr.UI.ViewModels
 
             // Command that accepts a Guid parameter
             ViewProjectDetailsCommand = new RelayCommand<Guid>(ViewProjectDetails);
+            ShowAllCommand = new RelayCommand(ToggleShowAll);
             
             LoadProjects();
+        }
+
+        private void LoadProjects()
+        {
+            var projects = _projectService.LoadOngoingProjects();
+            _allOngoingProjects = new ObservableCollection<Project>(projects);
+            
+            var completedProjects = _projectService.LoadCompletedProjects();
+            CompletedProjects = new ObservableCollection<Project>(completedProjects);
+            
+            ApplyFilter();
+        }
+
+        private void ToggleShowAll()
+        {
+            // Hvis alle er markeret, fjern alle. Ellers vis alle.
+            if (AreAllFiltersSelected())
+            {
+                ShowPlanlagt = false;
+                ShowAktiv = false;
+                ShowAfsluttet = false;
+                ShowAflyst = false;
+            }
+            else
+            {
+                ShowPlanlagt = true;
+                ShowAktiv = true;
+                ShowAfsluttet = true;
+                ShowAflyst = true;
+            }
+        }
+
+        private bool AreAllFiltersSelected()
+        {
+            return ShowPlanlagt && ShowAktiv && ShowAfsluttet && ShowAflyst;
+        }
+
+        private void UpdateShowAllButtonText()
+        {
+            ShowAllButtonText = AreAllFiltersSelected() ? "Fjern alle" : "Vis alle";
+        }
+
+        private void ApplyFilter()
+        {
+            var filteredProjects = _allOngoingProjects.Where(p =>
+                (p.Status == ProjectStatus.Planlagt && ShowPlanlagt) ||
+                (p.Status == ProjectStatus.Aktiv && ShowAktiv) ||
+                (p.Status == ProjectStatus.Afsluttet && ShowAfsluttet) ||
+                (p.Status == ProjectStatus.Aflyst && ShowAflyst)
+            ).ToList();
+
+            Projects = new ObservableCollection<Project>(filteredProjects);
         }
 
         private void ViewProjectDetails(Guid projectId)
         {
             // Use MainViewModel's parameterized navigation command
             _mainViewModel.NavigateToProjectDetailsCommand.Execute(projectId);
-        }
-
-        private int _sortIndex;
-        public int SortIndex
-        {
-            get => _sortIndex;
-            set
-            {
-                if (_sortIndex != value)
-                {
-                    _sortIndex = value;
-                    OnPropertyChanged(nameof(SortIndex));
-                    ApplySorting();
-                }
-            }
-        }
-
-        private void ApplySorting()
-        {
-            // Sort ongoing projects
-            if (Projects != null && Projects.Count > 0)
-            {
-                IEnumerable<Project> sorted = Projects;
-                switch (SortIndex)
-                {
-                    case 0: // alfabetisk
-                        sorted = Projects.OrderBy(p => p.Name);
-                        break;
-                    case 1: // tidligst først
-                        sorted = Projects.OrderBy(p => p.EndDate);
-                        break;
-                    case 2: // senest først
-                        sorted = Projects.OrderByDescending(p => p.EndDate);
-                        break;
-                }
-                var sortedList = sorted.ToList();
-                Projects.Clear();
-                foreach (var p in sortedList)
-                    Projects.Add(p);
-            }
-            // Sort completed projects
-            if (CompletedProjects != null && CompletedProjects.Count > 0)
-            {
-                IEnumerable<Project> sortedCompleted = CompletedProjects;
-                switch (SortIndex)
-                {
-                    case 0: // alfabetisk
-                        sortedCompleted = CompletedProjects.OrderBy(p => p.Name);
-                        break;
-                    case 1: // tidligst først
-                        sortedCompleted = CompletedProjects.OrderBy(p => p.EndDate);
-                        break;
-                    case 2: // senest først
-                        sortedCompleted = CompletedProjects.OrderByDescending(p => p.EndDate);
-                        break;
-                }
-                var sortedCompletedList = sortedCompleted.ToList();
-                CompletedProjects.Clear();
-                foreach (var p in sortedCompletedList)
-                    CompletedProjects.Add(p);
-            }
-        }
-
-        private void LoadProjects()
-        {
-            var projects = _projectService.LoadOngoingProjects();
-            Projects = new ObservableCollection<Project>(projects);
-
-            var completedProjects = _projectService.LoadCompletedProjects();
-            CompletedProjects = new ObservableCollection<Project>(completedProjects);
         }
     }
 }
