@@ -1,19 +1,20 @@
-using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
-using System.Windows.Input;
 using Mestr.Core.Enum;
+using Mestr.Core.Interface;
 using Mestr.Core.Model;
+using Mestr.Data.Repository;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
-using Mestr.Data.Repository;
 using Mestr.UI.Command;
 using Mestr.UI.View;
 using Microsoft.Win32;
 using System;
+using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
 {
@@ -99,7 +100,7 @@ namespace Mestr.UI.ViewModels
             NavigateToDashboardCommand = new RelayCommand(NavigateToDashboardWithWarning);
             // Initialize commands
             SaveProjectDetailsCommand = new RelayCommand(SaveProjectDetails);
-            GenerateInvoiceCommand = new RelayCommand(GenerateInvoice);
+            GenerateInvoiceCommand = new RelayCommand(GenerateInvoice, CanGenerateInvoice);
             ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow);
             ToggleProjectStatusCommand = new RelayCommand(ToggleProjectStatus);
             EditEarningCommand = new RelayCommand<Earning>(EditEarning);
@@ -236,6 +237,12 @@ namespace Mestr.UI.ViewModels
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
+        }
+
+        private bool CanGenerateInvoice()
+        {
+            var unpaidEarnings = Project.Earnings?.Where(e => !e.IsPaid).ToList() ?? new List<Earning>();
+            return unpaidEarnings.Count > 0;
         }
 
         private void GenerateInvoice()
