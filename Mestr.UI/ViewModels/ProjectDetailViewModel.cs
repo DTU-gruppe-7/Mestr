@@ -1,19 +1,20 @@
-using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
-using System.Windows.Input;
 using Mestr.Core.Enum;
+using Mestr.Core.Interface;
 using Mestr.Core.Model;
+using Mestr.Data.Repository;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
-using Mestr.Data.Repository;
 using Mestr.UI.Command;
 using Mestr.UI.View;
 using Microsoft.Win32;
 using System;
+using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
 {
@@ -109,20 +110,28 @@ namespace Mestr.UI.ViewModels
             LoadProject();
         }
 
-
-
-        private bool HasUnsavedChanges()
+        private void Project_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (Project == null) return false;
+            if (_isLoadingProject) return;
+
+            if (e.PropertyName == nameof(Project.Name) || e.PropertyName == nameof(Project.Description))
+            {
+                CheckForUnsavedChanges();
+            }
+        }
+
+        private void CheckForUnsavedChanges()
+        {
+            if (Project == null) return;
 
             return Project.Name != _originalProjectName ||
                    Project.Description != _originalProjectDescription ||
                    Project.Status != _originalProjectStatus;
         }
 
-        private bool ConfirmNavigationIfUnsaved()
+        private void NavigateToDashboardWithWarning()
         {
-            if (HasUnsavedChanges())
+            if (_hasUnsavedChanges)
             {
                 var result = MessageBox.Show(
                     "Du har ugemte ændringer. Vil du forlade siden uden at gemme?",
@@ -130,11 +139,9 @@ namespace Mestr.UI.ViewModels
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Warning);
 
-                if (result == MessageBoxResult.Yes)
+                if (result == MessageBoxResult.No)
                 {
-                    // Restore original values before navigating away
-                    RevertUnsavedChanges();
-                    return true;
+                    return; // Stay on the page
                 }
 
                 return false;
@@ -256,6 +263,16 @@ namespace Mestr.UI.ViewModels
 
             try
             {
+                foreach ( var earning in Earnings)
+                {
+                    earning.MarkAsPaid(DateTime.Now);
+                    _earningService.Update(earning);
+
+                }
+
+                // Synkronisér tilbage til Project før PDF-generering
+                Project.Earnings = Earnings.ToList();
+
                 // Generer PDF som byte-array
                 var pdfBytes = _pdfService.GeneratePdfInvoice(Project);
 
