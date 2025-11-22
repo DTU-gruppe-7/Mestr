@@ -29,11 +29,11 @@
             </Border.Effect>
             
             <StackPanel Orientation="Horizontal">
-                <Button Content="Dashboard" 
+                <Button Content="Projekter" 
                         Style="{StaticResource NavTabButtonStyle}"
                         Tag="Active"/>
                 
-                <Button Content="Klienter" 
+                <Button Content="Kunder" 
                         Style="{StaticResource NavTabButtonStyle}"
                         Command="{Binding NavigateToClientsCommand}"/>
             </StackPanel>

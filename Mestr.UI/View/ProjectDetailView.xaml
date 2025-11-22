@@ -131,6 +131,41 @@
                                     <Setter Property="FontWeight" Value="SemiBold"/>
                                     <Setter Property="BorderThickness" Value="0"/>
                                     <Setter Property="Padding" Value="0,10,5,5"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="DataGridColumnHeader">
+                                                <Grid>
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <ContentPresenter VerticalAlignment="Center"/>
+                                                            <Path x:Name="SortArrow"
+                                                                  Margin="5,0,0,0"
+                                                                  VerticalAlignment="Center"
+                                                                  Width="8"
+                                                                  Height="10"
+                                                                  Stretch="Fill"
+                                                                  Visibility="Collapsed"
+                                                                  Fill="#1E293B"
+                                                                  Data="M 0 4 L 4 0 L 8 4 Z"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="SortDirection" Value="Ascending">
+                                                        <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                                        <Setter TargetName="SortArrow" Property="Data" Value="M 0 4 L 4 0 L 8 4 Z"/>
+                                                    </Trigger>
+                                                    <Trigger Property="SortDirection" Value="Descending">
+                                                        <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                                        <Setter TargetName="SortArrow" Property="Data" Value="M 0 0 L 4 4 L 8 0 Z"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
                                 </Style>
 
                                 <Style x:Key="CellStyle" TargetType="DataGridCell">
@@ -166,6 +201,7 @@
                                         <DataGrid ItemsSource="{Binding Earnings}"
                                               AutoGenerateColumns="False"
                                               IsReadOnly="True"
+                                              CanUserSortColumns="True"
                                               BorderThickness="0"
                                               Background="Transparent"
                                               HeadersVisibility="Column"
@@ -189,6 +225,7 @@
                                         <DataGrid ItemsSource="{Binding Expenses}"
                                                 AutoGenerateColumns="False"
                                                 IsReadOnly="True"
+                                                CanUserSortColumns="True"
                                                 BorderThickness="0"
                                                 Background="Transparent"
                                                 HeadersVisibility="Column"
@@ -198,10 +235,10 @@
                                                 CellStyle="{StaticResource CellStyle}"
                                                 RowStyle="{StaticResource RowStyle}">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Kategori" Binding="{Binding Category}" Width="*" />
-                                                <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Description}" Width="*" />
-                                                <DataGridTextColumn Header="Beløb" Binding="{Binding Amount, StringFormat='{}{0:N2} kr.'}" Width="*" />
-                                                <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
+                                                <DataGridTextColumn Header="Kategori" Binding="{Binding Category}" SortMemberPath="Category" Width="*" />
+                                                <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Description}" SortMemberPath="Description" Width="*" />
+                                                <DataGridTextColumn Header="Beløb" Binding="{Binding Amount, StringFormat='{}{0:N2} kr.'}" SortMemberPath="Amount" Width="*" />
+                                                <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" SortMemberPath="Date" Width="*" />
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </StackPanel>
@@ -285,6 +322,99 @@
                                      VerticalScrollBarVisibility="Auto"
                                      AcceptsReturn="True"
                                      MinHeight="300"/>
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="Kunde">
+                        <TabItem.Style>
+                            <Style TargetType="TabItem">
+                                <Setter Property="Foreground" Value="#1E293B"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Padding" Value="15,10"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="TabItem">
+                                            <Grid>
+                                                <Border Name="Border"
+                                                        Background="#F5F7FA"
+                                                        BorderBrush="#E0E0E0"
+                                                        BorderThickness="0,0,0,2"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter ContentSource="Header"
+                                                                      HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#1E293B"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TabItem.Style>
+
+                        <Grid Margin="0,15,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0"
+                                       Text="Kundeoplysninger"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="#333"
+                                       Margin="0,0,0,20"/>
+
+                            <StackPanel Grid.Row="1" MaxWidth="600" HorizontalAlignment="Left">
+                                <Grid Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Navn:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.Name}" Foreground="#1E293B" FontSize="14"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Email:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.Email}" Foreground="#1E293B" FontSize="14"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Telefon:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.Phone}" Foreground="#1E293B" FontSize="14"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Adresse:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.Address}" Foreground="#1E293B" FontSize="14" TextWrapping="Wrap"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="CVR:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.CVR}" Foreground="#1E293B" FontSize="14"/>
+                                </Grid>
+                            </StackPanel>
                         </Grid>
                     </TabItem>
                 </TabControl>
