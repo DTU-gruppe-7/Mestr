@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Windows.Input;
-using Mestr.Core.Model;
+﻿using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
 using Mestr.UI.Command;
+using Mestr.UI.View;
+using System;
+using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
 {
@@ -45,14 +46,24 @@ namespace Mestr.UI.ViewModels
             var clients = _clientService.GetAllClients();
             Clients = new ObservableCollection<Client>(clients);
         }
-
         private void NavigateToAddClient()
         {
-            // Navigate to add client view (you'll need to implement this in MainViewModel)
-            // _mainViewModel.NavigateToAddClientCommand.Execute(null);
-            
-            // For now, you can add a placeholder or implement the navigation
-            // CurrentViewModel = new AddClientViewModel(this, _clientService);
+            ShowAddClientWindow();
+        }
+        private void ShowAddClientWindow()
+        {
+            var addClientVm = new AddClientViewModel(_clientService);
+
+            var addClientWindow = new AddClientWindow()
+            {
+                DataContext = addClientVm,
+                Owner = App.Current.MainWindow
+            };
+
+            addClientWindow.ShowDialog();
+
+            // Reload clients after the window closes
+            LoadClients();
         }
 
         private void ViewClientDetails(Guid clientId)

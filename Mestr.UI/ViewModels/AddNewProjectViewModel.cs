@@ -2,6 +2,7 @@
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
 using Mestr.UI.Command;
+using Mestr.UI.View;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,6 +23,7 @@ namespace Mestr.UI.ViewModels
 
         public ICommand CreateProjectCommand { get; }
         public ICommand NavigateToDashboardCommand => _mainViewModel.NavigateToDashboardCommand;
+        public ICommand OpenAddClientWindowCommand { get; }
 
         public AddNewProjectViewModel(MainViewModel mainViewModel, IProjectService projectService, IClientService clientService)
         {
@@ -29,7 +31,8 @@ namespace Mestr.UI.ViewModels
             _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
             _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
             CreateProjectCommand = new RelayCommand(CreateProject, CanCreateProject);
-            
+            OpenAddClientWindowCommand = new RelayCommand(OpenAddClientWindow);
+
             LoadClients();
         }
 
@@ -104,6 +107,26 @@ namespace Mestr.UI.ViewModels
             if (client == null)
             {
                 AddError(propertyName, "Vælg venligst en kunde.");
+            }
+        }
+        private void OpenAddClientWindow()
+        {
+            var addClientViewModel = new AddClientViewModel(_clientService);
+            var addClientWindow = new AddClientWindow
+            {
+                DataContext = addClientViewModel
+            };
+
+            var result = addClientWindow.ShowDialog();
+
+            // Reload clients after the window is closed
+            LoadClients();
+
+            // Optionally select the newly created client if any
+            if (Clients.Any())
+            {
+                var lastClient = Clients.OrderBy(c => c.Uuid).LastOrDefault();
+                SelectedClient = lastClient;
             }
         }
 
