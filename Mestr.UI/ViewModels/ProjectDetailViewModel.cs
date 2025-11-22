@@ -31,14 +31,23 @@ namespace Mestr.UI.ViewModels
         private bool _hasUnsavedChanges = false;
         private string _originalProjectName = string.Empty;
         private string _originalProjectDescription = string.Empty;
+        private ProjectStatus _originalProjectStatus;
         private bool _disposed = false;
         private bool _isLoadingProject = false;
 
         public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Afsluttet;
 
+        public ObservableCollection<ProjectStatus> AvailableStatuses { get; } = new ObservableCollection<ProjectStatus>
+        {
+            ProjectStatus.Planlagt,
+            ProjectStatus.Aktiv,
+            ProjectStatus.Afsluttet,
+            ProjectStatus.Aflyst
+        };
+
         public ObservableCollection<Earning> Earnings
         {
-            get => _earnings;   
+            get => _earnings;
             set
             {
                 _earnings = value;
@@ -60,7 +69,7 @@ namespace Mestr.UI.ViewModels
         {
             get => _project;
             set
-            { 
+            {
                 _project = value;
                 OnPropertyChanged(nameof(Project));
             }
@@ -79,7 +88,7 @@ namespace Mestr.UI.ViewModels
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectId = projectId;
-                  
+
             // Initialize services with correct dependencies
             _pdfService = new PdfService();
 
@@ -107,7 +116,8 @@ namespace Mestr.UI.ViewModels
             if (Project == null) return false;
 
             return Project.Name != _originalProjectName ||
-                   Project.Description != _originalProjectDescription;
+                   Project.Description != _originalProjectDescription ||
+                   Project.Status != _originalProjectStatus;
         }
 
         private bool ConfirmNavigationIfUnsaved()
@@ -140,6 +150,7 @@ namespace Mestr.UI.ViewModels
             // Restore original values
             Project.Name = _originalProjectName;
             Project.Description = _originalProjectDescription;
+            Project.Status = _originalProjectStatus;
 
             // Notify UI of changes
             OnPropertyChanged(nameof(Project));
@@ -170,13 +181,14 @@ namespace Mestr.UI.ViewModels
                 _mainViewModel.NavigateToDashboardCommand.Execute(null);
                 return;
             }
-            
+
             _isLoadingProject = true;
 
             try
             {
                 _originalProjectName = project.Name ?? string.Empty;
                 _originalProjectDescription = project.Description ?? string.Empty;
+                _originalProjectStatus = project.Status;
                 Project = project;
                 Earnings = project.Earnings != null
                     ? new ObservableCollection<Earning>(project.Earnings)
@@ -184,7 +196,7 @@ namespace Mestr.UI.ViewModels
                 Expenses = project.Expenses != null
                     ? new ObservableCollection<Expense>(project.Expenses)
                     : new ObservableCollection<Expense>();
-                    _hasUnsavedChanges = false;
+                _hasUnsavedChanges = false;
             }
             finally
             {
@@ -201,10 +213,11 @@ namespace Mestr.UI.ViewModels
                 // Sync collections back to Project before saving
                 Project.Earnings = Earnings.ToList();
                 Project.Expenses = Expenses.ToList();
-                
+
                 _projectService.UpdateProject(Project);
                 _originalProjectName = Project.Name ?? string.Empty;
                 _originalProjectDescription = Project.Description ?? string.Empty;
+                _originalProjectStatus = Project.Status;
                 _hasUnsavedChanges = false;
 
                 MessageBox.Show(
@@ -213,7 +226,7 @@ namespace Mestr.UI.ViewModels
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
 
-                    _mainViewModel.NavigateToDashboardCommand.Execute(null);
+                _mainViewModel.NavigateToDashboardCommand.Execute(null);
             }
             catch (Exception ex)
             {
@@ -344,7 +357,7 @@ namespace Mestr.UI.ViewModels
             OnPropertyChanged(nameof(IsProjectCompleted));
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
-        
+
         private void DeleteProject()
         {
             if (Project == null || Project.Uuid == Guid.Empty) return;

@@ -82,12 +82,9 @@
                               ItemsSource="{Binding Clients}"
                               SelectedItem="{Binding SelectedClient, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
                               DisplayMemberPath="Name"
+                              Style="{StaticResource ModernComboBoxStyle}"
+                              ItemContainerStyle="{StaticResource InlineComboBoxItemStyle}"
                               Height="30">
-                            <ComboBox.ItemContainerStyle>
-                                <Style TargetType="ComboBoxItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                </Style>
-                            </ComboBox.ItemContainerStyle>
                         </ComboBox>
                         <ItemsControl Grid.Row="1"
                   ItemsSource="{Binding Path=(Validation.Errors), ElementName=ClientBox}">

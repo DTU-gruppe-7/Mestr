@@ -58,7 +58,9 @@ namespace Mestr.Services.Service
         public IEnumerable<Project> LoadOngoingProjects() 
         {
             return _projectRepository.GetAll()
-                .Where(p => p.Status == ProjectStatus.Aktiv || p.Status == ProjectStatus.Planlagt);
+                .Where(p => p.Status == ProjectStatus.Aktiv || 
+                            p.Status == ProjectStatus.Planlagt || 
+                            p.Status == ProjectStatus.Aflyst);
         }
 
         public IEnumerable<Project> LoadCompletedProjects()
