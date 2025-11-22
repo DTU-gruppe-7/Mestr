@@ -102,7 +102,7 @@ namespace Mestr.UI.ViewModels
 
         }
 
-        private async void GenerateInvoice()
+        private void GenerateInvoice()
         {
             if (Project == null)
                 return;
@@ -120,11 +120,13 @@ namespace Mestr.UI.ViewModels
 
             try
             {
-                // PDF-generering og filskrivning på baggrundstråd
-                var pdfBytes = await Task.Run(() => _pdfService.GeneratePdfInvoice(Project));
-                await Task.Run(() => File.WriteAllBytes(filePath, pdfBytes));
+                // Generer PDF som byte-array
+                var pdfBytes = _pdfService.GeneratePdfInvoice(Project);
 
-                // Åbn PDF på UI-tråden
+                // Gem filen synkront
+                File.WriteAllBytes(filePath, pdfBytes);
+
+                // Åbn filen
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = filePath,
@@ -136,6 +138,7 @@ namespace Mestr.UI.ViewModels
                 System.Windows.MessageBox.Show($"Fejl ved generering af PDF: {ex.Message}");
             }
         }
+
 
 
 
