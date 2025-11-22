@@ -70,20 +70,27 @@
                         </ItemsControl>
                     </Grid>
 
-                    <!-- Client Name -->
-                    <TextBlock Text="KUNDENAVN" Foreground="#475569" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <!-- Client Selection -->
+                    <TextBlock Text="KUNDE" Foreground="#475569" FontWeight="SemiBold" Margin="0,0,0,5"/>
                     <Grid Margin="0 0 0 15">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="20"/>
                         </Grid.RowDefinitions>
-                        <TextBox x:Name="ClientBox"
-                                 Grid.Row="0"
-                                 Text="{Binding ClientName, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
-                                 Style="{StaticResource ModernTextBoxStyle}"
-                                 Height="30"/>
+                        <ComboBox x:Name="ClientBox"
+                            Grid.Row="0"
+                              ItemsSource="{Binding Clients}"
+                              SelectedItem="{Binding SelectedClient, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                              DisplayMemberPath="Name"
+                              Height="30">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
                         <ItemsControl Grid.Row="1"
-                                      ItemsSource="{Binding Path=(Validation.Errors), ElementName=ClientBox}">
+                  ItemsSource="{Binding Path=(Validation.Errors), ElementName=ClientBox}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Foreground="Red" FontSize="11" Text="{Binding ErrorContent}"/>
