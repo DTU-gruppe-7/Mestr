@@ -72,7 +72,7 @@
 
                     <!-- Client Selection -->
                     <TextBlock Text="KUNDE" Foreground="#475569" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                    <Grid Margin="0 0 0 15">
+                    <Grid Margin="0 0 0 0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="20"/>
@@ -98,6 +98,42 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </Grid>
+
+                    <!-- Add New Client Button -->
+                    <Button Content="Opret ny kunde" 
+          Command="{Binding OpenAddClientWindowCommand}"
+          HorizontalAlignment="Left"
+          Margin="0,0,0,30"
+          Padding="10,5"
+          FontSize="12"
+          Foreground="#3B82F6"
+          Background="Transparent"
+          BorderBrush="#3B82F6"
+          BorderThickness="1"
+          Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="4"
+                                  Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#EFF6FF"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
 
                     <!-- Deadline -->
                     <TextBlock Text="DEADLINE" Foreground="#475569" FontWeight="SemiBold" Margin="0,0,0,5"/>

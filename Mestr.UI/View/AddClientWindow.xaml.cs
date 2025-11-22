@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Mestr.Core.Model;
+using Mestr.UI.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +22,22 @@ namespace Mestr.UI.View
     /// </summary>
     public partial class AddClientWindow : Window
     {
+        public Client? CreatedClient { get; private set; }
+
         public AddClientWindow()
         {
             InitializeComponent();
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
+            // Get the created client from the ViewModel if it exists
+            if (DataContext is AddClientViewModel viewModel)
+            {
+                CreatedClient = viewModel.CreatedClient;
+            }
         }
     }
 }

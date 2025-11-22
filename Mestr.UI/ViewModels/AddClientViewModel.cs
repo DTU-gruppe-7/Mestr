@@ -1,4 +1,5 @@
-﻿using Mestr.Services.Interface;
+﻿using Mestr.Core.Model;
+using Mestr.Services.Interface;
 using Mestr.UI.Command;
 using System;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace Mestr.UI.ViewModels
     public class AddClientViewModel : ViewModelBase
     {
         private readonly IClientService _clientService;
+        private Client? _createdClient;
 
         private string _companyName = string.Empty;
         private string _contactPerson = string.Empty;
@@ -29,6 +31,16 @@ namespace Mestr.UI.ViewModels
         }
 
         public string WindowTitle => "Tilføj ny klient";
+
+        public Client? CreatedClient
+        {
+            get => _createdClient;
+            set
+            {
+                _createdClient = value;
+                OnPropertyChanged(nameof(CreatedClient));
+            }
+        }
 
         public string CompanyName
         {
@@ -73,7 +85,7 @@ namespace Mestr.UI.ViewModels
             {
                 _phoneNumber = value;
                 OnPropertyChanged(nameof(PhoneNumber));
-                ValidateText(nameof(PhoneNumber), value, "Telefonnummer");
+                ValidatePhoneNumber(nameof(PhoneNumber), value);
                 ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
             }
         }
@@ -190,6 +202,29 @@ namespace Mestr.UI.ViewModels
             if (!email.Contains("@") || !email.Contains("."))
             {
                 AddError(propertyName, "Ugyldig email adresse");
+            }
+        }
+        private void ValidatePhoneNumber(string propertyName, string phoneNumber)
+        {
+            ClearErrors(propertyName);
+
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                AddError(propertyName, "Telefonnummer må ikke være tomt");
+                return;
+            }
+
+            // Check if phone number contains only digits
+            if (!phoneNumber.All(char.IsDigit))
+            {
+                AddError(propertyName, "Telefonnummer må kun indeholde tal");
+                return;
+            }
+
+            // Check if phone number has at least 8 digits
+            if (phoneNumber.Length < 8)
+            {
+                AddError(propertyName, "Telefonnummer skal være mindst 8 cifre");
             }
         }
     }
