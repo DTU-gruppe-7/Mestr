@@ -28,6 +28,11 @@ namespace Mestr.UI.ViewModels
         private Project _project = null!;
         private ObservableCollection<Earning> _earnings = new();
         private ObservableCollection<Expense> _expenses = new();
+        private bool _hasUnsavedChanges = false;
+        private string _originalProjectName = string.Empty;
+        private string _originalProjectDescription = string.Empty;
+        private bool _disposed = false;
+        private bool _isLoadingProject = false;
 
         public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Afsluttet;
 
@@ -56,12 +61,24 @@ namespace Mestr.UI.ViewModels
             get => _project;
             set
             {
+
+                if (_project != null)
+                {
+                    _project.PropertyChanged -= Project_PropertyChanged;
+                }
+
                 _project = value;
+
+                if (_project != null)
+                {
+                    _project.PropertyChanged += Project_PropertyChanged;
+                }
+
                 OnPropertyChanged(nameof(Project));
             }
         }
 
-        public ICommand NavigateToDashboardCommand => _mainViewModel.NavigateToDashboardCommand;
+        public ICommand NavigateToDashboardCommand { get; }
         public ICommand SaveProjectDetailsCommand { get; }
         public ICommand GenerateInvoiceCommand { get; }
         public ICommand ToggleProjectStatusCommand { get; }
@@ -82,6 +99,7 @@ namespace Mestr.UI.ViewModels
             _earningService = new EarningService();
             _expenseService = new ExpenseService();
 
+            NavigateToDashboardCommand = new RelayCommand(NavigateToDashboardWithWarning);
             // Initialize commands
             SaveProjectDetailsCommand = new RelayCommand(SaveProjectDetails);
             GenerateInvoiceCommand = new RelayCommand(GenerateInvoice);
@@ -94,12 +112,66 @@ namespace Mestr.UI.ViewModels
             LoadProject();
         }
 
+        private void Project_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (_isLoadingProject) return;
+
+            if (e.PropertyName == nameof(Project.Name) || e.PropertyName == nameof(Project.Description))
+            {
+                CheckForUnsavedChanges();
+            }
+        }
+
+        private void CheckForUnsavedChanges()
+        {
+            if (Project == null) return;
+
+            _hasUnsavedChanges = Project.Name != _originalProjectName ||
+                                 Project.Description != _originalProjectDescription;
+        }
+
+        private void NavigateToDashboardWithWarning()
+        {
+            if (_hasUnsavedChanges)
+            {
+                var result = MessageBox.Show(
+                    "Du har ugemte ændringer. Vil du forlade siden uden at gemme?",
+                    "Ugemte ændringer",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.No)
+                {
+                    return; // Stay on the page
+                }
+            }
+
+            // Navigate away
+            _mainViewModel.NavigateToDashboardCommand.Execute(null);
+        }
+
         private void LoadProject()
         {
             var project = _projectService.GetProjectByUuid(_projectId);
 
-            if (project != null)
+            if (project == null)
             {
+                MessageBox.Show(
+                    "Projektet kunne ikke findes.",
+                    "Fejl",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                _mainViewModel.NavigateToDashboardCommand.Execute(null);
+                return;
+            }
+            
+            _isLoadingProject = true;
+
+            try
+            {
+                _originalProjectName = project.Name ?? string.Empty;
+                _originalProjectDescription = project.Description ?? string.Empty;
                 Project = project;
                 Earnings = project.Earnings != null
                     ? new ObservableCollection<Earning>(project.Earnings)
@@ -107,6 +179,11 @@ namespace Mestr.UI.ViewModels
                 Expenses = project.Expenses != null
                     ? new ObservableCollection<Expense>(project.Expenses)
                     : new ObservableCollection<Expense>();
+                    _hasUnsavedChanges = false;
+            }
+            finally
+            {
+                _isLoadingProject = false;
             }
         }
 
@@ -121,6 +198,10 @@ namespace Mestr.UI.ViewModels
                 Project.Expenses = Expenses.ToList();
                 
                 _projectService.UpdateProject(Project);
+                _originalProjectName = Project.Name ?? string.Empty;
+                _originalProjectDescription = Project.Description ?? string.Empty;
+                _hasUnsavedChanges = false;
+
                 MessageBox.Show(
                     "Projektet blev gemt succesfuldt.",
                     "Gem succesfuldt",
@@ -286,7 +367,32 @@ namespace Mestr.UI.ViewModels
                 }
             }
         }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
 
+            if (disposing)
+            {
+                // Unsubscribe from events
+                if (_project != null)
+                {
+                    _project.PropertyChanged -= Project_PropertyChanged;
+                }
+            }
+
+            _disposed = true;
+        }
+
+        ~ProjectDetailViewModel()
+        {
+            Dispose(false);
+        }
     }
 }
