@@ -21,55 +21,99 @@
 
             <StackPanel Margin="0,0,0,15">
                 <TextBlock Text="Transaktionstype" FontWeight="SemiBold" FontSize="12" Foreground="#666" Margin="0,0,0,5"/>
-                <ComboBox ItemsSource="{Binding TransactionTypes}"
-                          SelectedItem="{Binding SelectedTransactionType}"
-                          IsEnabled="{Binding IsTypeEnabled}"
-                          Style="{StaticResource ModernComboBoxStyle}"
-                          Height="35"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                    </Grid.RowDefinitions>
+                    <ComboBox Grid.Row="0"
+                              ItemsSource="{Binding TransactionTypes}"
+                              SelectedItem="{Binding SelectedTransactionType}"
+                              IsEnabled="{Binding IsTypeEnabled}"
+                              Style="{StaticResource ModernComboBoxStyle}"
+                              Height="35"/>
+                </Grid>
             </StackPanel>
 
             <StackPanel Margin="0,0,0,15">
                 <TextBlock Text="Beskrivelse" FontWeight="SemiBold" FontSize="12" Foreground="#666" Margin="0,0,0,5"/>
-                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
-                         Style="{StaticResource ModernTextBoxStyle}"
-                         Height="35"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                    </Grid.RowDefinitions>
+                    <TextBox x:Name="descriptionBox"
+                             Grid.Row="0"
+                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                             Style="{StaticResource ModernTextBoxStyle}"
+                             Height="35"/>
+                    <ItemsControl Grid.Row="1"
+                                  ItemsSource="{Binding Path=(Validation.Errors), ElementName=descriptionBox}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Foreground="#E02020" FontSize="11" Margin="0,2,0,0" Text="{Binding ErrorContent}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
             </StackPanel>
 
             <StackPanel Margin="0,0,0,15">
                 <TextBlock Text="Beløb" FontWeight="SemiBold" FontSize="12" Foreground="#666" Margin="0,0,0,5"/>
-                <TextBox x:Name="amountBox"
-                         Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
-                         PreviewTextInput="AmountBox_PreviewTextInput"
-                         DataObject.Pasting="AmountBox_Pasting"
-                         TextChanged="AmountBox_TextChanged"
-                         Style="{StaticResource ModernTextBoxStyle}"
-                         Height="35"/>
-
-                <ItemsControl ItemsSource="{Binding Path=(Validation.Errors), ElementName=amountBox}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Foreground="#E02020" FontSize="11" Margin="0,2,0,0" Text="{Binding ErrorContent}"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                    </Grid.RowDefinitions>
+                    <TextBox x:Name="amountBox"
+                             Grid.Row="0"
+                             Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                             Style="{StaticResource ModernTextBoxStyle}"
+                             Height="35"
+                             PreviewTextInput="AmountBox_PreviewTextInput"
+                             DataObject.Pasting="AmountBox_Pasting"
+                             TextChanged="AmountBox_TextChanged"/>
+                    <ItemsControl Grid.Row="1"
+                                  ItemsSource="{Binding Path=(Validation.Errors), ElementName=amountBox}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Foreground="#E02020" FontSize="11" Margin="0,2,0,0" Text="{Binding ErrorContent}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
             </StackPanel>
 
             <StackPanel Margin="0,0,0,15" Visibility="{Binding CategoryVisibility}">
                 <TextBlock Text="Kategori" FontWeight="SemiBold" FontSize="12" Foreground="#666" Margin="0,0,0,5"/>
-                <ComboBox ItemsSource="{Binding Categories}"
-                          SelectedItem="{Binding SelectedCategory}"
-                          Style="{StaticResource ModernComboBoxStyle}"
-                          Height="35"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                    </Grid.RowDefinitions>
+                    <ComboBox Grid.Row="0"
+                              ItemsSource="{Binding Categories}"
+                              SelectedItem="{Binding SelectedCategory}"
+                              Style="{StaticResource ModernComboBoxStyle}"
+                              Height="35"/>
+                </Grid>
             </StackPanel>
 
-            <StackPanel Margin="0,0,0,25">
+            <StackPanel Margin="0,0,0,15">
                 <TextBlock Text="Dato" FontWeight="SemiBold" FontSize="12" Foreground="#666" Margin="0,0,0,5"/>
-                <DatePicker SelectedDate="{Binding Date, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
-                            Style="{StaticResource ModernDatePickerStyle}"
-                            Height="35"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                    </Grid.RowDefinitions>
+                    <DatePicker Grid.Row="0"
+                                SelectedDate="{Binding Date, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                Style="{StaticResource ModernDatePickerStyle}"
+                                Height="35"/>
+                </Grid>
             </StackPanel>
 
-            <Border BorderThickness="0,1,0,0" BorderBrush="#E5E7EB" Padding="0,20,0,0">
+            <Border BorderThickness="0,1,0,0" BorderBrush="#E5E7EB" Padding="0,20,0,0" Margin="0,10,0,0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Annuller" 
                             Width="100" 
