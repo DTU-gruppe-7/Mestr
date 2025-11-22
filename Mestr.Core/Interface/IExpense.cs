@@ -1,4 +1,5 @@
 ﻿using Mestr.Core.Enum;
+using Mestr.Core.Model;
 using System;
 
 namespace Mestr.Core.Interface
@@ -6,7 +7,6 @@ namespace Mestr.Core.Interface
     public interface IExpense
     {
         Guid Uuid { get; }
-        Guid ProjectUuid { get; set; }
         string Description { get; set; }
         decimal Amount { get; set; }
         DateTime Date { get; set; }

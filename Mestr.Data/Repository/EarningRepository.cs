@@ -3,122 +3,95 @@ using Mestr.Core.Interface;
 using Mestr.Core.Model;
 using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
-using Microsoft.Data.Sqlite;
-using System.Runtime.InteropServices.Marshalling;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mestr.Data.Repository
 {
     public class EarningRepository : IRepository<Earning>
     {
-        private readonly SqliteDbContext _dbContext;
-        private readonly SqliteConnection _connection;
-        public EarningRepository() {
-            _dbContext = SqliteDbContext.Instance;
-            _connection = _dbContext.GetConnection();
-        }
         public void Add(Earning entity)
         {
-            if (entity == null)
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+
+            dbContext.DatabaseLock.Wait();
+            try
             {
-                throw new ArgumentNullException(nameof(entity));
+                dbContext.Instance.Earnings.Add(entity);
+                dbContext.Instance.SaveChanges();
             }
-            using var command = _connection.CreateCommand();
-            command.CommandText = "INSERT INTO earnings (uuid, projectuuid, description, amount, date, isPaid) " +
-                "VALUES (@uuid, @projectUuid, @description, @amount, @date, @isPaid);";
-            //Get the value from entity uuid property   
-            command.Parameters.AddWithValue("@uuid", entity.Uuid);
-            command.Parameters.AddWithValue("@projectUuid", entity.ProjectUuid);
-            command.Parameters.AddWithValue("@description", entity.Description);
-            command.Parameters.AddWithValue("@amount", entity.Amount);
-            command.Parameters.AddWithValue("@date", entity.Date);
-            command.Parameters.AddWithValue("@isPaid", entity.IsPaid);
-            command.ExecuteNonQuery();
+            finally
+            {
+                dbContext.DatabaseLock.Release();
+            }
         }
 
         public Earning? GetByUuid(Guid uuid)
         {
-            if (uuid == Guid.Empty)
+            if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
+
+            dbContext.DatabaseLock.Wait();
+            try
             {
-                throw new ArgumentNullException(nameof(uuid));
+                return dbContext.Instance.Earnings
+                    .Include(e => e.Project)
+                    .FirstOrDefault(e => e.Uuid == uuid);
             }
-
-            using var command = _connection.CreateCommand();
-            command.CommandText = "SELECT * FROM earnings WHERE uuid = @uuid";
-            command.Parameters.AddWithValue("@uuid", uuid);  
-
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
+            finally
             {
-                var earning = new Earning(
-                    Guid.Parse(reader["uuid"].ToString()!),
-                    Guid.Parse(reader["projectuuid"].ToString()!),
-                    reader["description"].ToString()!,
-                    reader.GetDecimal(reader.GetOrdinal("amount")),
-                    reader.GetDateTime(reader.GetOrdinal("date")),
-                    reader.GetBoolean(reader.GetOrdinal("isPaid"))
-                    );
-                return earning;
+                dbContext.DatabaseLock.Release();
             }
-
-            return null;
         }
+
         public IEnumerable<Earning> GetAll()
         {
-            var earnings = new List<Earning>();
-
-            using var command = _connection.CreateCommand();
-            command.CommandText = "SELECT * FROM earnings";
-
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
+            dbContext.DatabaseLock.Wait();
+            try
             {
-                var earning = new Earning(
-                    Guid.Parse(reader["uuid"].ToString()!),
-                    Guid.Parse(reader["projectuuid"].ToString()!),
-                    reader["description"].ToString()!,
-                    reader.GetDecimal(reader.GetOrdinal("amount")),
-                    reader.GetDateTime(reader.GetOrdinal("date")),
-                    reader.GetBoolean(reader.GetOrdinal("isPaid"))
-                );
-                earnings.Add(earning);
+                return dbContext.Instance.Earnings
+                    .Include(e => e.Project)
+                    .AsNoTracking()
+                    .ToList();
             }
-
-            return earnings;
+            finally
+            {
+                dbContext.DatabaseLock.Release();
+            }
         }
 
         public void Update(Earning entity)
         {
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-            using var command = _connection.CreateCommand();
-            command.CommandText = "UPDATE earnings " +
-                "SET description = @description, " +
-                "amount = @amount, " +
-                "date = @date, " +
-                "isPaid = @isPaid " +
-                "WHERE uuid = @uuid";
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            command.Parameters.AddWithValue("@uuid", entity.Uuid);
-            command.Parameters.AddWithValue("@description", entity.Description);
-            command.Parameters.AddWithValue("@amount", entity.Amount);
-            command.Parameters.AddWithValue("@date", entity.Date);
-            command.Parameters.AddWithValue("@isPaid", entity.IsPaid);
-            command.ExecuteNonQuery();
+            dbContext.DatabaseLock.Wait();
+            try
+            {
+                dbContext.Instance.Earnings.Update(entity);
+                dbContext.Instance.SaveChanges();
+            }
+            finally
+            {
+                dbContext.DatabaseLock.Release();
+            }
         }
 
         public void Delete(Guid uuid)
         {
-            if (uuid == Guid.Empty)
-            {
-                throw new ArgumentNullException(nameof(uuid));
-            }
+            if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            using var command = _connection.CreateCommand();
-            command.CommandText = "DELETE FROM earnings WHERE uuid = @uuid";
-            command.Parameters.AddWithValue("@uuid", uuid);
-            command.ExecuteNonQuery();
+            dbContext.DatabaseLock.Wait();
+            try
+            {
+                var earning = dbContext.Instance.Earnings.FirstOrDefault(e => e.Uuid == uuid);
+                if (earning != null)
+                {
+                    dbContext.Instance.Earnings.Remove(earning);
+                    dbContext.Instance.SaveChanges();
+                }
+            }
+            finally
+            {
+                dbContext.DatabaseLock.Release();
+            }
         }
     }
 }

@@ -7,9 +7,11 @@ using Mestr.Core.Enum;
 using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
+using Mestr.Data.Repository;
 using Mestr.UI.Command;
 using Mestr.UI.View;
 using Microsoft.Win32;
+using System;
 using System.Linq;
 using System.Windows;
 
@@ -17,15 +19,15 @@ namespace Mestr.UI.ViewModels
 {
     public class ProjectDetailViewModel : ViewModelBase
     {
-        private readonly EarningService _earningService;
-        private readonly ExpenseService _expenseService;
+        private readonly IEarningService _earningService;
+        private readonly IExpenseService _expenseService;
         private readonly MainViewModel _mainViewModel;
         private readonly ProjectService _projectService;
         private readonly PdfService _pdfService;
         private readonly Guid _projectId;
         private Project _project = null!;
-        private ObservableCollection<Earning> _earnings;
-        private ObservableCollection<Expense> _expenses;
+        private ObservableCollection<Earning> _earnings = new();
+        private ObservableCollection<Expense> _expenses = new();
         private bool _hasUnsavedChanges = false;
         private string _originalProjectName = string.Empty;
         private string _originalProjectDescription = string.Empty;
@@ -42,7 +44,7 @@ namespace Mestr.UI.ViewModels
                 _earnings = value;
                 OnPropertyChanged(nameof(Earnings));
                 OnPropertyChanged(nameof(ProfitLoss));
-                OnPropertyChanged(nameof(ProfitLossColor));
+                //OnPropertyChanged(nameof(ProfitLossColor));
             }
         }
 
@@ -54,7 +56,7 @@ namespace Mestr.UI.ViewModels
                 _expenses = value;
                 OnPropertyChanged(nameof(Expenses));
                 OnPropertyChanged(nameof(ProfitLoss));
-                OnPropertyChanged(nameof(ProfitLossColor));
+                //OnPropertyChanged(nameof(ProfitLossColor));
             }
         }
 
@@ -89,17 +91,20 @@ namespace Mestr.UI.ViewModels
         public ICommand EditExpenseCommand { get; }
         public ICommand DeleteProjectCommand { get; }
 
-
         public ProjectDetailViewModel(MainViewModel mainViewModel, Guid projectId)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectId = projectId;
+                  
+            // Initialize services with correct dependencies
             _pdfService = new PdfService();
+
             _projectService = new ProjectService();
             _earningService = new EarningService();
             _expenseService = new ExpenseService();
 
             NavigateToDashboardCommand = new RelayCommand(NavigateToDashboardWithWarning);
+            // Initialize commands
             SaveProjectDetailsCommand = new RelayCommand(SaveProjectDetails);
             GenerateInvoiceCommand = new RelayCommand(GenerateInvoice);
             ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow);
@@ -164,9 +169,7 @@ namespace Mestr.UI.ViewModels
                 _mainViewModel.NavigateToDashboardCommand.Execute(null);
                 return;
             }
-
-            var earningsList = _earningService.GetAllByProjectUuid(_projectId);
-            var expensesList = _expenseService.GetAllByProjectUuid(_projectId);
+            
             _isLoadingProject = true;
 
             try
@@ -174,9 +177,13 @@ namespace Mestr.UI.ViewModels
                 _originalProjectName = project.Name ?? string.Empty;
                 _originalProjectDescription = project.Description ?? string.Empty;
                 Project = project;
-                Earnings = new ObservableCollection<Earning>(earningsList);
-                Expenses = new ObservableCollection<Expense>(expensesList);
-                _hasUnsavedChanges = false;
+                Earnings = project.Earnings != null
+                    ? new ObservableCollection<Earning>(project.Earnings)
+                    : new ObservableCollection<Earning>();
+                Expenses = project.Expenses != null
+                    ? new ObservableCollection<Expense>(project.Expenses)
+                    : new ObservableCollection<Expense>();
+                    _hasUnsavedChanges = false;
             }
             finally
             {
@@ -190,6 +197,10 @@ namespace Mestr.UI.ViewModels
 
             try
             {
+                // Sync collections back to Project before saving
+                Project.Earnings = Earnings.ToList();
+                Project.Expenses = Expenses.ToList();
+                
                 _projectService.UpdateProject(Project);
                 _originalProjectName = Project.Name ?? string.Empty;
                 _originalProjectDescription = Project.Description ?? string.Empty;
@@ -256,6 +267,7 @@ namespace Mestr.UI.ViewModels
 
         private void ShowEconomyWindow()
         {
+            // RETTELSE: Brug korrekt constructor med services først
             var economyVm = new EconomyViewModel(
                 _projectId,
                 _earningService,
@@ -275,11 +287,12 @@ namespace Mestr.UI.ViewModels
         {
             if (earning == null) return;
 
+            // RETTELSE: Brug constructor med Earning parameter
             var economyVm = new EconomyViewModel(
-                _projectId,
-                _earningService,
-                _expenseService,
-                earning); // Pass earning to edit constructor
+                projectUuid: _projectId,
+                earningService: _earningService,
+                expenseService: _expenseService,
+                earningToEdit: earning);
 
             var economyWindow = new EconomyWindow()
             {
@@ -288,18 +301,19 @@ namespace Mestr.UI.ViewModels
             };
 
             economyWindow.ShowDialog();
-            LoadProject(); // Refresh data efter lukket dialog
+            LoadProject();
         }
 
         private void EditExpense(Expense? expense)
         {
             if (expense == null) return;
 
+            // RETTELSE: Brug constructor med Expense parameter
             var economyVm = new EconomyViewModel(
-                _projectId,
-                _earningService,
-                _expenseService,
-                expense); // Pass expense to edit constructor
+                projectUuid: _projectId,
+                earningService: _earningService,
+                expenseService: _expenseService,
+                expenseToEdit: expense);
 
             var economyWindow = new EconomyWindow()
             {
@@ -308,7 +322,7 @@ namespace Mestr.UI.ViewModels
             };
 
             economyWindow.ShowDialog();
-            LoadProject(); // Refresh data after closing dialog
+            LoadProject();
         }
 
         private void ToggleProjectStatus()
@@ -330,38 +344,16 @@ namespace Mestr.UI.ViewModels
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
 
-
         public decimal ProfitLoss
         {
             get
             {
-                decimal totalIncome = 0;
-                decimal totalExpense = 0;
-
-                if (Earnings != null)
-                    totalIncome = Earnings.Sum(e => e.Amount);
-
-                if (Expenses != null)
-                    totalExpense = Expenses.Sum(e => e.Amount);
-
+                decimal totalIncome = Earnings?.Sum(e => e.Amount) ?? 0;
+                decimal totalExpense = Expenses?.Sum(e => e.Amount) ?? 0;
                 return totalIncome - totalExpense;
-             }
-          }
-
-        public string ProfitLossColor
-        {
-            get
-            {
-                var profitLoss = ProfitLoss;
-                if (profitLoss < 0)
-                    return "#E02020"; // Rød
-                else if (profitLoss > 0)
-                    return "#008800"; // Grøn
-                else
-                    return "#666666"; // Grå/neutral for 0
             }
         }
-
+                
         private void DeleteProject()
         {
             if (Project == null || Project.Uuid == Guid.Empty) return;

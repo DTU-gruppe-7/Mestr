@@ -83,7 +83,7 @@ namespace Mestr.UI.ViewModels
 
         private void CreateProject()
         {
-            var project = _projectService.CreateProject(ProjectName, Description, Deadline);
+            var project = _projectService.CreateProject(ProjectName, ClientName, Description, Deadline);
             
             // Option 1: Navigate to dashboard
             _mainViewModel.NavigateToDashboardCommand.Execute(null);

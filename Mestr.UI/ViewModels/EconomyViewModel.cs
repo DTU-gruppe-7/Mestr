@@ -13,7 +13,7 @@ namespace Mestr.UI.ViewModels
     internal class EconomyViewModel : ViewModelBase
     {
         private readonly Guid _projectUuid;
-        private readonly Guid? _editingId; // Null = Create mode, Value = Edit mode
+        private readonly Guid? _editingId;
         
         private readonly IEarningService _earningService;
         private readonly IExpenseService _expenseService;
@@ -27,11 +27,8 @@ namespace Mestr.UI.ViewModels
         private Visibility _categoryVisibility;
         private bool _isTypeEnabled = true;
 
-        // Constructor 1: Opret ny transaktion
-        public EconomyViewModel(
-            Guid projectUuid, 
-            IEarningService earningService, 
-            IExpenseService expenseService)
+        // Constructor 1: Opret ny transaktion (accepterer services som parameter)
+        public EconomyViewModel(Guid projectUuid, IEarningService earningService, IExpenseService expenseService)
         {
             _projectUuid = projectUuid;
             _earningService = earningService ?? throw new ArgumentNullException(nameof(earningService));
@@ -54,11 +51,7 @@ namespace Mestr.UI.ViewModels
         }
 
         // Constructor 2: Rediger eksisterende udgift
-        public EconomyViewModel(
-            Guid projectUuid, 
-            IEarningService earningService, 
-            IExpenseService expenseService, 
-            Expense expenseToEdit) 
+        public EconomyViewModel(Guid projectUuid, IEarningService earningService, IExpenseService expenseService, Expense expenseToEdit) 
             : this(projectUuid, earningService, expenseService)
         {
             if (expenseToEdit == null) throw new ArgumentNullException(nameof(expenseToEdit));
@@ -67,7 +60,6 @@ namespace Mestr.UI.ViewModels
             IsTypeEnabled = false;
             SelectedTransactionType = "Udgift";
 
-            // Populer felter fra eksisterende data
             Description = expenseToEdit.Description;
             Amount = expenseToEdit.Amount;
             Date = expenseToEdit.Date;
@@ -76,11 +68,7 @@ namespace Mestr.UI.ViewModels
         }
 
         // Constructor 3: Rediger eksisterende indtægt
-        public EconomyViewModel(
-            Guid projectUuid, 
-            IEarningService earningService, 
-            IExpenseService expenseService, 
-            Earning earningToEdit) 
+        public EconomyViewModel(Guid projectUuid, IEarningService earningService, IExpenseService expenseService, Earning earningToEdit) 
             : this(projectUuid, earningService, expenseService)
         {
             if (earningToEdit == null) throw new ArgumentNullException(nameof(earningToEdit));
@@ -245,6 +233,7 @@ namespace Mestr.UI.ViewModels
                             existingExpense.Amount = Amount;
                             existingExpense.Date = Date;
                             existingExpense.Category = categoryEnum;
+                            existingExpense.IsAccepted = IsPaid;
                             
                             _expenseService.Update(existingExpense);
                         }
@@ -277,6 +266,7 @@ namespace Mestr.UI.ViewModels
                             existingEarning.Description = Description;
                             existingEarning.Amount = Amount;
                             existingEarning.Date = Date;
+                            existingEarning.IsPaid = IsPaid;
                             
                             _earningService.Update(existingEarning);
                         }

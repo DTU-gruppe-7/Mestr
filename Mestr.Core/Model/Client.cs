@@ -5,38 +5,44 @@ using System.Collections.Generic;
 namespace Mestr.Core.Model;
 public class Client : IClient
 {
-	private readonly Guid _uuid;
+	private Guid _uuid;
 	private string name;
-	private string email;
+    private string contactPerson;
+    private string email;
 	private string phoneNumber;
     private string address;
 	private string postalAddress;
 	private string city;
 	private string? cvr;
-	private readonly DateTime initDate;
-    private IList<IProject> projects;
+    private ICollection<Project> projects = new List<Project>();
+
+    // EF Core requires a parameterless constructor
+    private Client()
+    {
+    }
 
     // Constructor
-    public Client(Guid uuid, string name, string email, string phoneNumber, string address,
-                  string postalAddress, string city, string? cvr = null)
+    public Client(Guid uuid, string name, string contactPerson, string email, string phoneNumber, string address,
+                  string postalAddress, string city, string cvr)
     {
         this._uuid = uuid;
         this.name = name;
+        this.contactPerson = contactPerson;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.postalAddress = postalAddress;
         this.city = city;
         this.cvr = cvr;
-        this.initDate = DateTime.Now;
-        this.projects = new List<IProject>();
     }
 
 
     // Properties 
-    public Guid Uuid { get => _uuid; }
+    public Guid Uuid { get => _uuid; private set => _uuid = value; }
     public string Name {get => name; set => name = value;}
-    
+
+    public string ContactPerson { get => contactPerson; set => contactPerson = value; }
+
     public string Email 
     { 
         get => email; 
@@ -69,8 +75,11 @@ public class Client : IClient
     public string PostalAddress { get => postalAddress; set => postalAddress = value; }
     public string City { get => city; set => city = value; }
     public string? Cvr { get => cvr; set => cvr = value; }
-    public DateTime InitDate { get; }
-    public IList<IProject> Projects { get => projects; set => projects = value; }
+    // Navigation property for related projects
+    public ICollection<Project> Projects
+    {
+        get => projects; set => projects = value;
+    }
 
     // Get entire address
     public string GetFullAddress()
