@@ -9,8 +9,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Mestr.UI;component/Component/Styles/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <DataTemplate DataType="{x:Type viewmodels:ProjectViewModel}">
-                <views:ProjectView/>
+            <DataTemplate DataType="{x:Type viewmodels:AddNewProjectViewModel}">
+                <views:AddNewProjectView/>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewmodels:DashboardViewModel}">
                 <views:DashboardView/>

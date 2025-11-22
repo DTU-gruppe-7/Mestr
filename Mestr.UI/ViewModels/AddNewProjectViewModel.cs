@@ -11,7 +11,7 @@ using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
 {
-    public class ProjectViewModel : ViewModelBase
+    public class AddNewProjectViewModel : ViewModelBase
     {
         private readonly MainViewModel _mainViewModel;
         private readonly IProjectService _projectService;
@@ -20,7 +20,7 @@ namespace Mestr.UI.ViewModels
         public ICommand CreateProjectCommand { get; }
         public ICommand NavigateToDashboardCommand => _mainViewModel.NavigateToDashboardCommand;
 
-        public ProjectViewModel(MainViewModel mainViewModel, IProjectService projectService)
+        public AddNewProjectViewModel(MainViewModel mainViewModel, IProjectService projectService)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
