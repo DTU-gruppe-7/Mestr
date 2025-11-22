@@ -115,12 +115,17 @@
 
             <Border BorderThickness="0,1,0,0" BorderBrush="#E5E7EB" Padding="0,20,0,0" Margin="0,10,0,0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Slet" 
+                            Width="100" 
+                            Margin="0,0,10,0"
+                            Visibility="{Binding DeleteButtonVisibility}"
+                            Command="{Binding DeleteCommand}"
+                            Style="{StaticResource ModernButtonStyle}"/>
                     <Button Content="Annuller" 
                             Width="100" 
                             Margin="0,0,10,0"
                             Command="{Binding CancelCommand}"
-                            Style="{StaticResource ModernButtonStyle}"
-                            Opacity="0.8"/>
+                            Style="{StaticResource ModernButtonStyle}"/>
                     <Button Content="Gem" 
                             Width="100" 
                             Command="{Binding SaveCommand}"

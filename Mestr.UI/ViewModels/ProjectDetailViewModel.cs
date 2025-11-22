@@ -32,10 +32,19 @@ namespace Mestr.UI.ViewModels
         private bool _hasUnsavedChanges = false;
         private string _originalProjectName = string.Empty;
         private string _originalProjectDescription = string.Empty;
+        private ProjectStatus _originalProjectStatus; 
         private bool _disposed = false;
         private bool _isLoadingProject = false;
 
         public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Afsluttet;
+
+        public ObservableCollection<ProjectStatus> AvailableStatuses { get; } = new ObservableCollection<ProjectStatus>
+        {
+            ProjectStatus.Planlagt,
+            ProjectStatus.Aktiv,
+            ProjectStatus.Afsluttet,
+            ProjectStatus.Aflyst
+        };
 
         public ObservableCollection<Earning> Earnings
         {
@@ -115,8 +124,9 @@ namespace Mestr.UI.ViewModels
         {
             if (Project == null) return;
 
-            _hasUnsavedChanges = Project.Name != _originalProjectName ||
-                                 Project.Description != _originalProjectDescription;
+            return Project.Name != _originalProjectName ||
+                   Project.Description != _originalProjectDescription ||
+                   Project.Status != _originalProjectStatus;
         }
 
         private void NavigateToDashboardWithWarning()
@@ -133,6 +143,30 @@ namespace Mestr.UI.ViewModels
                 {
                     return; // Stay on the page
                 }
+
+                return false;
+
+            }
+
+            return true; // No unsaved changes, allow navigation
+        }
+        private void RevertUnsavedChanges()
+        {
+            if (Project == null) return;
+
+            // Restore original values
+            Project.Name = _originalProjectName;
+            Project.Description = _originalProjectDescription;
+            Project.Status = _originalProjectStatus;
+
+            // Notify UI of changes
+            OnPropertyChanged(nameof(Project));
+        }
+        private void NavigateToDashboardWithWarning()
+        {
+            if (!ConfirmNavigationIfUnsaved())
+            {
+                return; // User chose to stay on the page
             }
 
             // Navigate away
@@ -161,6 +195,7 @@ namespace Mestr.UI.ViewModels
             {
                 _originalProjectName = project.Name ?? string.Empty;
                 _originalProjectDescription = project.Description ?? string.Empty;
+                _originalProjectStatus = project.Status;
                 Project = project;
                 Earnings = project.Earnings != null
                     ? new ObservableCollection<Earning>(project.Earnings)
@@ -189,6 +224,7 @@ namespace Mestr.UI.ViewModels
                 _projectService.UpdateProject(Project);
                 _originalProjectName = Project.Name ?? string.Empty;
                 _originalProjectDescription = Project.Description ?? string.Empty;
+                _originalProjectStatus = Project.Status;
                 _hasUnsavedChanges = false;
 
                 MessageBox.Show(
