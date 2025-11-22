@@ -1,7 +1,9 @@
-﻿using Mestr.UI.ViewModels;
-using System.Configuration;
+﻿using System.Configuration;
 using System.Data;
 using System.Windows;
+using Mestr.UI.ViewModels;
+using QuestPDF.Infrastructure;
+using QuestPDF.Fluent;
 
 namespace Mestr.UI
 {
@@ -12,6 +14,7 @@ namespace Mestr.UI
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            QuestPDF.Settings.License = LicenseType.Community;
             MainWindow = new MainWindow()
             {
                 DataContext = new MainViewModel(),

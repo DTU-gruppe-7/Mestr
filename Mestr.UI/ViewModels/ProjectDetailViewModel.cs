@@ -1,9 +1,15 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Windows.Input;
 using Mestr.Core.Enum;
 using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
 using Mestr.UI.Command;
 using Mestr.UI.View;
+using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -19,6 +25,7 @@ namespace Mestr.UI.ViewModels
         private readonly ExpenseService _expenseService;
         private readonly MainViewModel _mainViewModel;
         private readonly ProjectService _projectService;
+        private readonly PdfService _pdfService;
         private readonly Guid _projectId;
         private Project _project = null!;
         private ObservableCollection<Earning> _earnings;
@@ -77,6 +84,7 @@ namespace Mestr.UI.ViewModels
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectId = projectId;
+            _pdfService = new PdfService();
             _projectService = new ProjectService();
             _earningService = new EarningService();
             _expenseService = new ExpenseService();
@@ -137,8 +145,44 @@ namespace Mestr.UI.ViewModels
 
         private void GenerateInvoice()
         {
+            if (Project == null)
+                return;
+
+            var dialog = new SaveFileDialog
+            {
+                FileName = $"Invoice_{Project.Name}.pdf",
+                Filter = "PDF Files (*.pdf)|*.pdf"
+            };
+
+            if (dialog.ShowDialog() != true)
+                return;
+
+            string filePath = dialog.FileName;
+
+            try
+            {
+                // Generer PDF som byte-array
+                var pdfBytes = _pdfService.GeneratePdfInvoice(Project);
+
+                // Gem filen synkront
+                File.WriteAllBytes(filePath, pdfBytes);
+
+                // �bn filen
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = filePath,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Fejl ved generering af PDF: {ex.Message}");
+            }
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
+
+
+
 
         private void ShowEconomyWindow()
         {
