@@ -405,9 +405,8 @@
                                     <TextBlock Grid.Column="0" Text="Adresse:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
                                     <TextBlock Grid.Column="1" Foreground="#1E293B" FontSize="14" TextWrapping="Wrap">
                                         <Run Text="{Binding Project.Client.Address}"/>
-                                        <Run Text=", "/>
-                                        <Run Text="{Binding Project.Client.PostalAdress}"/>
-                                        <Run Text=" "/>
+                                        <Run Text=","/>
+                                        <Run Text="{Binding Project.Client.PostalAddress}"/>
                                         <Run Text="{Binding Project.Client.City}"/>
                                     </TextBlock>
                                 </Grid>
