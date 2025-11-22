@@ -43,11 +43,7 @@
                     <Run Text="Status: "/>
                     <Run Text="{Binding Project.Status, FallbackValue='N/A'}" 
                             FontWeight="SemiBold"/>
-                </TextBlock>
-                <TextBlock FontSize="14" Foreground="#555" HorizontalAlignment="Center">
-                    <Run Text="Kunde: "/>
-                    <Run Text="{Binding Project.Client.Name}"/>
-                </TextBlock>
+                        </TextBlock>
             </StackPanel>
 
             <Button Grid.Column="2"
@@ -179,9 +175,10 @@
                                               CellStyle="{StaticResource CellStyle}"
                                               RowStyle="{StaticResource RowStyle}">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Navn" Binding="{Binding Description}" Width="2*" />
+                                                <DataGridTextColumn Header="Navn" Binding="{Binding Description}" Width="*" />
                                                 <DataGridTextColumn Header="Estimat" Binding="{Binding Amount, StringFormat='{}{0:N2} kr.'}" Width="*" />
                                                 <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
+                                                <DataGridCheckBoxColumn Header="Faktureret" Binding="{Binding IsPaid}" Width="Auto" />
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </StackPanel>
