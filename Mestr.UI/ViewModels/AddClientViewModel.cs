@@ -24,6 +24,7 @@ namespace Mestr.UI.ViewModels
         private string _city = string.Empty;
         private string _cvr = string.Empty;
 
+
         // Constructor 1: Opret ny klient
         public AddClientViewModel(IClientService clientService)
         {
@@ -31,6 +32,7 @@ namespace Mestr.UI.ViewModels
 
             SaveCommand = new RelayCommand(Save, CanSave);
             CancelCommand = new RelayCommand(Cancel);
+            DeleteCommand = new RelayCommand(Delete, CanDelete); // Placeholder for delete functionality
         }
 
         // Constructor 2: Rediger eksisterende client
@@ -152,6 +154,7 @@ namespace Mestr.UI.ViewModels
 
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
+        public ICommand DeleteCommand { get; }
 
         private bool CanSave()
         {
@@ -159,6 +162,11 @@ namespace Mestr.UI.ViewModels
                    && !string.IsNullOrWhiteSpace(ContactPerson)
                    && !string.IsNullOrWhiteSpace(Email)
                    && !string.IsNullOrWhiteSpace(PhoneNumber);
+        }
+
+        private bool CanDelete()
+        {
+            return _editingId.HasValue;
         }
 
         private void Save()
@@ -234,6 +242,32 @@ namespace Mestr.UI.ViewModels
         private void Cancel()
         {
             CloseWindow();
+        }
+
+        private void Delete()
+        {
+            var result = MessageBox.Show(
+                $"Er du sikker på, at du vil slette klienten '{CompanyName}'?",
+                "Bekræft sletning",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                _clientService.DeleteClient(_editingId!.Value);
+                CloseWindow();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Fejl ved sletning: {ex.Message}",
+                    "Fejl",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
 
         private void CloseWindow()
