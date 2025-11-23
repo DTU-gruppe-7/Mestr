@@ -173,19 +173,6 @@ namespace Mestr.UI.ViewModels
         {
             try
             {
-                _clientService.CreateClient(
-                    string.IsNullOrWhiteSpace(CompanyName) ? null : CompanyName,
-                    ContactPerson,
-                    Email,
-                    PhoneNumber,
-                    Address ?? string.Empty,
-                    PostalCode ?? string.Empty,
-                    City ?? string.Empty,
-                    string.IsNullOrWhiteSpace(CVR) ? null : CVR
-                );
-                MessageBox.Show(
-                    "Klienten blev oprettet succesfuldt.",
-                    "Oprettelse succesfuld",
                 if (_editingId.HasValue)
                 {
                     var existingClient = _clientService.GetClientByUuid(_editingId.Value);
@@ -201,14 +188,20 @@ namespace Mestr.UI.ViewModels
                         existingClient.City = City ?? string.Empty;
                         existingClient.Cvr = string.IsNullOrWhiteSpace(CVR) ? null : CVR;
                         _clientService.UpdateClient(existingClient);
+                        
+                        MessageBox.Show(
+                            "Klienten blev opdateret succesfuldt.",
+                            "Opdatering succesfuld",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
                     }
                     else
                     {
                         MessageBox.Show(
-                    "Klienten blev ikke fundet.",
-                    "Fejl",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                            "Klienten blev ikke fundet.",
+                            "Fejl",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
                         return;
                     }
                 }
@@ -225,6 +218,12 @@ namespace Mestr.UI.ViewModels
                         City ?? string.Empty,
                         string.IsNullOrWhiteSpace(CVR) ? null : CVR
                     );
+                    
+                    MessageBox.Show(
+                        "Klienten blev oprettet succesfuldt.",
+                        "Oprettelse succesfuld",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
                 }
 
                 CloseWindow();
@@ -232,8 +231,8 @@ namespace Mestr.UI.ViewModels
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Kunne ikke oprette klienten. Fejl: {ex.Message}",
-                    "Oprettelse mislykkedes",
+                    $"Kunne ikke gemme klienten. Fejl: {ex.Message}",
+                    "Fejl",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
