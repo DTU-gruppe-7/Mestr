@@ -235,9 +235,17 @@ namespace Mestr.UI.ViewModels
                 return;
             }
 
-            var addr = new System.Net.Mail.MailAddress(email);
-            // Optionally, check if the address matches the input (to catch some edge cases)
-            if (addr.Address != email)
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                // Optionally, check if the address matches the input (to catch some edge cases)
+                if (addr.Address != email)
+                {
+                    AddError(propertyName, "Ugyldig email adresse");
+                    return; // Added missing return statement
+                }
+            }
+            catch (FormatException)
             {
                 AddError(propertyName, "Ugyldig email adresse");
             }
