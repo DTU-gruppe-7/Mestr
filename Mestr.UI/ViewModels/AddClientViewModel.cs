@@ -49,7 +49,6 @@ namespace Mestr.UI.ViewModels
             {
                 _companyName = value;
                 OnPropertyChanged(nameof(CompanyName));
-                ValidateText(nameof(CompanyName), value, "Firmanavn");
                 ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
             }
         }
@@ -136,7 +135,6 @@ namespace Mestr.UI.ViewModels
         private bool CanSave()
         {
             return !HasErrors
-                   && !string.IsNullOrWhiteSpace(CompanyName)
                    && !string.IsNullOrWhiteSpace(ContactPerson)
                    && !string.IsNullOrWhiteSpace(Email)
                    && !string.IsNullOrWhiteSpace(PhoneNumber);
@@ -147,7 +145,7 @@ namespace Mestr.UI.ViewModels
             try
             {
                 _clientService.CreateClient(
-                    CompanyName,
+                    string.IsNullOrWhiteSpace(CompanyName) ? null : CompanyName,
                     ContactPerson,
                     Email,
                     PhoneNumber,

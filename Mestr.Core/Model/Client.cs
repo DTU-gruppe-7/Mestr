@@ -5,7 +5,7 @@ namespace Mestr.Core.Model;
 public class Client
 {
 	private Guid _uuid;
-	private string companyName;
+	private string? companyName;
     private string contactPerson;
     private string email;
 	private string phoneNumber;
@@ -21,7 +21,7 @@ public class Client
     }
 
     // Constructor
-    public Client(Guid uuid, string companyName, string contactPerson, string email, string phoneNumber, string address,
+    public Client(Guid uuid, string? companyName, string contactPerson, string email, string phoneNumber, string address,
                   string postalAddress, string city, string cvr)
     {
         this._uuid = uuid;
@@ -38,7 +38,7 @@ public class Client
 
     // Properties 
     public Guid Uuid { get => _uuid; private set => _uuid = value; }
-    public string Name {get => companyName; set => companyName = value;}
+    public string Name {get => companyName ?? contactPerson; set => companyName = value;}
 
     public string ContactPerson { get => contactPerson; set => contactPerson = value; }
 
