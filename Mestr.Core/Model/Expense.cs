@@ -1,10 +1,9 @@
 ﻿using System;
 using Mestr.Core.Enum;
-using Mestr.Core.Interface;
 
 namespace Mestr.Core.Model;
 
-public class Expense : IExpense
+public class Expense
 {
 	private Guid _uuid;
     private string description = string.Empty;

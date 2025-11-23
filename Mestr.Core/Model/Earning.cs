@@ -1,8 +1,7 @@
-﻿using Mestr.Core.Interface;
-using System;
+﻿using System;
 
 namespace Mestr.Core.Model;
-public class Earning : IEarning
+public class Earning
 {
 	private Guid _uuid;
 	private string description = string.Empty;

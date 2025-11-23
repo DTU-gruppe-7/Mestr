@@ -1,5 +1,4 @@
 ﻿using Mestr.Core.Enum;
-using Mestr.Core.Interface;
 using Mestr.Core.Model;
 using Mestr.Data.DbContext;
 using Mestr.Data.Interface;

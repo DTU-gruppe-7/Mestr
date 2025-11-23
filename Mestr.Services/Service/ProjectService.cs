@@ -1,6 +1,5 @@
 ﻿using Mestr.Core.Enum;
 using Mestr.Core.Model;
-using Mestr.Core.Interface;
 using Mestr.Data.Interface;
 using Mestr.Services.Interface;
 using Mestr.Data.Repository;

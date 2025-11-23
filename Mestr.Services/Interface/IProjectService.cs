@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Mestr.Core.Model;
 using Mestr.Data.Interface;
 using Mestr.Core.Enum;
-using Mestr.Core.Interface;
 
 namespace Mestr.Services.Interface
 {

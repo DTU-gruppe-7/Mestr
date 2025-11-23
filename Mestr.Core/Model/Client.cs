@@ -1,9 +1,8 @@
-﻿using Mestr.Core.Interface;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Mestr.Core.Model;
-public class Client : IClient
+public class Client
 {
 	private Guid _uuid;
 	private string companyName;

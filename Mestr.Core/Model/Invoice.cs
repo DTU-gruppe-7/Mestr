@@ -1,10 +1,9 @@
 ﻿using System;
 using Mestr.Core.Enum;
-using Mestr.Core.Interface;
 
 namespace Mestr.Core.Model;
 
-public class Invoice : IInvoice
+public class Invoice
 {
 	private readonly Guid _uuid;
 	private Guid projectUuid;
@@ -17,10 +16,10 @@ public class Invoice : IInvoice
 	private decimal totalAmount;
 	private InvoiceStatus status;
 	private string filePath;
-	private IProject project;
+	private Project project;
 
     public Invoice(Guid uuid, Guid projectUuid, string invoiceNumber, DateTime invoiceDate, DateTime dueDate, decimal subTotal,
-		decimal vatPercentage, decimal vatAmount, decimal totalAmount, InvoiceStatus status, string filePath, IProject project)
+		decimal vatPercentage, decimal vatAmount, decimal totalAmount, InvoiceStatus status, string filePath, Project project)
 	{
 		this._uuid = uuid;
 		this.projectUuid = projectUuid;
@@ -46,6 +45,6 @@ public class Invoice : IInvoice
 	public decimal TotalAmount { get => totalAmount; set => totalAmount = value; }
 	public InvoiceStatus Status { get => status; set => status = value; }
 	public string FilePath { get => filePath; set => filePath = value; }
-	public IProject Project { get => project; set => project = value; }
+	public Project Project { get => project; set => project = value; }
 
 }
