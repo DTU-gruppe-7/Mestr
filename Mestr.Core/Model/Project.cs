@@ -23,7 +23,7 @@ public class Project
 
     // EF Core requires a parameterless constructor
     private Project()
-    {
+    { 
     }
 
     public Project(Guid uuid, string name, Client client, DateTime createdDate, DateTime startDate, 

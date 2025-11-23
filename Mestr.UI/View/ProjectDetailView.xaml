@@ -307,17 +307,32 @@
                         <Grid Margin="0,15,0,0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0"
-                                       Text="Projektbeskrivelse"
-                                       FontSize="18"
-                                       FontWeight="SemiBold"
-                                       Foreground="#333"
-                                       Margin="0,0,0,12"/>
+                            <!-- Deadline Section -->
+                            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                                <TextBlock Text="DEADLINE" 
+                                           Foreground="#475569" 
+                                           FontWeight="SemiBold" 
+                                           Margin="0,0,0,5"/>
+                                <DatePicker SelectedDate="{Binding Project.EndDate, UpdateSourceTrigger=PropertyChanged}"
+                                            Style="{StaticResource ModernDatePickerStyle}"
+                                            Height="40"
+                                            Language="da-DK"
+                                            HorizontalAlignment="Left"
+                                            MinWidth="250"/>
+                            </StackPanel>
 
-                            <TextBox Grid.Row="1"
+                            <!-- Description Section -->
+                            <TextBlock Grid.Row="1"
+                                       Text="PROJEKTBESKRIVELSE"
+                                       Foreground="#475569"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,5"/>
+
+                            <TextBox Grid.Row="2"
                                      Text="{Binding Project.Description, UpdateSourceTrigger=PropertyChanged}"
                                      Background="White"
                                      Foreground="#1E293B"

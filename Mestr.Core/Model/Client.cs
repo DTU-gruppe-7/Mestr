@@ -5,13 +5,14 @@ namespace Mestr.Core.Model;
 public class Client
 {
 	private Guid _uuid;
-	private string? companyName;
-    private string contactPerson;
-    private string email;
-	private string phoneNumber;
-    private string address;
-	private string postalAddress;
-	private string city;
+	private string companyName = string.Empty;
+	private string contactPerson = string.Empty;
+	private string email = string.Empty;
+	private string phoneNumber = string.Empty;
+	private string address = string.Empty;
+	private string postalAddress = string.Empty;
+	private string city = string.Empty;
+
 	private string? cvr;
     private ICollection<Project> projects = new List<Project>();
 

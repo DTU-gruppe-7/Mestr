@@ -183,8 +183,10 @@
 
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Klient Navn" Binding="{Binding Name}" SortMemberPath="Name" Width="2*" />
+                            <DataGridTextColumn Header="Klient Navn" Binding="{Binding ContactPerson}" SortMemberPath="Name" Width="2*" />
                             <DataGridTextColumn Header="Email" Binding="{Binding Email}" SortMemberPath="Email" Width="2*" />
                             <DataGridTextColumn Header="Telefon" Binding="{Binding PhoneNumber}" SortMemberPath="Phone" Width="*" />
+                            
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
