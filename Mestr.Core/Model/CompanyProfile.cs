@@ -7,6 +7,7 @@ namespace Mestr.Core.Model
         // Vi bruger en fast ID eller bare tager den første, da der kun er én profil
         public Guid Uuid { get; private set; }
         public string CompanyName { get; set; } = string.Empty;
+        public string ContactPerson { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string ZipCode { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;

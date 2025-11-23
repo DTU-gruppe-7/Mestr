@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mestr.UI.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,12 @@ namespace Mestr.UI.View
         public AddCompanyInfoWindow()
         {
             InitializeComponent();
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
         }
     }
 }

@@ -120,6 +120,22 @@ namespace Mestr.Data.DbContext
                 // Explicit foreign key property
                 entity.Property(e => e.ProjectUuid).IsRequired();
             });
+
+            // Configure CompanyProfile entity
+            modelBuilder.Entity<CompanyProfile>(entity =>
+            {
+                entity.HasKey(e => e.Uuid);
+                entity.Property(e => e.CompanyName).IsRequired();
+                entity.Property(e => e.ContactPerson).IsRequired();
+                entity.Property(e => e.Address).IsRequired();
+                entity.Property(e => e.ZipCode).IsRequired();
+                entity.Property(e => e.City).IsRequired();
+                entity.Property(e => e.Cvr).IsRequired();
+                entity.Property(e => e.Email).IsRequired();
+                entity.Property(e => e.PhoneNumber).IsRequired();
+                entity.Property(e => e.BankRegNumber).IsRequired();
+                entity.Property(e => e.BankAccountNumber).IsRequired();
+            });
         }
     }
 }
