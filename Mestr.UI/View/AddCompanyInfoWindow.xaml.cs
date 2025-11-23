@@ -24,11 +24,5 @@ namespace Mestr.UI.View
         {
             InitializeComponent();
         }
-
-        protected override void OnClosed(EventArgs e)
-        {
-            base.OnClosed(e);
-
-        }
     }
 }

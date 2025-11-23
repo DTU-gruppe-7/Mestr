@@ -337,4 +337,35 @@
             </StackPanel>
         </Border>
     </DataTemplate>
+
+    <!-- Icon Button Style -->
+<Style x:Key="IconButton" TargetType="Button">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Padding" Value="8"/>
+    <Setter Property="Template">
+        <Setter.Value>
+            <ControlTemplate TargetType="Button">
+                <Border Background="{TemplateBinding Background}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}"
+                        CornerRadius="4">
+                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+            </ControlTemplate>
+        </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+            <Setter Property="Background" Value="#F0F4F8"/>
+        </Trigger>
+        <Trigger Property="IsPressed" Value="True">
+            <Setter Property="Background" Value="#E0E4E8"/>
+        </Trigger>
+    </Style.Triggers>
+</Style>
+
+<!-- Primary Brush -->
+<SolidColorBrush x:Key="PrimaryBrush" Color="#0057E8"/>
 </ResourceDictionary>

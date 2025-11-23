@@ -7,14 +7,14 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize"
         SizeToContent="Height"
-        MaxHeight="800"
+        MaxHeight="860"
         Language="da-DK">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" PanningMode="VerticalOnly">
 
         <StackPanel Margin="25">
 
-            <TextBlock Text="Tilføj ny klient" 
+            <TextBlock Text="Tilføj virksomhedsinfo" 
                        FontSize="24" 
                        FontWeight="Bold" 
                        Foreground="#333" 
@@ -134,7 +134,7 @@
 
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Postnr." FontWeight="SemiBold" FontSize="12" Foreground="#666" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding PostalCode, UpdateSourceTrigger=PropertyChanged}"
+                    <TextBox Text="{Binding ZipCode, UpdateSourceTrigger=PropertyChanged}"
                              Style="{StaticResource ModernTextBoxStyle}"
                              Height="35"/>
                 </StackPanel>
@@ -165,14 +165,14 @@
 
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Reg." FontWeight="SemiBold" FontSize="12" Foreground="#666" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding RegNumber, UpdateSourceTrigger=PropertyChanged}"
+                    <TextBox Text="{Binding BankRegNumber, UpdateSourceTrigger=PropertyChanged}"
                  Style="{StaticResource ModernTextBoxStyle}"
                  Height="35"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2">
                     <TextBlock Text="Konto" FontWeight="SemiBold" FontSize="12" Foreground="#666" Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding City, UpdateSourceTrigger=PropertyChanged}"
+                    <TextBox Text="{Binding BankAccountNumber, UpdateSourceTrigger=PropertyChanged}"
                  Style="{StaticResource ModernTextBoxStyle}"
                  Height="35"/>
                 </StackPanel>

@@ -1,4 +1,5 @@
-﻿using Mestr.UI.ViewModels;
+﻿using Mestr.UI.View;
+using Mestr.UI.ViewModels;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 using System.Configuration;

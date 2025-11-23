@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
 {
-    public class AddCompanyInfoWindow : ViewModelBase
+    public class AddCompanyInfoViewModel : ViewModelBase
     {
         private readonly ICompanyProfileService _companyProfileService;
         private CompanyProfile profile;
@@ -28,13 +28,26 @@ namespace Mestr.UI.ViewModels
         private string _bankRegNumber = string.Empty;
         private string _bankAccountNumber = string.Empty;
 
-        public AddCompanyInfoWindow(ICompanyProfileService companyProfileService, CompanyProfile profile)
+        public AddCompanyInfoViewModel(ICompanyProfileService companyProfileService, CompanyProfile profile)
         {
             _companyProfileService = companyProfileService ?? throw new ArgumentNullException(nameof(companyProfileService));
             this.profile = profile ?? throw new ArgumentNullException(nameof(profile));
 
             SaveCommand = new RelayCommand(Save, CanSave);
             CancelCommand = new RelayCommand(Cancel);
+
+            CompanyName = profile.CompanyName;
+            ContactPerson = profile.ContactPerson;
+            Email = profile.Email;
+            PhoneNumber = profile.PhoneNumber;
+            Address = profile.Address;
+            ZipCode = profile.ZipCode;
+            City = profile.City;
+            CVR = profile.Cvr;
+            BankRegNumber = profile.BankRegNumber;
+            BankAccountNumber = profile.BankAccountNumber;
+
+            
         }
 
         public string WindowTitle => "Tilføj virksomhedsinfo";
@@ -176,13 +189,19 @@ namespace Mestr.UI.ViewModels
 
                 _companyProfileService.UpdateProfile(profile);
 
-                CloseWindow();
+                MessageBox.Show(
+                    "Virksomhedsinfo blev gemt succesfuldt.",
+                    "Gem succesfuldt",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+
+                CloseWindow(true);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Kunne ikke oprette klienten. Fejl: {ex.Message}",
-                    "Oprettelse mislykkedes",
+                    $"Kunne ikke gemme virksomhedsinfo. Fejl: {ex.Message}",
+                    "Gem mislykkedes",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -190,15 +209,20 @@ namespace Mestr.UI.ViewModels
 
         private void Cancel()
         {
-            CloseWindow();
+            CloseWindow(false);
         }
 
-        private void CloseWindow()
+        private void CloseWindow(bool dialogResult)
         {
-            Application.Current.Windows
+            var window = Application.Current.Windows
                 .OfType<Window>()
-                .FirstOrDefault(w => w.DataContext == this)?
-                .Close();
+                .FirstOrDefault(w => w.DataContext == this);
+
+            if (window != null)
+            {
+                window.DialogResult = dialogResult;
+                window.Close();
+            }
         }
 
         private void ValidateEmail(string propertyName, string email)

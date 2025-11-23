@@ -1,14 +1,14 @@
-
+using Mestr.Core.Enum;
 using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
 using Mestr.UI.Command;
+using Mestr.UI.View;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
-using Mestr.Core.Enum;
 
 
 namespace Mestr.UI.ViewModels
@@ -17,26 +17,32 @@ namespace Mestr.UI.ViewModels
     {
         private readonly MainViewModel _mainViewModel;
         private readonly IProjectService _projectService;
+        private readonly ICompanyProfileService _companyProfileService;
         private ObservableCollection<Project> _projects = [];
         private ObservableCollection<Project> _completedProjects = [];
         private ObservableCollection<Project> _allOngoingProjects = [];
+        private CompanyProfile profile;
 
-        public DashboardViewModel(MainViewModel mainViewModel, IProjectService projectService)
+        public DashboardViewModel(MainViewModel mainViewModel, IProjectService projectService, ICompanyProfileService companyProfileService, CompanyProfile profile)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
+            _companyProfileService = companyProfileService ?? throw new ArgumentNullException(nameof(companyProfileService));
 
             // Command that accepts a Guid parameter
             ViewProjectDetailsCommand = new RelayCommand<Guid>(ViewProjectDetails);
             ShowAllCommand = new RelayCommand(ToggleShowAll);
+            OpenCompanyInfoCommand = new RelayCommand(OpenCompanyInfo);
 
             LoadProjects();
+            this.profile = profile;
         }
 
         public ICommand NavigateToProjectCommand => _mainViewModel.NavigateToAddNewProjectCommand;
         public ICommand NavigateToClientsCommand => _mainViewModel.NavigateToClientsCommand;
         public ICommand ViewProjectDetailsCommand { get; }
         public ICommand ShowAllCommand { get; }
+        public ICommand OpenCompanyInfoCommand { get; }
 
         // Filter properties
         private bool _showPlanlagt = true;
@@ -164,6 +170,29 @@ namespace Mestr.UI.ViewModels
         {
             // Use MainViewModel's parameterized navigation command
             _mainViewModel.NavigateToProjectDetailsCommand.Execute(projectId);
+        }
+        private void OpenCompanyInfo()
+        {
+            // Hent den nyeste version fra databasen for at sikre, vi har de seneste data
+            var currentProfile = _companyProfileService.GetProfile();
+
+            if (currentProfile != null)
+            {
+                // Brug den hentede profil
+                var addCompanyInfoVm = new AddCompanyInfoViewModel(_companyProfileService, currentProfile);
+
+                var addCompanyInfoWindow = new AddCompanyInfoWindow()
+                {
+                    DataContext = addCompanyInfoVm,
+                    Owner = App.Current.MainWindow,
+                    WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner
+                };
+
+                addCompanyInfoWindow.ShowDialog();
+
+                // Opdater den lokale profil-variabel, så dashboardet evt. kan bruge de nye data (hvis nødvendigt)
+                this.profile = currentProfile;
+            }
         }
     }
 }

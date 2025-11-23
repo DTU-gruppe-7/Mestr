@@ -12,15 +12,9 @@ namespace Mestr.Data.Repository
             dbContext.DatabaseLock.Wait();
             try
             {
-                var profile = dbContext.Instance.CompanyProfile.FirstOrDefault();
-                if (profile == null)
-                {
-                    // Opret en standard profil hvis ingen findes
-                    profile = new CompanyProfile("Mit Firma", "mig@example.com");
-                    dbContext.Instance.CompanyProfile.Add(profile);
-                    dbContext.Instance.SaveChanges();
-                }
-                return profile;
+                // Returner blot den første, eller null hvis ingen findes.
+                // Vi opretter IKKE en dummy-profil her længere.
+                return dbContext.Instance.CompanyProfile.FirstOrDefault();
             }
             finally
             {
@@ -33,8 +27,20 @@ namespace Mestr.Data.Repository
             dbContext.DatabaseLock.Wait();
             try
             {
-                // Fordi vi ved der kun er én, kan vi bare opdatere den
-                dbContext.Instance.CompanyProfile.Update(profile);
+                // Tjek om profilen allerede findes i databasen (baseret på UUID)
+                var exists = dbContext.Instance.CompanyProfile.Any(x => x.Uuid == profile.Uuid);
+
+                if (!exists)
+                {
+                    // Hvis den ikke findes, tilføjer vi den (Insert)
+                    dbContext.Instance.CompanyProfile.Add(profile);
+                }
+                else
+                {
+                    // Hvis den findes, opdaterer vi den (Update)
+                    dbContext.Instance.CompanyProfile.Update(profile);
+                }
+
                 dbContext.Instance.SaveChanges();
             }
             finally
