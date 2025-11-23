@@ -17,7 +17,7 @@ namespace Mestr.UI.ViewModels
         private readonly IEarningService _earningService;
         private readonly IExpenseService _expenseService;
         private readonly ICompanyProfileService _companyProfileService;
-        private CompanyProfile profile;
+        private CompanyProfile? profile;
 
         public ViewModelBase CurrentViewModel 
         { 
@@ -60,7 +60,7 @@ namespace Mestr.UI.ViewModels
             CheckAndShowCompanyProfileWindow();
             
             // Set initial ViewModel
-            CurrentViewModel = new DashboardViewModel(this, _projectService, _companyProfileService, profile);
+            CurrentViewModel = new DashboardViewModel(this, _projectService, _companyProfileService, profile!);
         }
 
         private void CheckAndShowCompanyProfileWindow()
@@ -112,7 +112,7 @@ namespace Mestr.UI.ViewModels
 
         private void NavigateToDashboard()
         {
-            CurrentViewModel = new DashboardViewModel(this, _projectService, _companyProfileService, profile);
+            CurrentViewModel = new DashboardViewModel(this, _projectService, _companyProfileService, profile!);
         }
 
         private void NavigateToClients()

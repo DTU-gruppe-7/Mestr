@@ -49,7 +49,7 @@ namespace Mestr.Services.Service
                 address,
                 postalAddress,
                 city,
-                cvr
+                cvr!
             );
 
             _clientRepository.Add(newClient);

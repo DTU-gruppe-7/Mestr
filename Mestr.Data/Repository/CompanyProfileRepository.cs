@@ -13,8 +13,7 @@ namespace Mestr.Data.Repository
             try
             {
                 // Returner blot den første, eller null hvis ingen findes.
-                // Vi opretter IKKE en dummy-profil her længere.
-                return dbContext.Instance.CompanyProfile.FirstOrDefault();
+                return dbContext.Instance.CompanyProfile.FirstOrDefault()!;
             }
             finally
             {
