@@ -101,7 +101,7 @@ namespace Mestr.UI.ViewModels
             // Initialize commands
             SaveProjectDetailsCommand = new RelayCommand(SaveProjectDetails);
             GenerateInvoiceCommand = new RelayCommand(GenerateInvoice, CanGenerateInvoice);
-            ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow);
+            ShowEconomyWindowCommand = new RelayCommand(ShowEconomyWindow, CanAddEconomy);
             ToggleProjectStatusCommand = new RelayCommand(ToggleProjectStatus);
             EditEarningCommand = new RelayCommand<Earning>(EditEarning);
             EditExpenseCommand = new RelayCommand<Expense>(EditExpense);
@@ -109,8 +109,6 @@ namespace Mestr.UI.ViewModels
 
             LoadProject();
         }
-
-
 
         private bool HasUnsavedChanges()
         {
@@ -283,9 +281,6 @@ namespace Mestr.UI.ViewModels
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
 
-
-
-
         private void ShowEconomyWindow()
         {
             // RETTELSE: Brug korrekt constructor med services først
@@ -302,6 +297,11 @@ namespace Mestr.UI.ViewModels
 
             economyWindow.ShowDialog();
             LoadProject();
+        }
+
+        private bool CanAddEconomy()
+        {
+            return Project.Status != ProjectStatus.Afsluttet;
         }
 
         private void EditEarning(Earning? earning)
