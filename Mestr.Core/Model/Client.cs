@@ -22,7 +22,7 @@ public class Client
 
     // Constructor
     public Client(Guid uuid, string? companyName, string contactPerson, string email, string phoneNumber, string address,
-                  string postalAddress, string city, string cvr)
+                  string postalAddress, string city, string? cvr)
     {
         this._uuid = uuid;
         this.companyName = companyName;
@@ -38,7 +38,11 @@ public class Client
 
     // Properties 
     public Guid Uuid { get => _uuid; private set => _uuid = value; }
-    public string Name {get => companyName ?? contactPerson; set => companyName = value;}
+    public string Name
+    {
+        get => companyName ?? contactPerson;
+        set => companyName = string.IsNullOrWhiteSpace(value) ? null : value;
+    }
 
     public string ContactPerson { get => contactPerson; set => contactPerson = value; }
 
