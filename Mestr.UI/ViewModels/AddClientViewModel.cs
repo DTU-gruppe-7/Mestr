@@ -198,8 +198,9 @@ namespace Mestr.UI.ViewModels
                 return;
             }
 
-            // Simple email validation
-            if (!email.Contains("@") || !email.Contains("."))
+            var addr = new System.Net.Mail.MailAddress(email);
+            // Optionally, check if the address matches the input (to catch some edge cases)
+            if (addr.Address != email)
             {
                 AddError(propertyName, "Ugyldig email adresse");
             }

@@ -35,7 +35,7 @@ namespace Mestr.UI.ViewModels
             OpenCompanyInfoCommand = new RelayCommand(OpenCompanyInfo);
 
             LoadProjects();
-            this.profile = profile;
+            this.profile = _companyProfileService.GetProfile();
         }
 
         public ICommand NavigateToProjectCommand => _mainViewModel.NavigateToAddNewProjectCommand;
