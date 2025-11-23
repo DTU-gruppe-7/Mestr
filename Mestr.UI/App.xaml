@@ -24,6 +24,9 @@
             <DataTemplate DataType="{x:Type viewmodels:EconomyViewModel}">
                 <views:EconomyWindow/>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type viewmodels:AddCompanyInfoViewModel}">
+                <views:AddCompanyInfoWindow/>
+            </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -1,67 +1,56 @@
 ﻿using Mestr.Core.Model;
+using Mestr.Data.Interface;
 using Mestr.Services.Interface;
 using Mestr.UI.Command;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
 {
-    public class AddClientViewModel : ViewModelBase
+    public class AddCompanyInfoViewModel : ViewModelBase
     {
-        private readonly IClientService _clientService;
-        private Client? _createdClient;
-        private readonly Guid? _editingId;
-
+        private readonly ICompanyProfileService _companyProfileService;
+        private CompanyProfile profile;
 
         private string _companyName = string.Empty;
         private string _contactPerson = string.Empty;
         private string _email = string.Empty;
         private string _phoneNumber = string.Empty;
         private string _address = string.Empty;
-        private string _postalCode = string.Empty;
+        private string _zipCode = string.Empty;
         private string _city = string.Empty;
         private string _cvr = string.Empty;
+        private string _bankRegNumber = string.Empty;
+        private string _bankAccountNumber = string.Empty;
 
-        // Constructor 1: Opret ny klient
-        public AddClientViewModel(IClientService clientService)
+        public AddCompanyInfoViewModel(ICompanyProfileService companyProfileService, CompanyProfile profile)
         {
-            _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
+            _companyProfileService = companyProfileService ?? throw new ArgumentNullException(nameof(companyProfileService));
+            this.profile = profile ?? throw new ArgumentNullException(nameof(profile));
 
             SaveCommand = new RelayCommand(Save, CanSave);
             CancelCommand = new RelayCommand(Cancel);
+
+            CompanyName = profile.CompanyName;
+            ContactPerson = profile.ContactPerson;
+            Email = profile.Email;
+            PhoneNumber = profile.PhoneNumber;
+            Address = profile.Address;
+            ZipCode = profile.ZipCode;
+            City = profile.City;
+            CVR = profile.Cvr;
+            BankRegNumber = profile.BankRegNumber;
+            BankAccountNumber = profile.BankAccountNumber;
+
+            
         }
 
-        // Constructor 2: Rediger eksisterende client
-        public AddClientViewModel(IClientService clientService, Client existingClient)
-            : this(clientService)
-        {
-            if (existingClient == null)
-                throw new ArgumentNullException(nameof(existingClient));
-
-            _editingId = existingClient.Uuid;
-            CompanyName = existingClient.Name;
-            ContactPerson = existingClient.ContactPerson;
-            Email = existingClient.Email;
-            PhoneNumber = existingClient.PhoneNumber;
-            Address = existingClient.Address;
-            PostalCode = existingClient.PostalAddress;
-            City = existingClient.City;
-            CVR = existingClient.Cvr ?? string.Empty;
-        }
-
-        public string WindowTitle => _editingId.HasValue ? "Rediger klient" : "Tilføj ny klient";
-
-        public Client? CreatedClient
-        {
-            get => _createdClient;
-            set
-            {
-                _createdClient = value;
-                OnPropertyChanged(nameof(CreatedClient));
-            }
-        }
+        public string WindowTitle => "Tilføj virksomhedsinfo";
 
         public string CompanyName
         {
@@ -121,13 +110,13 @@ namespace Mestr.UI.ViewModels
             }
         }
 
-        public string PostalCode
+        public string ZipCode
         {
-            get => _postalCode;
+            get => _zipCode;
             set
             {
-                _postalCode = value;
-                OnPropertyChanged(nameof(PostalCode));
+                _zipCode = value;
+                OnPropertyChanged(nameof(ZipCode));
             }
         }
 
@@ -151,6 +140,26 @@ namespace Mestr.UI.ViewModels
             }
         }
 
+        public string BankRegNumber
+        {
+            get => _bankRegNumber;
+            set
+            {
+                _bankRegNumber = value;
+                OnPropertyChanged(nameof(BankRegNumber));
+            }
+        }
+
+        public string BankAccountNumber
+        {
+            get => _bankAccountNumber;
+            set
+            {
+                _bankAccountNumber = value;
+                OnPropertyChanged(nameof(BankAccountNumber));
+            }
+        }
+
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
 
@@ -167,54 +176,32 @@ namespace Mestr.UI.ViewModels
         {
             try
             {
-                if (_editingId.HasValue)
-                {
-                    var existingClient = _clientService.GetClientByUuid(_editingId.Value);
-                    if (existingClient != null)
-                    {
-                        // Opdater eksisterende klient
-                        existingClient.Name = CompanyName;
-                        existingClient.ContactPerson = ContactPerson;
-                        existingClient.Email = Email;
-                        existingClient.PhoneNumber = PhoneNumber;
-                        existingClient.Address = Address ?? string.Empty;
-                        existingClient.PostalAddress = PostalCode ?? string.Empty;
-                        existingClient.City = City ?? string.Empty;
-                        existingClient.Cvr = string.IsNullOrWhiteSpace(CVR) ? null : CVR;
-                        _clientService.UpdateClient(existingClient);
-                    }
-                    else
-                    {
-                        MessageBox.Show(
-                    "Klienten blev ikke fundet.",
-                    "Fejl",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-                        return;
-                    }
-                }
-                else
-                {
-                    //Create new client
-                    _clientService.CreateClient(
-                        CompanyName,
-                        ContactPerson,
-                        Email,
-                        PhoneNumber,
-                        Address ?? string.Empty,
-                        PostalCode ?? string.Empty,
-                        City ?? string.Empty,
-                        string.IsNullOrWhiteSpace(CVR) ? null : CVR
-                    );
-                }
+                profile.CompanyName = CompanyName;
+                profile.ContactPerson = ContactPerson;
+                profile.Email = Email;
+                profile.PhoneNumber = PhoneNumber;
+                profile.Address = Address;
+                profile.ZipCode = ZipCode;
+                profile.City = City;
+                profile.Cvr = CVR;
+                profile.BankRegNumber = BankRegNumber;
+                profile.BankAccountNumber = BankAccountNumber;
 
-                CloseWindow();
+                _companyProfileService.UpdateProfile(profile);
+
+                MessageBox.Show(
+                    "Virksomhedsinfo blev gemt succesfuldt.",
+                    "Gem succesfuldt",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+
+                CloseWindow(true);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Kunne ikke oprette klienten. Fejl: {ex.Message}",
-                    "Oprettelse mislykkedes",
+                    $"Kunne ikke gemme virksomhedsinfo. Fejl: {ex.Message}",
+                    "Gem mislykkedes",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -222,15 +209,20 @@ namespace Mestr.UI.ViewModels
 
         private void Cancel()
         {
-            CloseWindow();
+            CloseWindow(false);
         }
 
-        private void CloseWindow()
+        private void CloseWindow(bool dialogResult)
         {
-            Application.Current.Windows
+            var window = Application.Current.Windows
                 .OfType<Window>()
-                .FirstOrDefault(w => w.DataContext == this)?
-                .Close();
+                .FirstOrDefault(w => w.DataContext == this);
+
+            if (window != null)
+            {
+                window.DialogResult = dialogResult;
+                window.Close();
+            }
         }
 
         private void ValidateEmail(string propertyName, string email)
