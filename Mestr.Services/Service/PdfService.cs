@@ -33,7 +33,7 @@ public class PdfService : IPdfService
             throw new InvalidOperationException("Firmaprofil ikke fundet. Opret venligst en firmaprofil før generering af faktura.");
 
         // Determine if client is business or private
-        bool isBusinessClient = project.Client.Cvr != null;
+        bool isBusinessClient = project.Client.IsBusinessClient();
 
         // Get only unpaid earnings that will be included in this invoice
         var unpaidEarnings = project.Earnings?.Where(e => !e.IsPaid).ToList() ?? new List<Earning>();
