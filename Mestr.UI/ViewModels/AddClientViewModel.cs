@@ -12,6 +12,8 @@ namespace Mestr.UI.ViewModels
     {
         private readonly IClientService _clientService;
         private Client? _createdClient;
+        private readonly Guid? _editingId;
+
 
         private string _companyName = string.Empty;
         private string _contactPerson = string.Empty;
@@ -22,6 +24,7 @@ namespace Mestr.UI.ViewModels
         private string _city = string.Empty;
         private string _cvr = string.Empty;
 
+        // Constructor 1: Opret ny klient
         public AddClientViewModel(IClientService clientService)
         {
             _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
@@ -30,7 +33,25 @@ namespace Mestr.UI.ViewModels
             CancelCommand = new RelayCommand(Cancel);
         }
 
-        public string WindowTitle => "Tilføj ny klient";
+        // Constructor 2: Rediger eksisterende client
+        public AddClientViewModel(IClientService clientService, Client existingClient)
+            : this(clientService)
+        {
+            if (existingClient == null)
+                throw new ArgumentNullException(nameof(existingClient));
+
+            _editingId = existingClient.Uuid;
+            CompanyName = existingClient.Name;
+            ContactPerson = existingClient.ContactPerson;
+            Email = existingClient.Email;
+            PhoneNumber = existingClient.PhoneNumber;
+            Address = existingClient.Address;
+            PostalCode = existingClient.PostalAddress;
+            City = existingClient.City;
+            CVR = existingClient.Cvr ?? string.Empty;
+        }
+
+        public string WindowTitle => _editingId.HasValue ? "Rediger klient" : "Tilføj ny klient";
 
         public Client? CreatedClient
         {
@@ -146,6 +167,26 @@ namespace Mestr.UI.ViewModels
         {
             try
             {
+                if (_editingId.HasValue)
+                {
+                    var existingClient = _clientService.GetClientByUuid(_editingId.Value);
+                    if (existingClient != null)
+                    {
+                        // Opdater eksisterende klient
+                        existingClient.Name = CompanyName;
+                        existingClient.ContactPerson = ContactPerson;
+                        existingClient.Email = Email;
+                        existingClient.PhoneNumber = PhoneNumber;
+                        existingClient.Address = Address ?? string.Empty;
+                        existingClient.PostalAddress = PostalCode ?? string.Empty;
+                        existingClient.City = City ?? string.Empty;
+                        existingClient.Cvr = string.IsNullOrWhiteSpace(CVR) ? null : CVR;
+                        _clientService.UpdateClient(existingClient);
+                        CloseWindow();
+                        return;
+                    }
+                }
+
                 _clientService.CreateClient(
                     CompanyName,
                     ContactPerson,
@@ -156,12 +197,6 @@ namespace Mestr.UI.ViewModels
                     City ?? string.Empty,
                     string.IsNullOrWhiteSpace(CVR) ? null : CVR
                 );
-
-                MessageBox.Show(
-                    "Klienten blev oprettet succesfuldt.",
-                    "Oprettelse succesfuld",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
 
                 CloseWindow();
             }

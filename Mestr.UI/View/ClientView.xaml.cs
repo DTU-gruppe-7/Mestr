@@ -37,10 +37,7 @@ namespace Mestr.UI.View
                     // 3. Hent ViewModel og kør kommandoen
                     if (this.DataContext is ClientViewModel vm)
                     {
-                        if (vm.ViewClientDetailsCommand.CanExecute(clickedClient.Uuid))
-                        {
-                            vm.ViewClientDetailsCommand.Execute(clickedClient.Uuid);
-                        }
+                        vm.EditClientCommand.Execute(clickedClient.Uuid);
                     }
                 }
             }

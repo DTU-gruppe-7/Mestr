@@ -5,6 +5,7 @@ using Mestr.UI.Command;
 using Mestr.UI.View;
 using System;
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Mestr.UI.ViewModels
@@ -29,6 +30,8 @@ namespace Mestr.UI.ViewModels
         public ICommand NavigateToAddClientCommand { get; }
         public ICommand ViewClientDetailsCommand { get; }
 
+        public ICommand EditClientCommand { get; }
+
         public ClientViewModel(MainViewModel mainViewModel, IClientService clientService)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
@@ -37,6 +40,7 @@ namespace Mestr.UI.ViewModels
             // Command that accepts a Guid parameter for viewing client details
             ViewClientDetailsCommand = new RelayCommand<Guid>(ViewClientDetails);
             NavigateToAddClientCommand = new RelayCommand(NavigateToAddClient);
+            EditClientCommand = new RelayCommand<Guid>(EditClient);
 
             LoadClients();
         }
@@ -52,6 +56,7 @@ namespace Mestr.UI.ViewModels
         }
         private void ShowAddClientWindow()
         {
+            var clientvm = new ClientViewModel(_mainViewModel, _clientService);
             var addClientVm = new AddClientViewModel(_clientService);
 
             var addClientWindow = new AddClientWindow()
@@ -64,6 +69,42 @@ namespace Mestr.UI.ViewModels
 
             // Reload clients after the window closes
             LoadClients();
+        }
+
+        private void EditClient(Guid clientId)
+        {
+            try
+            {
+
+
+                var client = _clientService.GetClientByUuid(clientId);
+                if (client == null)
+                {
+                    MessageBox.Show(
+                        "Klienten blev ikke fundet.",
+                        "Fejl",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+                var editClientVm = new AddClientViewModel(_clientService, client);
+                var editClientWindow = new AddClientWindow()
+                {
+                    DataContext = editClientVm,
+                    Owner = App.Current.MainWindow
+                };
+                editClientWindow.ShowDialog();
+                // Reload clients after the window closes
+                LoadClients();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Fejl ved redigering af klient: {ex.Message}",
+                    "Fejl",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
 
         private void ViewClientDetails(Guid clientId)
