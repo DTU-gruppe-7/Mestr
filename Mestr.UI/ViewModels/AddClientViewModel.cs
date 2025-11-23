@@ -182,21 +182,31 @@ namespace Mestr.UI.ViewModels
                         existingClient.City = City ?? string.Empty;
                         existingClient.Cvr = string.IsNullOrWhiteSpace(CVR) ? null : CVR;
                         _clientService.UpdateClient(existingClient);
-                        CloseWindow();
+                    }
+                    else
+                    {
+                        MessageBox.Show(
+                    "Klienten blev ikke fundet.",
+                    "Fejl",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
                         return;
                     }
                 }
-
-                _clientService.CreateClient(
-                    CompanyName,
-                    ContactPerson,
-                    Email,
-                    PhoneNumber,
-                    Address ?? string.Empty,
-                    PostalCode ?? string.Empty,
-                    City ?? string.Empty,
-                    string.IsNullOrWhiteSpace(CVR) ? null : CVR
-                );
+                else
+                {
+                    //Create new client
+                    _clientService.CreateClient(
+                        CompanyName,
+                        ContactPerson,
+                        Email,
+                        PhoneNumber,
+                        Address ?? string.Empty,
+                        PostalCode ?? string.Empty,
+                        City ?? string.Empty,
+                        string.IsNullOrWhiteSpace(CVR) ? null : CVR
+                    );
+                }
 
                 CloseWindow();
             }
