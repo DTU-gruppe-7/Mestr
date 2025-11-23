@@ -32,6 +32,7 @@ namespace Mestr.UI.ViewModels
         private string _originalProjectName = string.Empty;
         private string _originalProjectDescription = string.Empty;
         private ProjectStatus _originalProjectStatus;
+        private DateTime? _originalDeadline;
         private bool _disposed = false;
         private bool _isLoadingProject = false;
 
@@ -120,7 +121,8 @@ namespace Mestr.UI.ViewModels
 
             return Project.Name != _originalProjectName ||
                    Project.Description != _originalProjectDescription ||
-                   Project.Status != _originalProjectStatus;
+                   Project.Status != _originalProjectStatus ||
+                   Project.EndDate != _originalDeadline;
         }
 
         private bool ConfirmNavigationIfUnsaved()
@@ -154,6 +156,7 @@ namespace Mestr.UI.ViewModels
             Project.Name = _originalProjectName;
             Project.Description = _originalProjectDescription;
             Project.Status = _originalProjectStatus;
+            Project.EndDate = _originalDeadline;
 
             // Notify UI of changes
             OnPropertyChanged(nameof(Project));
@@ -192,6 +195,7 @@ namespace Mestr.UI.ViewModels
                 _originalProjectName = project.Name ?? string.Empty;
                 _originalProjectDescription = project.Description ?? string.Empty;
                 _originalProjectStatus = project.Status;
+                _originalDeadline = project.EndDate;
                 Project = project;
                 Earnings = project.Earnings != null
                     ? new ObservableCollection<Earning>(project.Earnings)
@@ -221,6 +225,7 @@ namespace Mestr.UI.ViewModels
                 _originalProjectName = Project.Name ?? string.Empty;
                 _originalProjectDescription = Project.Description ?? string.Empty;
                 _originalProjectStatus = Project.Status;
+                _originalDeadline = Project.EndDate;
                 _hasUnsavedChanges = false;
 
                 MessageBox.Show(
@@ -271,7 +276,7 @@ namespace Mestr.UI.ViewModels
                 // Gem filen synkront
                 File.WriteAllBytes(filePath, pdfBytes);
 
-                // �bn filen
+                // Åbn filen
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = filePath,
