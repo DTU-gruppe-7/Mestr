@@ -21,7 +21,24 @@ namespace Mestr.UI.ViewModels
         private ObservableCollection<Project> _projects = [];
         private ObservableCollection<Project> _completedProjects = [];
         private ObservableCollection<Project> _allOngoingProjects = [];
-        
+
+        public DashboardViewModel(MainViewModel mainViewModel, IProjectService projectService)
+        {
+            _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
+            _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
+
+            // Command that accepts a Guid parameter
+            ViewProjectDetailsCommand = new RelayCommand<Guid>(ViewProjectDetails);
+            ShowAllCommand = new RelayCommand(ToggleShowAll);
+
+            LoadProjects();
+        }
+
+        public ICommand NavigateToProjectCommand => _mainViewModel.NavigateToAddNewProjectCommand;
+        public ICommand NavigateToClientsCommand => _mainViewModel.NavigateToClientsCommand;
+        public ICommand ViewProjectDetailsCommand { get; }
+        public ICommand ShowAllCommand { get; }
+
         // Filter properties
         private bool _showPlanlagt = true;
         private bool _showAktiv = true;
@@ -93,23 +110,6 @@ namespace Mestr.UI.ViewModels
                 ApplyFilter();
                 UpdateShowAllButtonText();
             }
-        }
-
-        public ICommand NavigateToProjectCommand => _mainViewModel.NavigateToAddNewProjectCommand;
-        public ICommand NavigateToClientsCommand => _mainViewModel.NavigateToClientsCommand;
-        public ICommand ViewProjectDetailsCommand { get; }
-        public ICommand ShowAllCommand { get; }
-
-        public DashboardViewModel(MainViewModel mainViewModel, IProjectService projectService)
-        {
-            _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
-            _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
-
-            // Command that accepts a Guid parameter
-            ViewProjectDetailsCommand = new RelayCommand<Guid>(ViewProjectDetails);
-            ShowAllCommand = new RelayCommand(ToggleShowAll);
-            
-            LoadProjects();
         }
 
         private void LoadProjects()

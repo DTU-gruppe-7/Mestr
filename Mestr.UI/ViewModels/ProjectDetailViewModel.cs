@@ -23,7 +23,7 @@ namespace Mestr.UI.ViewModels
         private readonly IEarningService _earningService;
         private readonly IExpenseService _expenseService;
         private readonly MainViewModel _mainViewModel;
-        private readonly ProjectService _projectService;
+        private readonly IProjectService _projectService;
         private readonly PdfService _pdfService;
         private readonly Guid _projectId;
         private Project _project = null!;
@@ -85,7 +85,12 @@ namespace Mestr.UI.ViewModels
         public ICommand EditExpenseCommand { get; }
         public ICommand DeleteProjectCommand { get; }
 
-        public ProjectDetailViewModel(MainViewModel mainViewModel, Guid projectId)
+        public ProjectDetailViewModel(
+            MainViewModel mainViewModel, 
+            IProjectService projectService, 
+            IEarningService earningService, 
+            IExpenseService expenseService, 
+            Guid projectId)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectId = projectId;
@@ -93,9 +98,9 @@ namespace Mestr.UI.ViewModels
             // Initialize services with correct dependencies
             _pdfService = new PdfService();
 
-            _projectService = new ProjectService();
-            _earningService = new EarningService();
-            _expenseService = new ExpenseService();
+            _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
+            _earningService = earningService ?? throw new ArgumentNullException(nameof(earningService));
+            _expenseService = expenseService ?? throw new ArgumentNullException(nameof(expenseService));
 
             NavigateToDashboardCommand = new RelayCommand(NavigateToDashboardWithWarning);
             // Initialize commands
