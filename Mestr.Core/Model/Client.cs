@@ -110,8 +110,24 @@ public class Client
 
     private static bool IsValidPhoneNumber(string phoneNumber)
     {
-        // A simple phone number validation: check if it contains only digits and has a valid length
-        // This is a basic validation, you can expand it based on your requirements
-        return phoneNumber.All(char.IsDigit) && phoneNumber.Length >= 7 && phoneNumber.Length <= 15;
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+            return false;
+
+        // Check if phone number contains spaces - not allowed
+        if (phoneNumber.Contains(" "))
+            return false;
+
+        // Check if phone number starts with + (international format)
+        bool isInternational = phoneNumber.StartsWith("+");
+
+        // If international, remove the + for digit check
+        string numberToCheck = isInternational ? phoneNumber[1..] : phoneNumber;
+
+        // Check if remaining characters are only digits
+        if (!numberToCheck.All(char.IsDigit))
+            return false;
+
+        // Check length (E.164 standard: 8-15 digits, excluding country code prefix)
+        return numberToCheck.Length >= 8 && numberToCheck.Length <= 15;
     }
 }

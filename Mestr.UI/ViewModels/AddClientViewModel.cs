@@ -202,6 +202,7 @@ namespace Mestr.UI.ViewModels
                 AddError(propertyName, "Ugyldig email adresse");
             }
         }
+
         private void ValidatePhoneNumber(string propertyName, string phoneNumber)
         {
             ClearErrors(propertyName);
@@ -212,17 +213,37 @@ namespace Mestr.UI.ViewModels
                 return;
             }
 
-            // Check if phone number contains only digits
-            if (!phoneNumber.All(char.IsDigit))
+            // Check if phone number contains spaces
+            if (phoneNumber.Contains(" "))
             {
-                AddError(propertyName, "Telefonnummer må kun indeholde tal");
+                AddError(propertyName, "Telefonnummer må ikke indeholde mellemrum");
                 return;
             }
 
-            // Check if phone number has at least 8 digits
-            if (phoneNumber.Length < 8)
+            // Check if phone number starts with + (international format)
+            bool isInternational = phoneNumber.StartsWith("+");
+
+            // If international, remove the + for digit check
+            string numberToCheck = isInternational ? phoneNumber[1..] : phoneNumber;
+
+            // Check if remaining characters are only digits
+            if (!numberToCheck.All(char.IsDigit))
+            {
+                AddError(propertyName, "Telefonnummer må kun indeholde tal og + i starten");
+                return;
+            }
+
+            // Check minimum length
+            if (numberToCheck.Length < 8)
             {
                 AddError(propertyName, "Telefonnummer skal være mindst 8 cifre");
+                return;
+            }
+
+            // Check maximum length (E.164 standard allows up to 15 digits)
+            if (numberToCheck.Length > 15)
+            {
+                AddError(propertyName, "Telefonnummer må maksimalt være 15 cifre");
             }
         }
     }
