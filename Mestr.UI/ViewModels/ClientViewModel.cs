@@ -56,7 +56,6 @@ namespace Mestr.UI.ViewModels
         }
         private void ShowAddClientWindow()
         {
-            var clientvm = new ClientViewModel(_mainViewModel, _clientService);
             var addClientVm = new AddClientViewModel(_clientService);
 
             var addClientWindow = new AddClientWindow()
