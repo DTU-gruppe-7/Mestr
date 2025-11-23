@@ -17,7 +17,7 @@
 
         <!-- Header -->
         <DockPanel Grid.Row="0" Margin="10">
-            <Button Content="Home" 
+            <Button Content="Tilbage" 
                     Command="{Binding NavigateToDashboardCommand}" 
                     DockPanel.Dock="Left"
                     Style="{StaticResource HomeButtonStyle}"/>

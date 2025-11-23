@@ -22,7 +22,7 @@
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0"
-                    Content="HJEM"
+                    Content="Tilbage"
                     Style="{StaticResource HomeButtonStyle}"
                     Command="{Binding NavigateToDashboardCommand}"
                     VerticalAlignment="Center"/>

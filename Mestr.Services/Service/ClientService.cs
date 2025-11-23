@@ -18,12 +18,8 @@ namespace Mestr.Services.Service
 
         public Client CreateClient(string companyName, string contactName, string email, string phoneNumber, string address,
                                    string postalAddress, string city, string? cvr = null)
-        {
-            if (string.IsNullOrWhiteSpace(companyName))
-            {
-                throw new ArgumentException("Company name cannot be null or empty.", nameof(companyName));
-            }
 
+        {
             if (string.IsNullOrWhiteSpace(contactName))
             {
                 throw new ArgumentException("Contact name cannot be null or empty.", nameof(contactName));

@@ -12,6 +12,7 @@ public class Client
 	private string address = string.Empty;
 	private string postalAddress = string.Empty;
 	private string city = string.Empty;
+
 	private string? cvr;
     private ICollection<Project> projects = new List<Project>();
 
@@ -21,8 +22,8 @@ public class Client
     }
 
     // Constructor
-    public Client(Guid uuid, string companyName, string contactPerson, string email, string phoneNumber, string address,
-                  string postalAddress, string city, string cvr)
+    public Client(Guid uuid, string? companyName, string contactPerson, string email, string phoneNumber, string address,
+                  string postalAddress, string city, string? cvr)
     {
         this._uuid = uuid;
         this.companyName = companyName;
@@ -38,7 +39,11 @@ public class Client
 
     // Properties 
     public Guid Uuid { get => _uuid; private set => _uuid = value; }
-    public string Name {get => companyName; set => companyName = value;}
+    public string Name
+    {
+        get => companyName ?? contactPerson;
+        set => companyName = string.IsNullOrWhiteSpace(value) ? null : value;
+    }
 
     public string ContactPerson { get => contactPerson; set => contactPerson = value; }
 
@@ -110,8 +115,24 @@ public class Client
 
     private static bool IsValidPhoneNumber(string phoneNumber)
     {
-        // A simple phone number validation: check if it contains only digits and has a valid length
-        // This is a basic validation, you can expand it based on your requirements
-        return phoneNumber.All(char.IsDigit) && phoneNumber.Length >= 7 && phoneNumber.Length <= 15;
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+            return false;
+
+        // Check if phone number contains spaces - not allowed
+        if (phoneNumber.Contains(" "))
+            return false;
+
+        // Check if phone number starts with + (international format)
+        bool isInternational = phoneNumber.StartsWith("+");
+
+        // If international, remove the + for digit check
+        string numberToCheck = isInternational ? phoneNumber[1..] : phoneNumber;
+
+        // Check if remaining characters are only digits
+        if (!numberToCheck.All(char.IsDigit))
+            return false;
+
+        // Check length (E.164 standard: 8-15 digits, excluding country code prefix)
+        return numberToCheck.Length >= 8 && numberToCheck.Length <= 15;
     }
 }
