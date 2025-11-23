@@ -6,7 +6,7 @@ using Mestr.Core.Model;
 using Mestr.Services.Service;
 using Mestr.Data.Repository;
 
-namespace Mestr.Test.Services
+namespace Mestr.Test.Services.Service
 {
     /// <summary>
     /// Integration tests for EarningService - Testing earning management logic
