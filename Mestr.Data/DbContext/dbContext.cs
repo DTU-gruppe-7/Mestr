@@ -25,6 +25,7 @@ namespace Mestr.Data.DbContext
         public DbSet<Project> Projects { get; set; } = null!;
         public DbSet<Expense> Expenses { get; set; } = null!;
         public DbSet<Earning> Earnings { get; set; } = null!;
+        public DbSet<CompanyProfile> CompanyProfile { get; set; } = null!;
 
         private dbContext()
         {
