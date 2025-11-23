@@ -83,6 +83,10 @@ namespace Mestr.Services.Service
             {
                 throw new ArgumentException("Client not found.", nameof(clientId));
             }
+            if (client.Projects?.Count > 0)
+            {
+                throw new InvalidOperationException($"Kunden kan ikke slettes fordi den har {client.Projects.Count} projekt(er) forbundet.");
+            }
             _clientRepository.Delete(clientId);
         }
 
