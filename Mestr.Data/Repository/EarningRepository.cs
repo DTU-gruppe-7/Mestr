@@ -1,8 +1,10 @@
-﻿using Mestr.Core.Enum;
-using Mestr.Core.Model;
+﻿using Mestr.Core.Model;
 using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Mestr.Data.Repository
 {
@@ -12,15 +14,10 @@ namespace Mestr.Data.Repository
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                dbContext.Instance.Earnings.Add(entity);
-                dbContext.Instance.SaveChanges();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                context.Earnings.Add(entity);
+                context.SaveChanges();
             }
         }
 
@@ -28,32 +25,22 @@ namespace Mestr.Data.Repository
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Earnings
+                return context.Earnings
                     .Include(e => e.Project)
                     .FirstOrDefault(e => e.Uuid == uuid);
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
 
         public IEnumerable<Earning> GetAll()
         {
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Earnings
+                return context.Earnings
                     .Include(e => e.Project)
                     .AsNoTracking()
                     .ToList();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
 
@@ -61,15 +48,10 @@ namespace Mestr.Data.Repository
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                dbContext.Instance.Earnings.Update(entity);
-                dbContext.Instance.SaveChanges();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                context.Earnings.Update(entity);
+                context.SaveChanges();
             }
         }
 
@@ -77,19 +59,14 @@ namespace Mestr.Data.Repository
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                var earning = dbContext.Instance.Earnings.FirstOrDefault(e => e.Uuid == uuid);
+                var earning = context.Earnings.FirstOrDefault(e => e.Uuid == uuid);
                 if (earning != null)
                 {
-                    dbContext.Instance.Earnings.Remove(earning);
-                    dbContext.Instance.SaveChanges();
+                    context.Earnings.Remove(earning);
+                    context.SaveChanges();
                 }
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
     }

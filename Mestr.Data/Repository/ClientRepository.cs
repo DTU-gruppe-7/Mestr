@@ -2,6 +2,9 @@ using Mestr.Core.Model;
 using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Mestr.Data.Repository
 {
@@ -11,15 +14,10 @@ namespace Mestr.Data.Repository
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                dbContext.Instance.Clients.Add(entity);
-                dbContext.Instance.SaveChanges();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                context.Clients.Add(entity);
+                context.SaveChanges();
             }
         }
 
@@ -27,32 +25,22 @@ namespace Mestr.Data.Repository
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Clients
+                return context.Clients
                     .Include(c => c.Projects)
                     .FirstOrDefault(c => c.Uuid == uuid);
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
 
         public IEnumerable<Client> GetAll()
         {
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Clients
+                return context.Clients
                     .Include(c => c.Projects)
                     .AsNoTracking()
                     .ToList();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
 
@@ -60,15 +48,11 @@ namespace Mestr.Data.Repository
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                dbContext.Instance.Clients.Update(entity);
-                dbContext.Instance.SaveChanges();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                // Attach og set state til Modified er ofte den enkleste måde at opdatere disconnected entities
+                context.Clients.Update(entity);
+                context.SaveChanges();
             }
         }
 
@@ -76,19 +60,14 @@ namespace Mestr.Data.Repository
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                var client = dbContext.Instance.Clients.FirstOrDefault(c => c.Uuid == uuid);
+                var client = context.Clients.FirstOrDefault(c => c.Uuid == uuid);
                 if (client != null)
                 {
-                    dbContext.Instance.Clients.Remove(client);
-                    dbContext.Instance.SaveChanges();
+                    context.Clients.Remove(client);
+                    context.SaveChanges();
                 }
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
     }

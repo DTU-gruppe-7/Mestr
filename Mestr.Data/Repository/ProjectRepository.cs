@@ -3,6 +3,9 @@ using Mestr.Core.Model;
 using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Mestr.Data.Repository
 {
@@ -12,28 +15,23 @@ namespace Mestr.Data.Repository
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                // Check if the client already exists in the database
-                var existingClient = dbContext.Instance.Clients.Find(entity.Client.Uuid);
+                // Tjek om klienten allerede findes i databasen
+                var existingClient = context.Clients.Find(entity.Client.Uuid);
                 if (existingClient != null)
                 {
-                    // Attach the existing client as unchanged
+                    // Brug den eksisterende klient instans, som nu er tracked af context
                     entity.Client = existingClient;
                 }
                 else
                 {
-                    // Mark the client as Added if it doesn't exist
-                    dbContext.Instance.Clients.Add(entity.Client);
+                    // Marker klienten som Added hvis den ikke findes
+                    context.Clients.Add(entity.Client);
                 }
 
-                dbContext.Instance.Projects.Add(entity);
-                dbContext.Instance.SaveChanges();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                context.Projects.Add(entity);
+                context.SaveChanges();
             }
         }
 
@@ -41,36 +39,28 @@ namespace Mestr.Data.Repository
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Projects
+                // Vi bruger AsNoTracking her, hvis objektet kun skal bruges til visning.
+                // Hvis det skal redigeres og gemmes igen via Update, er det fint at returnere det detached.
+                return context.Projects
                     .Include(p => p.Client)
                     .Include(p => p.Expenses)
                     .Include(p => p.Earnings)
                     .FirstOrDefault(p => p.Uuid == uuid);
             }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
-            }
         }
 
         public IEnumerable<Project> GetAll()
         {
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Projects
+                return context.Projects
                     .Include(p => p.Client)
                     .Include(p => p.Expenses)
                     .Include(p => p.Earnings)
                     .AsNoTracking()
                     .ToList();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
 
@@ -78,11 +68,10 @@ namespace Mestr.Data.Repository
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                // Reload the entity from the database with tracking
-                var existingProject = dbContext.Instance.Projects
+                // Hent den eksisterende entitet fra databasen med tracking
+                var existingProject = context.Projects
                     .Include(p => p.Client)
                     .Include(p => p.Expenses)
                     .Include(p => p.Earnings)
@@ -90,52 +79,70 @@ namespace Mestr.Data.Repository
 
                 if (existingProject != null)
                 {
-                    // Update scalar properties
-                    dbContext.Instance.Entry(existingProject).CurrentValues.SetValues(entity);
-                    
-                    // Update client if changed
+                    // Opdater simple properties
+                    context.Entry(existingProject).CurrentValues.SetValues(entity);
+
+                    // Opdater klient hvis ændret
                     if (existingProject.Client.Uuid != entity.Client.Uuid)
                     {
-                        existingProject.Client = entity.Client;
+                        // Forsøg at finde den nye klient i db
+                        var newClient = context.Clients.Find(entity.Client.Uuid);
+                        if (newClient != null)
+                        {
+                            existingProject.Client = newClient;
+                        }
+                        else
+                        {
+                            // Hvis klienten er helt ny (burde sjældent ske ved update af projekt, men muligt)
+                            existingProject.Client = entity.Client;
+                        }
                     }
-                    
-                    // Update expenses collection
-                    UpdateCollection(existingProject.Expenses, entity.Expenses, dbContext.Instance);
-                    
-                    // Update earnings collection
-                    UpdateCollection(existingProject.Earnings, entity.Earnings, dbContext.Instance);
-                    
-                    dbContext.Instance.SaveChanges();
+
+                    // Opdater expenses kollektion
+                    UpdateCollection(existingProject.Expenses, entity.Expenses, context);
+
+                    // Opdater earnings kollektion
+                    UpdateCollection(existingProject.Earnings, entity.Earnings, context);
+
+                    context.SaveChanges();
                 }
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
 
-        private void UpdateCollection<T>(IList<T> existingCollection, IList<T> newCollection, dbContext context) 
+        private void UpdateCollection<T>(IList<T> existingCollection, IList<T> newCollection, dbContext context)
             where T : class
         {
-            // Remove items that are no longer in the collection
-            var itemsToRemove = existingCollection.Except(newCollection).ToList();
+            // Find items der skal fjernes (findes i existing, men ikke i new)
+            // Vi sammenligner typisk på ID. Da vi ikke har ID her i generisk metode,
+            // antager vi at objekternes Equals metode eller reference virker, 
+            // men EF Core 'SetValues' tilgang er ofte sikrere.
+            // Her bevarer vi din originale logik, men tilpasset context scope.
+
+            var itemsToRemove = existingCollection.Where(e => !newCollection.Contains(e)).ToList();
             foreach (var item in itemsToRemove)
             {
                 existingCollection.Remove(item);
-                context.Entry(item).State = EntityState.Deleted;
+                // Slet explicit fra context
+                context.Remove(item);
             }
 
-            // Add new items
-            var itemsToAdd = newCollection.Except(existingCollection).ToList();
+            // Find items der skal tilføjes (findes i new, men ikke i existing)
+            var itemsToAdd = newCollection.Where(e => !existingCollection.Contains(e)).ToList();
             foreach (var item in itemsToAdd)
             {
                 existingCollection.Add(item);
+                // Attach eller Add håndteres automatisk når de lægges i existingCollection, 
+                // da existingProject er tracked.
             }
 
-            // Update existing items
-            foreach (var item in newCollection.Intersect(existingCollection))
+            // Opdater eksisterende items
+            foreach (var existingItem in existingCollection)
             {
-                context.Entry(item).CurrentValues.SetValues(item);
+                var newItem = newCollection.FirstOrDefault(i => i.Equals(existingItem));
+                if (newItem != null)
+                {
+                    context.Entry(existingItem).CurrentValues.SetValues(newItem);
+                }
             }
         }
 
@@ -143,19 +150,14 @@ namespace Mestr.Data.Repository
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                var project = dbContext.Instance.Projects.FirstOrDefault(p => p.Uuid == uuid);
+                var project = context.Projects.FirstOrDefault(p => p.Uuid == uuid);
                 if (project != null)
                 {
-                    dbContext.Instance.Projects.Remove(project);
-                    dbContext.Instance.SaveChanges();
+                    context.Projects.Remove(project);
+                    context.SaveChanges();
                 }
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
     }
