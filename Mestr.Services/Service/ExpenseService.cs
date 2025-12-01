@@ -14,9 +14,9 @@ namespace Mestr.Services.Service
     {
         private readonly IRepository<Expense> _expenseRepository;
         
-        public ExpenseService()
+        public ExpenseService(IRepository<Expense> expenseRepo)
         {
-            _expenseRepository = new ExpenseRepository();
+            _expenseRepository = expenseRepo ?? throw new ArgumentNullException(nameof(expenseRepo));
         }
         
         public async Task<Expense> GetByUuidAsync(Guid uuid)

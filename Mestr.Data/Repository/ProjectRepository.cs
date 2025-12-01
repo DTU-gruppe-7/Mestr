@@ -65,11 +65,11 @@ namespace Mestr.Data.Repository
 
             using (var context = new dbContext())
             {
-                var existingProject = context.Projects
+                var existingProject = await context.Projects
                     .Include(p => p.Client)
                     .Include(p => p.Expenses)
                     .Include(p => p.Earnings)
-                    .FirstOrDefault(p => p.Uuid == entity.Uuid);
+                    .FirstOrDefaultAsync(p => p.Uuid == entity.Uuid);
 
                 if (existingProject != null)
                 {
@@ -77,7 +77,7 @@ namespace Mestr.Data.Repository
 
                     if (existingProject.Client.Uuid != entity.Client.Uuid)
                     {
-                        var newClient = context.Clients.Find(entity.Client.Uuid);
+                        var newClient = await context.Clients.FindAsync(entity.Client.Uuid);
                         if (newClient != null)
                         {
                             existingProject.Client = newClient;
@@ -125,7 +125,7 @@ namespace Mestr.Data.Repository
 
             using (var context = new dbContext())
             {
-                var project = context.Projects.FirstOrDefault(p => p.Uuid == uuid);
+                var project = await context.Projects.FirstOrDefaultAsync(p => p.Uuid == uuid);
                 if (project != null)
                 {
                     context.Projects.Remove(project);

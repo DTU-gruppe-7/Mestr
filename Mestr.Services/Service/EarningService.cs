@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.Data.Interface;
-using Mestr.Data.Repository;
+using Mestr.Data.Interface;
 
 namespace Mestr.Services.Service
 {
@@ -13,9 +13,9 @@ namespace Mestr.Services.Service
     {
         private readonly IRepository<Earning> _earningRepository;
         
-        public EarningService()
+        public EarningService(IRepository<Earning> earningRepo)
         {
-            _earningRepository = new EarningRepository();
+            _earningRepository = earningRepo ?? throw new ArgumentNullException(nameof(earningRepo));
         }
         
         public async Task<Earning> GetByUuidAsync(Guid uuid)

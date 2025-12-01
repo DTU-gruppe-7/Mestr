@@ -12,9 +12,9 @@ namespace Mestr.Services.Service
     {
         private readonly IRepository<Client> _clientRepository;
 
-        public ClientService()
+        public ClientService(IRepository<Client> clientRepo)
         {
-            _clientRepository = new ClientRepository();
+            _clientRepository = clientRepo ?? throw new ArgumentNullException(nameof(clientRepo));
         }
 
         public async Task<Client> CreateClientAsync(string companyName, string contactName, string email, string phoneNumber, string address,

@@ -51,7 +51,7 @@ namespace Mestr.Data.Repository
             using (var context = new dbContext())
             {
                 // Fetch the existing entity from this context
-                var existing = context.Earnings.FirstOrDefault(e => e.Uuid == entity.Uuid);
+                var existing = await context.Earnings.FirstOrDefaultAsync(e => e.Uuid == entity.Uuid);
                 
                 if (existing != null)
                 {
@@ -78,7 +78,7 @@ namespace Mestr.Data.Repository
 
             using (var context = new dbContext())
             {
-                var earning = context.Earnings.FirstOrDefault(e => e.Uuid == uuid);
+                var earning = await context.Earnings.FirstOrDefaultAsync(e => e.Uuid == uuid);
                 if (earning != null)
                 {
                     context.Earnings.Remove(earning);

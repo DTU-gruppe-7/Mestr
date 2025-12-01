@@ -35,11 +35,11 @@ namespace Mestr.UI.ViewModels
         public ICommand EditClientCommand { get; }
         public ICommand OpenCompanyInfoCommand { get; }
 
-        public ClientViewModel(MainViewModel mainViewModel, IClientService clientService)
+        public ClientViewModel(MainViewModel mainViewModel, IClientService clientService, ICompanyProfileService companyProfileService)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
-            _companyProfileService = new CompanyProfileService();
+            _companyProfileService = companyProfileService ?? throw new ArgumentNullException(nameof(companyProfileService));
 
             // Command that accepts a Guid parameter for viewing client details
             ViewClientDetailsCommand = new RelayCommand<Guid>(ViewClientDetails);

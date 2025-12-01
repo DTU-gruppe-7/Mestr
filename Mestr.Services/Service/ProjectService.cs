@@ -2,7 +2,6 @@
 using Mestr.Core.Model;
 using Mestr.Data.Interface;
 using Mestr.Services.Interface;
-using Mestr.Data.Repository;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,12 +10,10 @@ namespace Mestr.Services.Service
     public class ProjectService : IProjectService
     {
         private readonly IRepository<Project> _projectRepository;
-        private readonly IRepository<Client> _clientRepository;
 
-        public ProjectService()
+        public ProjectService(IRepository<Project> projectRepo)
         {
-            _projectRepository = new ProjectRepository();
-            _clientRepository = new ClientRepository();
+            _projectRepository = projectRepo ?? throw new ArgumentNullException(nameof(projectRepo));
         }
 
         public async Task<Project> CreateProjectAsync(string name, Client client, string description, DateTime? endDate)

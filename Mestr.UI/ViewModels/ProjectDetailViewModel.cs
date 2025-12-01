@@ -104,15 +104,16 @@ namespace Mestr.UI.ViewModels
             MainViewModel mainViewModel, 
             IProjectService projectService, 
             IEarningService earningService, 
-            IExpenseService expenseService, 
+            IExpenseService expenseService,
+            ICompanyProfileService companyProfileService,
             Guid projectId)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectId = projectId;
 
             // Initialize services with correct dependencies
-            _pdfService = new PdfService();
-            _companyProfileService = new CompanyProfileService();
+            _pdfService = new PdfService(projectService, companyProfileService);
+            _companyProfileService = companyProfileService ?? throw new ArgumentNullException(nameof(companyProfileService));
 
             _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
             _earningService = earningService ?? throw new ArgumentNullException(nameof(earningService));

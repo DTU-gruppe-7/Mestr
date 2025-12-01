@@ -62,7 +62,7 @@ namespace Mestr.Data.Repository
 
             using (var context = new dbContext())
             {
-                var client = context.Clients.FirstOrDefault(c => c.Uuid == uuid);
+                var client = await context.Clients.FirstOrDefaultAsync(c => c.Uuid == uuid);
                 if (client != null)
                 {
                     context.Clients.Remove(client);

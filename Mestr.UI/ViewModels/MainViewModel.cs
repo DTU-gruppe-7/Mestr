@@ -39,15 +39,20 @@ namespace Mestr.UI.ViewModels
         public ICommand NavigateToProjectDetailsCommand { get; }
         public ICommand NavigateToClientsCommand { get; }
 
-        public MainViewModel()
+        public MainViewModel(
+            IProjectService projectService,
+            IClientService clientService,
+            IEarningService earningService,
+            IExpenseService expenseService,
+            ICompanyProfileService companyProfileService)
         {
             
             // Initialize services with dependencies
-            _projectService = new ProjectService();
-            _clientService = new ClientService();
-            _earningService = new EarningService();
-            _expenseService = new ExpenseService();
-            _companyProfileService = new CompanyProfileService();
+            _projectService = projectService;
+            _clientService = clientService;
+            _earningService = earningService;
+            _expenseService = expenseService;
+            _companyProfileService = companyProfileService;
 
             // Non-parameterized navigation
             NavigateToAddNewProjectCommand = new RelayCommand(NavigateToAddNewProject);
@@ -117,12 +122,12 @@ namespace Mestr.UI.ViewModels
 
         private void NavigateToClients()
         {
-            CurrentViewModel = new ClientViewModel(this, _clientService);
+            CurrentViewModel = new ClientViewModel(this, _clientService, _companyProfileService);
         }
 
         private void NavigateToProjectDetails(Guid projectUuid)
         {
-            CurrentViewModel = new ProjectDetailViewModel(this, _projectService,_earningService,_expenseService, projectUuid);
+            CurrentViewModel = new ProjectDetailViewModel(this, _projectService,_earningService,_expenseService,_companyProfileService, projectUuid);
         }
     }
 }
