@@ -169,7 +169,7 @@
                             <Setter Property="Foreground" Value="#1E293B"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                             <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="10,10,5,5"/>
+                            <Setter Property="Padding" Value="10"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="DataGridColumnHeader">
@@ -207,7 +207,7 @@
                             </Setter>
                         </Style>
                         <Style x:Key="CellStyle" TargetType="DataGridCell">
-                            <Setter Property="Padding" Value="10,8,5,8" />
+                            <Setter Property="Padding" Value="10" />
                             <Setter Property="BorderThickness" Value="0" />
                         </Style>
                         <Style x:Key="RowStyle" TargetType="DataGridRow">
@@ -287,7 +287,7 @@
                             <Setter Property="Foreground" Value="#1E293B"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                             <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="10,10,5,5"/>
+                            <Setter Property="Padding" Value="10"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="DataGridColumnHeader">
@@ -325,7 +325,7 @@
                             </Setter>
                         </Style>
                         <Style x:Key="CellStyleCompleted" TargetType="DataGridCell">
-                            <Setter Property="Padding" Value="10,8,5,8" />
+                            <Setter Property="Padding" Value="10" />
                             <Setter Property="BorderThickness" Value="0" />
                         </Style>
 

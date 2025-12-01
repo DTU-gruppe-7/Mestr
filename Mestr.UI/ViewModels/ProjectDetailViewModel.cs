@@ -7,7 +7,6 @@ using Mestr.UI.Command;
 using Mestr.UI.View;
 using Microsoft.Win32;
 using System;
-using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -23,6 +22,7 @@ namespace Mestr.UI.ViewModels
         private readonly IExpenseService _expenseService;
         private readonly MainViewModel _mainViewModel;
         private readonly IProjectService _projectService;
+        private readonly ICompanyProfileService _companyProfileService;
         private readonly PdfService _pdfService;
         private readonly Guid _projectId;
         private Project _project = null!;
@@ -35,6 +35,7 @@ namespace Mestr.UI.ViewModels
         private DateTime? _originalDeadline;
         private bool _disposed = false;
         private bool _isLoadingProject = false;
+        private CompanyProfile? profile;
 
         public bool IsProjectCompleted => Project != null && Project.Status == ProjectStatus.Afsluttet;
 
@@ -84,6 +85,7 @@ namespace Mestr.UI.ViewModels
         public ICommand EditEarningCommand { get; }
         public ICommand EditExpenseCommand { get; }
         public ICommand DeleteProjectCommand { get; }
+        public ICommand OpenCompanyInfoCommand { get; }
 
         public ProjectDetailViewModel(
             MainViewModel mainViewModel, 
@@ -97,6 +99,7 @@ namespace Mestr.UI.ViewModels
 
             // Initialize services with correct dependencies
             _pdfService = new PdfService();
+            _companyProfileService = new CompanyProfileService();
 
             _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
             _earningService = earningService ?? throw new ArgumentNullException(nameof(earningService));
@@ -111,8 +114,10 @@ namespace Mestr.UI.ViewModels
             EditEarningCommand = new RelayCommand<Earning>(EditEarning);
             EditExpenseCommand = new RelayCommand<Expense>(EditExpense);
             DeleteProjectCommand = new RelayCommand(DeleteProject);
+            OpenCompanyInfoCommand = new RelayCommand(OpenCompanyInfo);
 
             LoadProject();
+            profile = _companyProfileService.GetProfile();
         }
 
         private bool HasUnsavedChanges()
@@ -229,12 +234,11 @@ namespace Mestr.UI.ViewModels
                 _hasUnsavedChanges = false;
 
                 MessageBox.Show(
-                    "Projektet blev gemt succesfuldt.",
+                    "Dine ændringer er nu gemt",
                     "Gem succesfuldt",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
 
-                _mainViewModel.NavigateToDashboardCommand.Execute(null);
             }
             catch (Exception ex)
             {
@@ -399,6 +403,30 @@ namespace Mestr.UI.ViewModels
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
                 }
+            }
+        }
+
+        private void OpenCompanyInfo()
+        {
+            // Hent den nyeste version fra databasen for at sikre, vi har de seneste data
+            var currentProfile = _companyProfileService.GetProfile();
+
+            if (currentProfile != null)
+            {
+                // Brug den hentede profil
+                var addCompanyInfoVm = new AddCompanyInfoViewModel(_companyProfileService, currentProfile);
+
+                var addCompanyInfoWindow = new AddCompanyInfoWindow()
+                {
+                    DataContext = addCompanyInfoVm,
+                    Owner = App.Current.MainWindow,
+                    WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner
+                };
+
+                addCompanyInfoWindow.ShowDialog();
+
+                // Opdater den lokale profil-variabel
+                profile = _companyProfileService.GetProfile();
             }
         }
     }
