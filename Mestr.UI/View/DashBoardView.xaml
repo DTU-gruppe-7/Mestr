@@ -169,7 +169,8 @@
                             <Setter Property="Foreground" Value="#1E293B"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                             <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="10"/>
+                            <Setter Property="Padding" Value="12,10"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="DataGridColumnHeader">
@@ -179,7 +180,7 @@
                                                     BorderThickness="{TemplateBinding BorderThickness}"
                                                     Padding="{TemplateBinding Padding}">
                                                 <StackPanel Orientation="Horizontal">
-                                                    <ContentPresenter VerticalAlignment="Center"/>
+                                                    <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
                                                     <Path x:Name="SortArrow"
                                                           Margin="5,0,0,0"
                                                           VerticalAlignment="Center"
@@ -207,8 +208,17 @@
                             </Setter>
                         </Style>
                         <Style x:Key="CellStyle" TargetType="DataGridCell">
-                            <Setter Property="Padding" Value="10" />
+                            <Setter Property="Padding" Value="0" />
                             <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Padding="12,10" Background="{TemplateBinding Background}">
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
                         </Style>
                         <Style x:Key="RowStyle" TargetType="DataGridRow">
                             <Setter Property="Cursor" Value="Hand" />
@@ -287,7 +297,8 @@
                             <Setter Property="Foreground" Value="#1E293B"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                             <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="10"/>
+                            <Setter Property="Padding" Value="12,10"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="DataGridColumnHeader">
@@ -297,7 +308,7 @@
                                                     BorderThickness="{TemplateBinding BorderThickness}"
                                                     Padding="{TemplateBinding Padding}">
                                                 <StackPanel Orientation="Horizontal">
-                                                    <ContentPresenter VerticalAlignment="Center"/>
+                                                    <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
                                                     <Path x:Name="SortArrow"
                                                           Margin="5,0,0,0"
                                                           VerticalAlignment="Center"
@@ -325,8 +336,17 @@
                             </Setter>
                         </Style>
                         <Style x:Key="CellStyleCompleted" TargetType="DataGridCell">
-                            <Setter Property="Padding" Value="10" />
+                            <Setter Property="Padding" Value="0" />
                             <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Padding="12,10" Background="{TemplateBinding Background}">
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
                         </Style>
 
                         <Style x:Key="RowStyleCompleted" TargetType="DataGridRow">
