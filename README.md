@@ -10,7 +10,7 @@
 
 **A modern, professional project management system built with .NET 9 and WPF**
 
-[Features](#features) • [Architecture](#architecture) • [Getting Started](#getting-started) • [Usage](#usage) • [Contributing](#contributing)
+[Features](#features) â€¢ [Architecture](#architecture) â€¢ [Getting Started](#getting-started) â€¢ [Usage](#usage) â€¢ [Contributing](#contributing)
 
 </div>
 
@@ -28,7 +28,6 @@
 - [Usage Guide](#usage-guide)
 - [Code Quality](#code-quality)
 - [Testing](#testing)
-- [Contributing](#contributing)
 - [License](#license)
 
 ---
@@ -69,7 +68,7 @@
 - ? Filter projects by status
 
 ### Financial Management
-- ? Track expenses by category (Materialer, Løn, Transport, Værktøj, etc.)
+- ? Track expenses by category (Materialer, LÃ¸n, Transport, VÃ¦rktÃ¸j, etc.)
 - ? Manage earnings/invoices
 - ? Mark expenses/earnings as paid
 - ? Automatic project profit calculation
@@ -323,7 +322,7 @@ All application constants are centralized in `Mestr.Core/Constants/AppConstants.
 ### Creating a Client
 
 1. Navigate to **"Kunder"** (Clients)
-2. Click **"Tilføj ny klient"** (Add new client)
+2. Click **"TilfÃ¸j ny klient"** (Add new client)
 3. Fill in required information:
    - Contact person ? Required
    - Email ? Required (validated)
@@ -346,12 +345,11 @@ All application constants are centralized in `Mestr.Core/Constants/AppConstants.
 ### Managing Project Finances
 
 1. Open a project from the dashboard
-2. Click **"Tilføj Transaktion"** (Add Transaction)
+2. Click **"TilfÃ¸j Transaktion"** (Add Transaction)
 3. Choose type:
    - **Udgift** (Expense): Select category, enter amount
-   - **Indtægt** (Earning): Enter amount
-4. Mark as paid when completed
-5. Click **"Gem Ændringer"** (Save Changes)
+   - **IndtÃ¦gt** (Earning): Enter amount
+4. Click **"Gem Ã†ndringer"** (Save Changes)
 
 ### Generating an Invoice
 
@@ -385,9 +383,6 @@ All application constants are centralized in `Mestr.Core/Constants/AppConstants.
 - ? MVVM pattern for UI
 - ? Repository pattern for data
 - ? Async-first approach
-- ? XML documentation (in progress)
-- ? Unit of Work pattern (planned)
-- ? Logging framework (planned)
 
 ---
 
@@ -417,39 +412,6 @@ dotnet test
 
 ---
 
-## ?? Current Status
-
-### Completed (40%)
-- ? Core domain models
-- ? Repository pattern
-- ? Service layer
-- ? WPF UI (MVVM)
-- ? PDF invoice generation
-- ? Client validation with factory pattern
-- ? Constants refactoring
-- ? Nullable reference type support
-- ? Async/await implementation
-- ? Comprehensive test suite
-
-### In Progress
-- ? Rename `dbContext` ? `MestrDbContext`
-- ? Unit of Work pattern
-- ? Logging framework
-- ? Service layer tests
-
-### Planned
-- ?? i18n support (English)
-- ?? Dark theme
-- ?? Advanced reporting
-- ?? Data export (CSV, Excel)
-- ?? Backup/restore functionality
-
----
-
-## ?? Contributing
-
-Contributions are welcome! This is an educational project for DTU (Technical University of Denmark).
-
 ### Development Setup
 
 1. Fork the repository
@@ -461,7 +423,6 @@ Contributions are welcome! This is an educational project for DTU (Technical Uni
 ### Coding Guidelines
 
 - Follow existing code style
-- Add tests for new features
 - Update documentation
 - Use meaningful commit messages
 - Ensure all tests pass before PR
@@ -477,17 +438,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## ?? Team
 
 **DTU Gruppe 7** - Technical University of Denmark
-
----
-
-## ?? Documentation
-
-Additional documentation available:
-- `CONFIGUREAWAIT_FIX_SUMMARY.md` - Async/await implementation
-- `NULLABLE_REFERENCE_FIXES_SUMMARY.md` - Nullable types
-- `CLIENT_MODEL_VALIDATION_SUMMARY.md` - Validation pattern
-- `CONSTANTS_REFACTORING_SUMMARY.md` - Constants organization
-- `REMAINING_ISSUES_ACTION_PLAN.md` - Future roadmap
 
 ---
 
