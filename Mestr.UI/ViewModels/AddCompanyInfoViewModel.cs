@@ -2,6 +2,7 @@
 using Mestr.Data.Interface;
 using Mestr.Services.Interface;
 using Mestr.UI.Command;
+using Mestr.UI.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -189,21 +190,13 @@ namespace Mestr.UI.ViewModels
 
                 _companyProfileService.UpdateProfile(profile);
 
-                MessageBox.Show(
-                    "Virksomhedsinfo blev gemt succesfuldt.",
-                    "Gem succesfuldt",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                MessageBoxHelper.Standard.CompanyInfoSaved();
 
                 CloseWindow(true);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Kunne ikke gemme virksomhedsinfo. Fejl: {ex.Message}",
-                    "Gem mislykkedes",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBoxHelper.Standard.SaveError(ex.Message);
             }
         }
 

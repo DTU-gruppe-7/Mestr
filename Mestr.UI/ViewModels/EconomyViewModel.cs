@@ -1,12 +1,13 @@
 ﻿using Mestr.Core.Enum;
 using Mestr.Core.Model;
 using Mestr.Services.Interface;
+using Mestr.UI.Command;
+using Mestr.UI.Utilities;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using Mestr.UI.Command;
 
 namespace Mestr.UI.ViewModels
 {
@@ -249,8 +250,7 @@ namespace Mestr.UI.ViewModels
                 {
                     if (!Enum.TryParse(SelectedCategory, out ExpenseCategory categoryEnum))
                     {
-                        MessageBox.Show("Ugyldig kategori valgt.", "Fejl", 
-                            MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBoxHelper.Standard.InvalidCategory();
                         return;
                     }
 
@@ -309,8 +309,7 @@ namespace Mestr.UI.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Fejl ved gemning: {ex.Message}", "Fejl", 
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Standard.SaveError(ex.Message);
             }
         }
 
@@ -321,13 +320,9 @@ namespace Mestr.UI.ViewModels
 
         private void Delete()
         {
-            var result = MessageBox.Show(
-                $"Er du sikker på, at du vil slette denne {(SelectedTransactionType == "Udgift" ? "udgift" : "indtægt")}?",
-                "Bekræft sletning",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result != MessageBoxResult.Yes)
+            string transactionType = SelectedTransactionType == "Udgift" ? "udgift" : "indtægt";
+            
+            if (!MessageBoxHelper.Standard.ConfirmDeleteTransaction(transactionType))
                 return;
 
             try
@@ -364,8 +359,7 @@ namespace Mestr.UI.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Fejl ved sletning: {ex.Message}", "Fejl",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Standard.DeleteError(ex.Message);
             }
         }
 

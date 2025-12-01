@@ -1,6 +1,7 @@
 ﻿using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.UI.Command;
+using Mestr.UI.Utilities;
 using System;
 using System.Linq;
 using System.Windows;
@@ -189,19 +190,11 @@ namespace Mestr.UI.ViewModels
                         existingClient.Cvr = string.IsNullOrWhiteSpace(CVR) ? null : CVR;
                         _clientService.UpdateClient(existingClient);
                         
-                        MessageBox.Show(
-                            "Klienten blev opdateret succesfuldt.",
-                            "Opdatering succesfuld",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
+                        MessageBoxHelper.Standard.ClientUpdated();
                     }
                     else
                     {
-                        MessageBox.Show(
-                            "Klienten blev ikke fundet.",
-                            "Fejl",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
+                        MessageBoxHelper.Standard.ClientNotFound();
                         return;
                     }
                 }
@@ -219,22 +212,14 @@ namespace Mestr.UI.ViewModels
                         string.IsNullOrWhiteSpace(CVR) ? null : CVR
                     );
                     
-                    MessageBox.Show(
-                        "Klienten blev oprettet succesfuldt.",
-                        "Oprettelse succesfuld",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                    MessageBoxHelper.Standard.ClientCreated();
                 }
 
                 CloseWindow();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Kunne ikke gemme klienten. Fejl: {ex.Message}",
-                    "Fejl",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBoxHelper.Standard.SaveError(ex.Message);
             }
         }
 
@@ -245,13 +230,7 @@ namespace Mestr.UI.ViewModels
 
         private void Delete()
         {
-            var result = MessageBox.Show(
-                $"Er du sikker på, at du vil slette klienten '{CompanyName}'?",
-                "Bekræft sletning",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result != MessageBoxResult.Yes)
+            if (!MessageBoxHelper.Standard.ConfirmDeleteClient(CompanyName))
                 return;
 
             try
@@ -261,11 +240,7 @@ namespace Mestr.UI.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Fejl ved sletning: {ex.Message}",
-                    "Fejl",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBoxHelper.Standard.DeleteError(ex.Message);
             }
         }
 

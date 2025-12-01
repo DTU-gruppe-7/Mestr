@@ -4,6 +4,7 @@ using Mestr.Core.Model;
 using Mestr.Services.Service;
 using Mestr.Services.Interface;
 using Mestr.Data.Repository;
+using Mestr.UI.Utilities;
 using System;
 using System.Windows.Input;
 
@@ -100,8 +101,7 @@ namespace Mestr.UI.ViewModels
             }
             catch (Exception ex)
             {
-                // Fallback hvis noget går helt galt
-                System.Windows.MessageBox.Show("Fejl ved indlæsning af firmaprofil: " + ex.Message);
+                MessageBoxHelper.Standard.LoadError($"Firmaprofil: {ex.Message}");
             }
         }
 

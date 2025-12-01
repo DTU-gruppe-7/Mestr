@@ -1,4 +1,5 @@
 ﻿using Mestr.Data.DbContext; // VIGTIGT: Husk denne using for at kunne se dbContext
+using Mestr.UI.Utilities;
 using Mestr.UI.View;
 using Mestr.UI.ViewModels;
 using QuestPDF.Fluent;
@@ -41,12 +42,9 @@ namespace Mestr.UI
             }
             catch (Exception ex)
             {
-                // Det er god praksis at fange fejl her. Hvis databasen ikke kan oprettes 
-                // (f.eks. manglende skriverettigheder), skal brugeren have besked.
-                MessageBox.Show($"Der opstod en fejl ved opstart af databasen:\n{ex.Message}",
-                                "Kritisk Fejl",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Error);
+                MessageBoxHelper.ShowError(
+                    $"Databasen kunne ikke initialiseres.\n\nFejl: {ex.Message}",
+                    "Kritisk fejl");
 
                 // Luk applikationen da den ikke kan virke uden database
                 Shutdown();

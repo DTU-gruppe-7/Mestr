@@ -2,6 +2,7 @@
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
 using Mestr.UI.Command;
+using Mestr.UI.Utilities;
 using Mestr.UI.View;
 using System;
 using System.Collections.ObjectModel;
@@ -79,16 +80,10 @@ namespace Mestr.UI.ViewModels
         {
             try
             {
-
-
                 var client = _clientService.GetClientByUuid(clientId);
                 if (client == null)
                 {
-                    MessageBox.Show(
-                        "Klienten blev ikke fundet.",
-                        "Fejl",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
+                    MessageBoxHelper.Standard.ClientNotFound();
                     return;
                 }
                 var editClientVm = new AddClientViewModel(_clientService, client);
@@ -103,11 +98,7 @@ namespace Mestr.UI.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Fejl ved redigering af klient: {ex.Message}",
-                    "Fejl",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBoxHelper.Standard.SaveError($"Redigering af klient: {ex.Message}");
             }
         }
 

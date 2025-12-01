@@ -4,6 +4,7 @@ using Mestr.Data.Repository;
 using Mestr.Services.Interface;
 using Mestr.Services.Service;
 using Mestr.UI.Command;
+using Mestr.UI.Utilities;
 using Mestr.UI.View;
 using Microsoft.Win32;
 using System;
@@ -152,13 +153,7 @@ namespace Mestr.UI.ViewModels
         {
             if (HasUnsavedChanges())
             {
-                var result = MessageBox.Show(
-                    "Du har ugemte ændringer. Vil du forlade siden uden at gemme?",
-                    "Ugemte ændringer",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
-
-                if (result == MessageBoxResult.Yes)
+                if (MessageBoxHelper.Standard.ConfirmUnsavedChanges())
                 {
                     // Restore original values before navigating away
                     RevertUnsavedChanges();
@@ -166,7 +161,6 @@ namespace Mestr.UI.ViewModels
                 }
 
                 return false;
-
             }
 
             return true; // No unsaved changes, allow navigation
@@ -227,12 +221,7 @@ namespace Mestr.UI.ViewModels
 
             if (project == null)
             {
-                MessageBox.Show(
-                    "Projektet kunne ikke findes.",
-                    "Fejl",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-
+                MessageBoxHelper.Standard.ProjectNotFound();
                 _mainViewModel.NavigateToDashboardCommand.Execute(null);
                 return;
             }
@@ -312,11 +301,7 @@ namespace Mestr.UI.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(
-                            $"Kunne ikke tilføje indtægt '{earning.Description}': {ex.Message}",
-                            "Fejl",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Warning);
+                        MessageBoxHelper.Standard.AddTransactionError($"indtægt '{earning.Description}'", ex.Message);
                     }
                 }
                 foreach (var expense in _pendingExpensesToAdd.ToList())
@@ -327,11 +312,7 @@ namespace Mestr.UI.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(
-                            $"Kunne ikke tilføje udgift '{expense.Description}': {ex.Message}",
-                            "Fejl",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Warning);
+                        MessageBoxHelper.Standard.AddTransactionError($"udgift '{expense.Description}'", ex.Message);
                     }
                 }
                 
@@ -344,11 +325,7 @@ namespace Mestr.UI.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(
-                            $"Kunne ikke opdatere indtægt '{earning.Description}': {ex.Message}",
-                            "Fejl",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Warning);
+                        MessageBoxHelper.Standard.UpdateTransactionError($"indtægt '{earning.Description}'", ex.Message);
                     }
                 }
                 foreach (var expense in _pendingExpensesToUpdate.ToList())
@@ -359,11 +336,7 @@ namespace Mestr.UI.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(
-                            $"Kunne ikke opdatere udgift '{expense.Description}': {ex.Message}",
-                            "Fejl",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Warning);
+                        MessageBoxHelper.Standard.UpdateTransactionError($"udgift '{expense.Description}'", ex.Message);
                     }
                 }
                 
@@ -383,20 +356,12 @@ namespace Mestr.UI.ViewModels
                     LoadProject();
                 }
                 
-                MessageBox.Show(
-                    "Dine ændringer er nu gemt",
-                    "Gem succesfuldt",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                MessageBoxHelper.Standard.ProjectUpdated();
 
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Kunne ikke gemme projektet. Fejl: {ex.Message}",
-                    "Gem mislykkedes",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBoxHelper.Standard.SaveError(ex.Message);
             }
         }
 
@@ -439,7 +404,7 @@ namespace Mestr.UI.ViewModels
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Fejl ved generering af PDF: {ex.Message}");
+                MessageBoxHelper.Standard.PdfGenerationError(ex.Message);
             }
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
@@ -759,27 +724,17 @@ namespace Mestr.UI.ViewModels
         {
             if (Project == null || Project.Uuid == Guid.Empty) return;
 
-            var result = MessageBox.Show(
-                $"Er du sikker på, at du vil slette projektet '{Project.Name}'?",
-                "Bekræft sletning",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
+            if (!MessageBoxHelper.Standard.ConfirmDeleteProject(Project.Name))
+                return;
 
-            if (result == MessageBoxResult.Yes)
+            try
             {
-                try
-                {
-                    _projectService.DeleteProject(_projectId);
-                    _mainViewModel.NavigateToDashboardCommand.Execute(null);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        $"Kunne ikke slette projektet. Fejl: {ex.Message}",
-                        "Sletning mislykkedes",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
+                _projectService.DeleteProject(_projectId);
+                _mainViewModel.NavigateToDashboardCommand.Execute(null);
+            }
+            catch (Exception ex)
+            {
+                MessageBoxHelper.Standard.DeleteError(ex.Message);
             }
         }
 
