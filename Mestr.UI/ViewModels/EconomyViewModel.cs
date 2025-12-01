@@ -256,25 +256,15 @@ namespace Mestr.UI.ViewModels
 
                     if (_editingId.HasValue)
                     {
-                        // EDIT MODE: Hent og modificer objekt
-                        var existingExpense = _expenseService.GetByUuid(_editingId.Value);
-                        if (existingExpense != null)
+                        // EDIT MODE: Use the existing object passed in, don't fetch from database
+                        // Create a new expense object with the updated values
+                        var updatedExpense = new Expense(_editingId.Value, Description, Amount, Date, categoryEnum, IsPaid)
                         {
-                            existingExpense.Description = Description;
-                            existingExpense.Amount = Amount;
-                            existingExpense.Date = Date;
-                            existingExpense.Category = categoryEnum;
-                            existingExpense.IsAccepted = IsPaid;
-                            
-                            // Notify parent through callback
-                            _onExpenseSaved?.Invoke(existingExpense);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Udgiften blev ikke fundet.", "Fejl", 
-                                MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
+                            ProjectUuid = _projectUuid
+                        };
+                        
+                        // Notify parent through callback
+                        _onExpenseSaved?.Invoke(updatedExpense);
                     }
                     else
                     {
@@ -292,24 +282,15 @@ namespace Mestr.UI.ViewModels
                 {
                     if (_editingId.HasValue)
                     {
-                        // EDIT MODE: Hent og modificer objekt
-                        var existingEarning = _earningService.GetByUuid(_editingId.Value);
-                        if (existingEarning != null)
+                        // EDIT MODE: Use the existing object passed in, don't fetch from database
+                        // Create a new earning object with the updated values
+                        var updatedEarning = new Earning(_editingId.Value, Description, Amount, Date, IsPaid)
                         {
-                            existingEarning.Description = Description;
-                            existingEarning.Amount = Amount;
-                            existingEarning.Date = Date;
-                            existingEarning.IsPaid = IsPaid;
-                            
-                            // Notify parent through callback
-                            _onEarningSaved?.Invoke(existingEarning);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Indtægten blev ikke fundet.", "Fejl", 
-                                MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
+                            ProjectUuid = _projectUuid
+                        };
+                        
+                        // Notify parent through callback
+                        _onEarningSaved?.Invoke(updatedEarning);
                     }
                     else
                     {
@@ -353,40 +334,27 @@ namespace Mestr.UI.ViewModels
             {
                 if (SelectedTransactionType == "Udgift")
                 {
-                    // Try to get from database first
-                    var expense = _expenseService.GetByUuid(_editingId!.Value);
-                    
-                    // If not found in database, create a temporary object with the ID for tracking
-                    if (expense == null)
+                    // Create expense object with current values for deletion
+                    if (!Enum.TryParse(SelectedCategory, out ExpenseCategory categoryEnum))
                     {
-                        // Create a minimal expense object for deletion tracking
-                        if (!Enum.TryParse(SelectedCategory, out ExpenseCategory categoryEnum))
-                        {
-                            categoryEnum = ExpenseCategory.Andet;
-                        }
-                        
-                        expense = new Expense(_editingId.Value, Description, Amount, Date, categoryEnum, IsPaid)
-                        {
-                            ProjectUuid = _projectUuid
-                        };
+                        categoryEnum = ExpenseCategory.Andet;
                     }
+                    
+                    var expense = new Expense(_editingId!.Value, Description, Amount, Date, categoryEnum, IsPaid)
+                    {
+                        ProjectUuid = _projectUuid
+                    };
                     
                     // Notify parent through callback
                     _onExpenseDeleted?.Invoke(expense);
                 }
                 else // Indtægt
                 {
-                    // Try to get from database first
-                    var earning = _earningService.GetByUuid(_editingId!.Value);
-                    
-                    // If not found in database, create a temporary object with the ID for tracking
-                    if (earning == null)
+                    // Create earning object with current values for deletion
+                    var earning = new Earning(_editingId!.Value, Description, Amount, Date, IsPaid)
                     {
-                        earning = new Earning(_editingId.Value, Description, Amount, Date, IsPaid)
-                        {
-                            ProjectUuid = _projectUuid
-                        };
-                    }
+                        ProjectUuid = _projectUuid
+                    };
                     
                     // Notify parent through callback
                     _onEarningDeleted?.Invoke(earning);
