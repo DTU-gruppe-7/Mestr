@@ -377,7 +377,7 @@
                             <DataGridTemplateColumn Header="Resultat" SortMemberPath="Result" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Result, StringFormat='{}{0:N2} kr.'}" 
+                                        <TextBlock Text="{Binding Result, StringFormat='{}{0:C}'}" 
                                                    Foreground="{Binding ResultColor}"
                                                    FontWeight="SemiBold"/>
                                     </DataTemplate>

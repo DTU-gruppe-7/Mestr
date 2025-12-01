@@ -65,9 +65,7 @@ public class Project
         get
         {
             decimal totalEarnings = earnings?.Sum(e => e.Amount) ?? 0;
-            Console.WriteLine("The earnings sum op to: " + totalEarnings );
             decimal totalExpenses = expenses?.Sum(e => e.Amount) ?? 0;
-            Console.WriteLine("The expenses sum op to: " + totalExpenses);
             return totalEarnings - totalExpenses;
         }
     }

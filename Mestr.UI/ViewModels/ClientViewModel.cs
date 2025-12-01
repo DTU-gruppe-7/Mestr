@@ -14,7 +14,9 @@ namespace Mestr.UI.ViewModels
     {
         private readonly MainViewModel _mainViewModel;
         private readonly IClientService _clientService;
+        private readonly ICompanyProfileService _companyProfileService;
         private ObservableCollection<Client> _clients = [];
+        private CompanyProfile? profile;
 
         public ObservableCollection<Client> Clients
         {
@@ -29,20 +31,23 @@ namespace Mestr.UI.ViewModels
         public ICommand NavigateToDashboardCommand => _mainViewModel.NavigateToDashboardCommand;
         public ICommand NavigateToAddClientCommand { get; }
         public ICommand ViewClientDetailsCommand { get; }
-
         public ICommand EditClientCommand { get; }
+        public ICommand OpenCompanyInfoCommand { get; }
 
         public ClientViewModel(MainViewModel mainViewModel, IClientService clientService)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
+            _companyProfileService = new CompanyProfileService();
 
             // Command that accepts a Guid parameter for viewing client details
             ViewClientDetailsCommand = new RelayCommand<Guid>(ViewClientDetails);
             NavigateToAddClientCommand = new RelayCommand(NavigateToAddClient);
             EditClientCommand = new RelayCommand<Guid>(EditClient);
+            OpenCompanyInfoCommand = new RelayCommand(OpenCompanyInfo);
 
             LoadClients();
+            profile = _companyProfileService.GetProfile();
         }
 
         private void LoadClients()
@@ -110,6 +115,30 @@ namespace Mestr.UI.ViewModels
         {
             // Navigate to client details view (you'll need to implement this in MainViewModel)
             // _mainViewModel.NavigateToClientDetailsCommand.Execute(clientId);
+        }
+
+        private void OpenCompanyInfo()
+        {
+            // Hent den nyeste version fra databasen for at sikre, vi har de seneste data
+            var currentProfile = _companyProfileService.GetProfile();
+
+            if (currentProfile != null)
+            {
+                // Brug den hentede profil
+                var addCompanyInfoVm = new AddCompanyInfoViewModel(_companyProfileService, currentProfile);
+
+                var addCompanyInfoWindow = new AddCompanyInfoWindow()
+                {
+                    DataContext = addCompanyInfoVm,
+                    Owner = App.Current.MainWindow,
+                    WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner
+                };
+
+                addCompanyInfoWindow.ShowDialog();
+
+                // Opdater den lokale profil-variabel
+                profile = _companyProfileService.GetProfile();
+            }
         }
     }
 }

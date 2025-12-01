@@ -1,5 +1,6 @@
 ﻿using Mestr.Core.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 
@@ -11,10 +12,7 @@ namespace Mestr.Data.DbContext
         // Dette matcher "Unit of Work" princippet beskrevet i Pro C# 10 with .NET 6.
         public dbContext()
         {
-            // Sikrer at databasen findes.
-            // Note: I produktionskode anbefaler bogen ofte at bruge "Migrations" 
-            // til at styre databaseændringer over tid (Kapitel 22).
-            Database.EnsureCreated();
+            //Tom da databasen bliver oprettet i App.xaml.cs
         }
 
         public DbSet<Client> Clients { get; set; } = null!;
@@ -27,13 +25,17 @@ namespace Mestr.Data.DbContext
         {
             if (!optionsBuilder.IsConfigured)
             {
-                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                var dbFolder = Path.Combine(appDataPath, "Mestr");
-                Directory.CreateDirectory(dbFolder);
-                var dbPath = Path.Combine(dbFolder, "mestr.db");
+                // Byg konfigurationen
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json")
+                    .Build();
 
-                // Vi bruger SQLite som database provider
-                optionsBuilder.UseSqlite($"Data Source={dbPath}");
+                // Hent connection string fra filen
+                var connectionString = config.GetConnectionString("DefaultConnection");
+
+                // Brug den
+                optionsBuilder.UseSqlite(connectionString);
             }
         }
 

@@ -219,7 +219,7 @@
                                               RowStyle="{StaticResource RowStyle}">
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="Navn" Binding="{Binding Description}" Width="*" />
-                                                <DataGridTextColumn Header="Estimat" Binding="{Binding Amount, StringFormat='{}{0:N2} kr.'}" Width="*" />
+                                                <DataGridTextColumn Header="Estimat" Binding="{Binding Amount, StringFormat='{}{0:C}'}" Width="*" />
                                                 <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
                                                 <DataGridCheckBoxColumn Header="Faktureret" Binding="{Binding IsPaid}" Width="Auto" />
                                             </DataGrid.Columns>
@@ -244,7 +244,7 @@
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="Kategori" Binding="{Binding Category}" SortMemberPath="Category" Width="*" />
                                                 <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Description}" SortMemberPath="Description" Width="*" />
-                                                <DataGridTextColumn Header="Beløb" Binding="{Binding Amount, StringFormat='{}{0:N2} kr.'}" SortMemberPath="Amount" Width="*" />
+                                                <DataGridTextColumn Header="Beløb" Binding="{Binding Amount, StringFormat='{}{0:C}'}" SortMemberPath="Amount" Width="*" />
                                                 <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" SortMemberPath="Date" Width="*" />
                                             </DataGrid.Columns>
                                         </DataGrid>
@@ -267,7 +267,7 @@
 
                                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                                     <TextBlock Text="Gevinst/Tab: " FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding Project.Result, StringFormat='{}{0:N2} kr.'}" FontSize="16" FontWeight="SemiBold" Foreground="{Binding Project.ResultColor}" VerticalAlignment="Center" Margin="0,0,20,0"/>
+                                    <TextBlock Text="{Binding Project.Result, StringFormat='{}{0:C}'}" FontSize="16" FontWeight="SemiBold" Foreground="{Binding Project.ResultColor}" VerticalAlignment="Center" Margin="0,0,20,0"/>
                                 </StackPanel>
                             </Grid>
                         </Grid>
