@@ -4,6 +4,7 @@ using Mestr.Data.Repository;
 using Mestr.Services.Interface;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Mestr.Services.Service
 {
@@ -16,7 +17,7 @@ namespace Mestr.Services.Service
             _clientRepository = new ClientRepository();
         }
 
-        public Client CreateClient(string companyName, string contactName, string email, string phoneNumber, string address,
+        public async Task<Client> CreateClientAsync(string companyName, string contactName, string email, string phoneNumber, string address,
                                    string postalAddress, string city, string? cvr = null)
 
         {
@@ -48,33 +49,33 @@ namespace Mestr.Services.Service
                 cvr!
             );
 
-            _clientRepository.Add(newClient);
+            await _clientRepository.AddAsync(newClient);
 
             return newClient;
         }
 
-        public Client? GetClientByUuid(Guid uuid)
+        public async Task<Client?> GetClientByUuidAsync(Guid uuid)
         {
-            return _clientRepository.GetByUuid(uuid);
+            return await _clientRepository.GetByUuidAsync(uuid);
         }
 
-        public IEnumerable<Client> GetAllClients()
+        public async Task<IEnumerable<Client>> GetAllClientsAsync()
         {
-            return _clientRepository.GetAll();
+            return await _clientRepository.GetAllAsync();
         }
 
-        public void UpdateClient(Client client)
+        public async Task UpdateClientAsync(Client client)
         {
             if (client == null)
             {
                 throw new ArgumentNullException(nameof(client), "Client must not be null.");
             }
-            _clientRepository.Update(client);
+            await _clientRepository.UpdateAsync(client);
         }
 
-        public void DeleteClient(Guid clientId)
+        public async Task DeleteClientAsync(Guid clientId)
         {
-            var client = _clientRepository.GetByUuid(clientId);
+            var client = await _clientRepository.GetByUuidAsync(clientId);
             if (client == null)
             {
                 throw new ArgumentException("Client not found.", nameof(clientId));
@@ -83,7 +84,7 @@ namespace Mestr.Services.Service
             {
                 throw new InvalidOperationException($"Kunden kan ikke slettes fordi den har {client.Projects.Count} projekt(er) forbundet.");
             }
-            _clientRepository.Delete(clientId);
+            await _clientRepository.DeleteAsync(clientId);
         }
 
     }

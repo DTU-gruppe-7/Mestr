@@ -10,41 +10,41 @@ namespace Mestr.Data.Repository
 {
     public class ClientRepository : IRepository<Client>
     {
-        public void Add(Client entity)
+        public async Task AddAsync(Client entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
             using (var context = new dbContext())
             {
                 context.Clients.Add(entity);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
         }
 
-        public Client? GetByUuid(Guid uuid)
+        public async Task<Client?> GetByUuidAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
             using (var context = new dbContext())
             {
-                return context.Clients
+                return await context.Clients
                     .Include(c => c.Projects)
-                    .FirstOrDefault(c => c.Uuid == uuid);
+                    .FirstOrDefaultAsync(c => c.Uuid == uuid);
             }
         }
 
-        public IEnumerable<Client> GetAll()
+        public async Task<IEnumerable<Client>> GetAllAsync()
         {
             using (var context = new dbContext())
             {
-                return context.Clients
+                return await context.Clients
                     .Include(c => c.Projects)
                     .AsNoTracking()
-                    .ToList();
+                    .ToListAsync();
             }
         }
 
-        public void Update(Client entity)
+        public async Task UpdateAsync(Client entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
@@ -52,11 +52,11 @@ namespace Mestr.Data.Repository
             {
                 // Attach og set state til Modified er ofte den enkleste måde at opdatere disconnected entities
                 context.Clients.Update(entity);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
         }
 
-        public void Delete(Guid uuid)
+        public async Task DeleteAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
@@ -66,7 +66,7 @@ namespace Mestr.Data.Repository
                 if (client != null)
                 {
                     context.Clients.Remove(client);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
             }
         }

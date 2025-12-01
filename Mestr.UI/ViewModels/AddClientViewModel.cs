@@ -170,13 +170,13 @@ namespace Mestr.UI.ViewModels
             return _editingId.HasValue;
         }
 
-        private void Save()
+        private async void Save()
         {
             try
             {
                 if (_editingId.HasValue)
                 {
-                    var existingClient = _clientService.GetClientByUuid(_editingId.Value);
+                    var existingClient = await _clientService.GetClientByUuidAsync(_editingId.Value);
                     if (existingClient != null)
                     {
                         // Opdater eksisterende klient
@@ -188,7 +188,7 @@ namespace Mestr.UI.ViewModels
                         existingClient.PostalAddress = PostalCode ?? string.Empty;
                         existingClient.City = City ?? string.Empty;
                         existingClient.Cvr = string.IsNullOrWhiteSpace(CVR) ? null : CVR;
-                        _clientService.UpdateClient(existingClient);
+                        await _clientService.UpdateClientAsync(existingClient);
                         
                         MessageBoxHelper.Standard.ClientUpdated();
                     }
@@ -201,7 +201,7 @@ namespace Mestr.UI.ViewModels
                 else
                 {
                     //Create new client
-                    _clientService.CreateClient(
+                    await _clientService.CreateClientAsync(
                         CompanyName,
                         ContactPerson,
                         Email,
@@ -228,14 +228,14 @@ namespace Mestr.UI.ViewModels
             CloseWindow();
         }
 
-        private void Delete()
+        private async void Delete()
         {
             if (!MessageBoxHelper.Standard.ConfirmDeleteClient(CompanyName))
                 return;
 
             try
             {
-                _clientService.DeleteClient(_editingId!.Value);
+                await _clientService.DeleteClientAsync(_editingId!.Value);
                 CloseWindow();
             }
             catch (Exception ex)

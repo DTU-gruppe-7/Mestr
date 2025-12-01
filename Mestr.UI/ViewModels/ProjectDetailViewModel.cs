@@ -215,9 +215,9 @@ namespace Mestr.UI.ViewModels
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
 
-        private void LoadProject()
+        private async void LoadProject()
         {
-            var project = _projectService.GetProjectByUuid(_projectId);
+            var project = await _projectService.GetProjectByUuidAsync(_projectId);
 
             if (project == null)
             {
@@ -260,7 +260,7 @@ namespace Mestr.UI.ViewModels
             }
         }
 
-        private void SaveProjectDetails()
+        private async void SaveProjectDetails()
         {
             if (Project == null || Project.Uuid == Guid.Empty) return;
 
@@ -271,7 +271,7 @@ namespace Mestr.UI.ViewModels
                 {
                     try
                     {
-                        _earningService.Delete(earning);
+                        await _earningService.DeleteAsync(earning);
                     }
                     catch (Exception ex)
                     {
@@ -283,7 +283,7 @@ namespace Mestr.UI.ViewModels
                 {
                     try
                     {
-                        _expenseService.Delete(expense);
+                        await _expenseService.DeleteAsync(expense);
                     }
                     catch (Exception ex)
                     {
@@ -297,7 +297,7 @@ namespace Mestr.UI.ViewModels
                 {
                     try
                     {
-                        _earningService.AddNewEarning(earning.ProjectUuid, earning.Description, earning.Amount, earning.Date);
+                        await _earningService.AddNewEarningAsync(earning.ProjectUuid, earning.Description, earning.Amount, earning.Date);
                     }
                     catch (Exception ex)
                     {
@@ -308,7 +308,7 @@ namespace Mestr.UI.ViewModels
                 {
                     try
                     {
-                        _expenseService.AddNewExpense(expense.ProjectUuid, expense.Description, expense.Amount, expense.Date, expense.Category);
+                        await _expenseService.AddNewExpenseAsync(expense.ProjectUuid, expense.Description, expense.Amount, expense.Date, expense.Category);
                     }
                     catch (Exception ex)
                     {
@@ -321,7 +321,7 @@ namespace Mestr.UI.ViewModels
                 {
                     try
                     {
-                        _earningService.Update(earning);
+                        await _earningService.UpdateAsync(earning);
                     }
                     catch (Exception ex)
                     {
@@ -332,7 +332,7 @@ namespace Mestr.UI.ViewModels
                 {
                     try
                     {
-                        _expenseService.Update(expense);
+                        await _expenseService.UpdateAsync(expense);
                     }
                     catch (Exception ex)
                     {
@@ -341,7 +341,7 @@ namespace Mestr.UI.ViewModels
                 }
                 
                 // Reload project from database to get fresh state
-                var freshProject = _projectService.GetProjectByUuid(_projectId);
+                var freshProject = await _projectService.GetProjectByUuidAsync(_projectId);
                 if (freshProject != null)
                 {
                     // Update project details (name, description, status, etc.)
@@ -350,7 +350,7 @@ namespace Mestr.UI.ViewModels
                     freshProject.Status = Project.Status;
                     freshProject.EndDate = Project.EndDate;
                     
-                    _projectService.UpdateProject(freshProject);
+                    await _projectService.UpdateProjectAsync(freshProject);
                     
                     // Reload the entire project to ensure we have the latest state
                     LoadProject();
@@ -371,7 +371,7 @@ namespace Mestr.UI.ViewModels
             return unpaidEarnings.Count > 0;
         }
 
-        private void GenerateInvoice()
+        private async void GenerateInvoice()
         {
             if (Project == null)
                 return;
@@ -390,7 +390,7 @@ namespace Mestr.UI.ViewModels
             try
             {
                 // Generer PDF som byte-array
-                var pdfBytes = _pdfService.GeneratePdfInvoice(Project);
+                var pdfBytes = await _pdfService.GeneratePdfInvoiceAsync(Project);
 
                 // Gem filen synkront
                 File.WriteAllBytes(filePath, pdfBytes);
@@ -701,26 +701,26 @@ namespace Mestr.UI.ViewModels
             ((RelayCommand)GenerateInvoiceCommand).RaiseCanExecuteChanged();
         }
 
-        private void ToggleProjectStatus()
+        private async void ToggleProjectStatus()
         {
             if (Project == null || Project.Uuid == Guid.Empty) return;
 
             if (IsProjectCompleted)
             {
                 Project.Status = ProjectStatus.Aktiv;
-                _projectService.UpdateProjectStatus(_projectId, ProjectStatus.Aktiv);
+                await _projectService.UpdateProjectStatusAsync(_projectId, ProjectStatus.Aktiv);
             }
             else
             {
                 Project.Status = ProjectStatus.Afsluttet;
-                _projectService.CompleteProject(_projectId);
+                await _projectService.CompleteProjectAsync(_projectId);
             }
 
             OnPropertyChanged(nameof(IsProjectCompleted));
             _mainViewModel.NavigateToDashboardCommand.Execute(null);
         }
 
-        private void DeleteProject()
+        private async void DeleteProject()
         {
             if (Project == null || Project.Uuid == Guid.Empty) return;
 
@@ -729,7 +729,7 @@ namespace Mestr.UI.ViewModels
 
             try
             {
-                _projectService.DeleteProject(_projectId);
+                await _projectService.DeleteProjectAsync(_projectId);
                 _mainViewModel.NavigateToDashboardCommand.Execute(null);
             }
             catch (Exception ex)

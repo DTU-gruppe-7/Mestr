@@ -38,9 +38,9 @@ namespace Mestr.UI.ViewModels
 
         public ObservableCollection<Client> Clients { get; } = new ObservableCollection<Client>();
 
-        private void LoadClients()
+        private async void LoadClients()
         {
-            var clients = _clientService.GetAllClients();
+            var clients = await _clientService.GetAllClientsAsync();
             Clients.Clear();
             foreach (var client in clients)
             {
@@ -130,9 +130,9 @@ namespace Mestr.UI.ViewModels
             }
         }
 
-        private void CreateProject()
+        private async void CreateProject()
         {
-            var project = _projectService.CreateProject(ProjectName, SelectedClient!, Description, Deadline);
+            var project = await _projectService.CreateProjectAsync(ProjectName, SelectedClient!, Description, Deadline);
             
             // Option 1: Navigate to dashboard
             _mainViewModel.NavigateToDashboardCommand.Execute(null);

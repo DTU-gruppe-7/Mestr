@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.Data.Interface;
@@ -17,19 +18,19 @@ namespace Mestr.Services.Service
             _earningRepository = new EarningRepository();
         }
         
-        public Earning GetByUuid(Guid uuid)
+        public async Task<Earning> GetByUuidAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) 
                 throw new ArgumentException("UUID cannot be empty.", nameof(uuid));
             
-            var earning = _earningRepository.GetByUuid(uuid);
+            var earning = await _earningRepository.GetByUuidAsync(uuid);
             if (earning == null)
                 throw new ArgumentException("Earning not found.", nameof(uuid));
             
             return earning;
         }
         
-        public Earning AddNewEarning(Guid projectUuid, string description, decimal amount, DateTime date)
+        public async Task<Earning> AddNewEarningAsync(Guid projectUuid, string description, decimal amount, DateTime date)
         {
             if (projectUuid == Guid.Empty)
                 throw new ArgumentException("Project UUID cannot be empty.", nameof(projectUuid));
@@ -43,29 +44,31 @@ namespace Mestr.Services.Service
                 ProjectUuid = projectUuid
             };
             
-            _earningRepository.Add(earning);
+            await _earningRepository.AddAsync(earning);
             return earning;
         }
         
-        public bool Delete(Earning entity)
+        public async Task<bool> DeleteAsync(Earning entity)
         {
             if (entity == null) 
                 throw new ArgumentNullException(nameof(entity));
             
-            _earningRepository.Delete(entity.Uuid);
+            if (entity.IsPaid)
+                throw new InvalidOperationException("Betalte indtægter kan ikke slettes.");
+            
+            await _earningRepository.DeleteAsync(entity.Uuid);
             return true;
         }
         
-        public Earning Update(Earning entity)
+        public async Task<Earning> UpdateAsync(Earning entity)
         {
             if (entity == null) 
                 throw new ArgumentNullException(nameof(entity));
             
-            // Just pass to repository - it will handle fetching and updating
-            _earningRepository.Update(entity);
+            await _earningRepository.UpdateAsync(entity);
             
-            // Return the updated entity from repository
-            return _earningRepository.GetByUuid(entity.Uuid) 
+            var updatedEarning = await _earningRepository.GetByUuidAsync(entity.Uuid);
+            return updatedEarning 
                 ?? throw new InvalidOperationException("Failed to retrieve updated earning.");
         }
     }

@@ -10,9 +10,9 @@ namespace Mestr.Services.Interface
 {
     public interface IExpenseService
     {
-        Expense GetByUuid(Guid uuid);
-        Expense AddNewExpense(Guid projectUuid, string description, decimal amount, DateTime date, ExpenseCategory category);
-        bool Delete(Expense entity);
-        Expense Update(Expense entity);
+        Task<Expense> GetByUuidAsync(Guid uuid);
+        Task<Expense> AddNewExpenseAsync(Guid projectUuid, string description, decimal amount, DateTime date, ExpenseCategory category);
+        Task<bool> DeleteAsync(Expense entity);
+        Task<Expense> UpdateAsync(Expense entity);
     }
 }

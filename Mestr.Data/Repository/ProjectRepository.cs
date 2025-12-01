@@ -11,66 +11,60 @@ namespace Mestr.Data.Repository
 {
     public class ProjectRepository : IRepository<Project>
     {
-        public void Add(Project entity)
+        public async Task AddAsync(Project entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
             using (var context = new dbContext())
             {
-                // Tjek om klienten allerede findes i databasen
-                var existingClient = context.Clients.Find(entity.Client.Uuid);
+                var existingClient = await context.Clients.FindAsync(entity.Client.Uuid);
                 if (existingClient != null)
                 {
-                    // Brug den eksisterende klient instans, som nu er tracked af context
                     entity.Client = existingClient;
                 }
                 else
                 {
-                    // Marker klienten som Added hvis den ikke findes
                     context.Clients.Add(entity.Client);
                 }
 
                 context.Projects.Add(entity);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
         }
 
-        public Project? GetByUuid(Guid uuid)
+        public async Task<Project?> GetByUuidAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
             using (var context = new dbContext())
             {
-                // Vi bruger AsNoTracking her, hvis objektet kun skal bruges til visning.
-                // Hvis det skal redigeres og gemmes igen via Update, er det fint at returnere det detached.
-                return context.Projects
+                return await context.Projects
                     .Include(p => p.Client)
                     .Include(p => p.Expenses)
                     .Include(p => p.Earnings)
-                    .FirstOrDefault(p => p.Uuid == uuid);
+                    .FirstOrDefaultAsync(p => p.Uuid == uuid);
             }
         }
 
-        public IEnumerable<Project> GetAll()
+        public async Task<IEnumerable<Project>> GetAllAsync()
         {
             using (var context = new dbContext())
             {
-                return context.Projects
+                return await context.Projects
                     .Include(p => p.Client)
                     .Include(p => p.Expenses)
                     .Include(p => p.Earnings)
                     .AsNoTracking()
-                    .ToList();
+                    .ToListAsync();
             }
         }
 
-        public void Update(Project entity)
+        public async Task UpdateAsync(Project entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
             using (var context = new dbContext())
             {
-                // Hent den eksisterende entitet fra databasen med tracking
                 var existingProject = context.Projects
                     .Include(p => p.Client)
                     .Include(p => p.Expenses)
@@ -79,13 +73,10 @@ namespace Mestr.Data.Repository
 
                 if (existingProject != null)
                 {
-                    // Opdater simple properties
                     context.Entry(existingProject).CurrentValues.SetValues(entity);
 
-                    // Opdater klient hvis ændret
                     if (existingProject.Client.Uuid != entity.Client.Uuid)
                     {
-                        // Forsøg at finde den nye klient i db
                         var newClient = context.Clients.Find(entity.Client.Uuid);
                         if (newClient != null)
                         {
@@ -93,18 +84,13 @@ namespace Mestr.Data.Repository
                         }
                         else
                         {
-                            // Hvis klienten er helt ny (burde sjældent ske ved update af projekt, men muligt)
                             existingProject.Client = entity.Client;
                         }
                     }
-
-                    // Opdater expenses kollektion
                     UpdateCollection(existingProject.Expenses, entity.Expenses, context);
-
-                    // Opdater earnings kollektion
                     UpdateCollection(existingProject.Earnings, entity.Earnings, context);
 
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
             }
         }
@@ -112,30 +98,17 @@ namespace Mestr.Data.Repository
         private void UpdateCollection<T>(IList<T> existingCollection, IList<T> newCollection, dbContext context)
             where T : class
         {
-            // Find items der skal fjernes (findes i existing, men ikke i new)
-            // Vi sammenligner typisk på ID. Da vi ikke har ID her i generisk metode,
-            // antager vi at objekternes Equals metode eller reference virker, 
-            // men EF Core 'SetValues' tilgang er ofte sikrere.
-            // Her bevarer vi din originale logik, men tilpasset context scope.
-
             var itemsToRemove = existingCollection.Where(e => !newCollection.Contains(e)).ToList();
             foreach (var item in itemsToRemove)
             {
                 existingCollection.Remove(item);
-                // Slet explicit fra context
                 context.Remove(item);
             }
-
-            // Find items der skal tilføjes (findes i new, men ikke i existing)
             var itemsToAdd = newCollection.Where(e => !existingCollection.Contains(e)).ToList();
             foreach (var item in itemsToAdd)
             {
                 existingCollection.Add(item);
-                // Attach eller Add håndteres automatisk når de lægges i existingCollection, 
-                // da existingProject er tracked.
             }
-
-            // Opdater eksisterende items
             foreach (var existingItem in existingCollection)
             {
                 var newItem = newCollection.FirstOrDefault(i => i.Equals(existingItem));
@@ -146,7 +119,7 @@ namespace Mestr.Data.Repository
             }
         }
 
-        public void Delete(Guid uuid)
+        public async Task DeleteAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
@@ -156,7 +129,7 @@ namespace Mestr.Data.Repository
                 if (project != null)
                 {
                     context.Projects.Remove(project);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
             }
         }

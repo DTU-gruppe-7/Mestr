@@ -3,6 +3,7 @@ using Mestr.Core.Enum;
 using Mestr.Core.Model;
 using Mestr.Data.Interface;
 using Mestr.Data.Repository;
+using Mestr.Data.DbContext;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Mestr.Test.Repository
 {
-    public class ClientRepositoryTest : IDisposable
+    public class ClientRepositoryTest : IAsyncLifetime
     {
         private readonly IRepository<Client> _clientRepository;
         private readonly List<Guid> _clientsToCleanup;
@@ -22,6 +23,15 @@ namespace Mestr.Test.Repository
             _clientsToCleanup = new List<Guid>();
         }
 
+        public ValueTask InitializeAsync()
+        {
+            using (var context = new dbContext())
+            {
+                context.Database.EnsureCreated();
+            }
+            return ValueTask.CompletedTask;
+        }
+
         [Fact]
         public void AddClient_ToRepository_Succeeds()
         {
@@ -30,10 +40,10 @@ namespace Mestr.Test.Repository
             _clientsToCleanup.Add(client.Uuid);
 
             // Act
-            _clientRepository.Add(client);
+            _clientRepository.AddAsync(client).Wait();
 
             // Assert
-            var retrievedClient = _clientRepository.GetByUuid(client.Uuid);
+            var retrievedClient = _clientRepository.GetByUuidAsync(client.Uuid).Result;
             Assert.NotNull(retrievedClient);
             Assert.Equal(client.Uuid, retrievedClient.Uuid);
             Assert.Equal(client.Name, retrievedClient.Name);
@@ -46,10 +56,10 @@ namespace Mestr.Test.Repository
             // Arrange
             var client = new Client(Guid.NewGuid(), "Test Client", "Jane Doe", "jane@test.com", "87654321", "456 Test Ave", "54321", "Test Town", "99999999");
             _clientsToCleanup.Add(client.Uuid);
-            _clientRepository.Add(client);
+            _clientRepository.AddAsync(client).Wait();
 
             // Act
-            var retrievedClient = _clientRepository.GetByUuid(client.Uuid);
+            var retrievedClient = _clientRepository.GetByUuidAsync(client.Uuid).Result;
 
             // Assert
             Assert.NotNull(retrievedClient);
@@ -64,7 +74,7 @@ namespace Mestr.Test.Repository
             var nonExistentUuid = Guid.NewGuid();
 
             // Act
-            var result = _clientRepository.GetByUuid(nonExistentUuid);
+            var result = _clientRepository.GetByUuidAsync(nonExistentUuid).Result;
 
             // Assert
             Assert.Null(result);
@@ -77,7 +87,7 @@ namespace Mestr.Test.Repository
             Client? client = null;
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => _clientRepository.Add(client));
+            Assert.ThrowsAsync<ArgumentNullException>(() => _clientRepository.AddAsync(client)).Wait();
         }
 
         [Fact]
@@ -87,7 +97,7 @@ namespace Mestr.Test.Repository
             var emptyGuid = Guid.Empty;
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => _clientRepository.GetByUuid(emptyGuid));
+            Assert.ThrowsAsync<ArgumentNullException>(() => _clientRepository.GetByUuidAsync(emptyGuid)).Wait();
         }
 
         [Fact]
@@ -99,11 +109,11 @@ namespace Mestr.Test.Repository
             _clientsToCleanup.Add(client1.Uuid);
             _clientsToCleanup.Add(client2.Uuid);
 
-            _clientRepository.Add(client1);
-            _clientRepository.Add(client2);
+            _clientRepository.AddAsync(client1).Wait();
+            _clientRepository.AddAsync(client2).Wait();
 
             // Act
-            var allClients = _clientRepository.GetAll();
+            var allClients = _clientRepository.GetAllAsync().Result;
 
             // Assert
             Assert.Contains(allClients, c => c.Uuid == client1.Uuid);
@@ -116,15 +126,15 @@ namespace Mestr.Test.Repository
             // Arrange
             var client = new Client(Guid.NewGuid(), "Original Name", "Original Person", "original@test.com", "33333333", "Original Address", "33333", "Original City", "11111111");
             _clientsToCleanup.Add(client.Uuid);
-            _clientRepository.Add(client);
+            _clientRepository.AddAsync(client).Wait();
 
             // Act
             client.Name = "Updated Name";
             client.Email = "updated@test.com";
-            _clientRepository.Update(client);
+            _clientRepository.UpdateAsync(client).Wait();
 
             // Assert
-            var retrievedClient = _clientRepository.GetByUuid(client.Uuid);
+            var retrievedClient = _clientRepository.GetByUuidAsync(client.Uuid).Result;
             Assert.Equal("Updated Name", retrievedClient.Name);
             Assert.Equal("updated@test.com", retrievedClient.Email);
         }
@@ -134,28 +144,27 @@ namespace Mestr.Test.Repository
         {
             // Arrange
             var client = new Client(Guid.NewGuid(), "To Be Deleted", "Delete Person", "delete@test.com", "44444444", "Delete Address", "44444", "Delete City", "22222222");
-            _clientsToCleanup.Add(client.Uuid); // Track for cleanup in case test fails
-            _clientRepository.Add(client);
+            _clientsToCleanup.Add(client.Uuid);
+            _clientRepository.AddAsync(client).Wait();
 
             // Act
-            _clientRepository.Delete(client.Uuid);
+            _clientRepository.DeleteAsync(client.Uuid).Wait();
 
             // Assert
-            var retrievedClient = _clientRepository.GetByUuid(client.Uuid);
+            var retrievedClient = _clientRepository.GetByUuidAsync(client.Uuid).Result;
             Assert.Null(retrievedClient);
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            // Cleanup all test data
             foreach (var clientUuid in _clientsToCleanup)
             {
                 try
                 {
-                    var client = _clientRepository.GetByUuid(clientUuid);
+                    var client = await _clientRepository.GetByUuidAsync(clientUuid);
                     if (client != null)
                     {
-                        _clientRepository.Delete(clientUuid);
+                        await _clientRepository.DeleteAsync(clientUuid);
                     }
                 }
                 catch

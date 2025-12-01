@@ -117,12 +117,12 @@ namespace Mestr.UI.ViewModels
             }
         }
 
-        private void LoadProjects()
+        private async void LoadProjects()
         {
-            var projects = _projectService.LoadOngoingProjects();
+            var projects = await _projectService.LoadOngoingProjectsAsync();
             _allOngoingProjects = new ObservableCollection<Project>(projects);
             
-            var completedProjects = _projectService.LoadCompletedProjects();
+            var completedProjects = await _projectService.LoadCompletedProjectsAsync();
             CompletedProjects = new ObservableCollection<Project>(completedProjects);
             
             ApplyFilter();

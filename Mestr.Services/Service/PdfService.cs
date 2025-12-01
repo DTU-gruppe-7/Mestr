@@ -22,7 +22,7 @@ public class PdfService : IPdfService
         _companyProfileService = new CompanyProfileService();
     }
 
-    public byte[] GeneratePdfInvoice(Project project)
+    public async Task<byte[]> GeneratePdfInvoiceAsync(Project project)
     {
         if (project == null)
             throw new ArgumentNullException(nameof(project));
@@ -54,7 +54,7 @@ public class PdfService : IPdfService
             }
             
             // Update project in database
-            _projectService.UpdateProject(project);
+            await _projectService.UpdateProjectAsync(project);
         }
 
         // Create PDF

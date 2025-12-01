@@ -193,7 +193,8 @@ namespace Mestr.UI.ViewModels
             set 
             { 
                 _isPaid = value; 
-                OnPropertyChanged(nameof(IsPaid)); 
+                OnPropertyChanged(nameof(IsPaid));
+                ((RelayCommand)DeleteCommand).RaiseCanExecuteChanged();
             } 
         }
 
@@ -315,7 +316,14 @@ namespace Mestr.UI.ViewModels
 
         private bool CanDelete()
         {
-            return _editingId.HasValue;
+            if (!_editingId.HasValue)
+                return false;
+            
+            // Prevent deletion of paid earnings
+            if (SelectedTransactionType == "Indtægt" && IsPaid)
+                return false;
+            
+            return true;
         }
 
         private void Delete()

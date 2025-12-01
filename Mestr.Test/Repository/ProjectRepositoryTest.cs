@@ -2,10 +2,11 @@
 using Mestr.Core.Enum;
 using Mestr.Data.Repository;
 using Mestr.Data.Interface;
+using Mestr.Data.DbContext;
 
 namespace Mestr.Test.Repository
 {
-    public class ProjectRepositoryTest : IDisposable
+    public class ProjectRepositoryTest : IAsyncLifetime
     {
         private readonly IRepository<Project> _projectRepository;
         private readonly IRepository<Client> _clientRepository;
@@ -20,10 +21,19 @@ namespace Mestr.Test.Repository
             _clientsToCleanup = new List<Guid>();
         }
 
+        public ValueTask InitializeAsync()
+        {
+            using (var context = new dbContext())
+            {
+                context.Database.EnsureCreated();
+            }
+            return ValueTask.CompletedTask;
+        }
+
         private Client CreateTestClient()
         {
             var client = new Client(Guid.NewGuid(), "Test Client", "John Doe", "test@something.com", "12345678", "123 Test St", "12345", "Test City", "88888888");
-            _clientRepository.Add(client);
+            _clientRepository.AddAsync(client).Wait();
             _clientsToCleanup.Add(client.Uuid);
             return client;
         }
@@ -46,10 +56,10 @@ namespace Mestr.Test.Repository
             _projectsToCleanup.Add(project.Uuid);
 
             // Act
-            _projectRepository.Add(project);
+            _projectRepository.AddAsync(project).Wait();
 
             // Assert
-            var retrievedProject = _projectRepository.GetByUuid(project.Uuid);
+            var retrievedProject = _projectRepository.GetByUuidAsync(project.Uuid).Result;
             Assert.NotNull(retrievedProject);
             Assert.Equal(project.Uuid, retrievedProject.Uuid);
             Assert.NotNull(retrievedProject.Client);
@@ -72,10 +82,10 @@ namespace Mestr.Test.Repository
                 DateTime.Now.AddDays(10)
             );
             _projectsToCleanup.Add(project.Uuid);
-            _projectRepository.Add(project);
+            _projectRepository.AddAsync(project).Wait();
 
             // Act
-            var retrievedProject = _projectRepository.GetByUuid(project.Uuid);
+            var retrievedProject = _projectRepository.GetByUuidAsync(project.Uuid).Result;
 
             // Assert
             Assert.NotNull(retrievedProject);
@@ -89,7 +99,7 @@ namespace Mestr.Test.Repository
             Project? project = null;
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => _projectRepository.Add(project));
+            Assert.ThrowsAsync<ArgumentNullException>(() => _projectRepository.AddAsync(project)).Wait();
         }
 
         [Fact]
@@ -99,7 +109,7 @@ namespace Mestr.Test.Repository
             var emptyGuid = Guid.Empty;
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => _projectRepository.GetByUuid(emptyGuid));
+            Assert.ThrowsAsync<ArgumentNullException>(() => _projectRepository.GetByUuidAsync(emptyGuid)).Wait();
         }
 
         [Fact]
@@ -130,11 +140,11 @@ namespace Mestr.Test.Repository
             _projectsToCleanup.Add(project1.Uuid);
             _projectsToCleanup.Add(project2.Uuid);
 
-            _projectRepository.Add(project1);
-            _projectRepository.Add(project2);
+            _projectRepository.AddAsync(project1).Wait();
+            _projectRepository.AddAsync(project2).Wait();
 
             // Act
-            var allProjects = _projectRepository.GetAll();
+            var allProjects = _projectRepository.GetAllAsync().Result;
 
             // Assert
             Assert.Contains(allProjects, p => p.Uuid == project1.Uuid);
@@ -156,13 +166,13 @@ namespace Mestr.Test.Repository
                 ProjectStatus.Aktiv,
                 DateTime.Now.AddDays(10)
             );
-            _projectRepository.Add(project);
+            _projectRepository.AddAsync(project).Wait();
 
             // Act
-            _projectRepository.Delete(project.Uuid);
+            _projectRepository.DeleteAsync(project.Uuid).Wait();
 
             // Assert
-            var retrievedProject = _projectRepository.GetByUuid(project.Uuid);
+            var retrievedProject = _projectRepository.GetByUuidAsync(project.Uuid).Result;
             Assert.Null(retrievedProject);
         }
 
@@ -182,25 +192,24 @@ namespace Mestr.Test.Repository
                 DateTime.Now.AddDays(10)
             );
             _projectsToCleanup.Add(project.Uuid);
-            _projectRepository.Add(project);
+            _projectRepository.AddAsync(project).Wait();
 
             // Act
             project.Description = "Updated Description";
-            _projectRepository.Update(project);
+            _projectRepository.UpdateAsync(project).Wait();
 
             // Assert
-            var retrievedProject = _projectRepository.GetByUuid(project.Uuid);
+            var retrievedProject = _projectRepository.GetByUuidAsync(project.Uuid).Result;
             Assert.Equal("Updated Description", retrievedProject.Description);
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            // Cleanup projects first (due to foreign key constraint)
             foreach (var projectUuid in _projectsToCleanup)
             {
                 try
                 {
-                    _projectRepository.Delete(projectUuid);
+                    await _projectRepository.DeleteAsync(projectUuid);
                 }
                 catch
                 {
@@ -208,12 +217,11 @@ namespace Mestr.Test.Repository
                 }
             }
 
-            // Then cleanup clients
             foreach (var clientUuid in _clientsToCleanup)
             {
                 try
                 {
-                    _clientRepository.Delete(clientUuid);
+                    await _clientRepository.DeleteAsync(clientUuid);
                 }
                 catch
                 {

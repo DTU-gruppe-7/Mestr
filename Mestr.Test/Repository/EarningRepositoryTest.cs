@@ -2,10 +2,11 @@
 using Mestr.Core.Enum;
 using Mestr.Data.Repository;
 using Mestr.Data.Interface;
+using Mestr.Data.DbContext;
 
 namespace Mestr.Test.Repository
 {
-    public class EarningRepositoryTest : IDisposable
+    public class EarningRepositoryTest : IAsyncLifetime
     {
         private readonly IRepository<Project> _projectRepository;
         private readonly IRepository<Earning> _earningRepository;
@@ -24,10 +25,19 @@ namespace Mestr.Test.Repository
             _clientsToCleanup = new List<Guid>();
         }
 
+        public ValueTask InitializeAsync()
+        {
+            using (var context = new dbContext())
+            {
+                context.Database.EnsureCreated();
+            }
+            return ValueTask.CompletedTask;
+        }
+
         private Project CreateTestProject()
         {
             var client = new Client(Guid.NewGuid(), "Test Client", "John Doe", "test@something.com", "12345678", "123 Test St", "12345", "Test City", "88888888");
-            _clientRepository.Add(client);
+            _clientRepository.AddAsync(client).Wait();
             _clientsToCleanup.Add(client.Uuid);
 
             var project = new Project(
@@ -40,7 +50,7 @@ namespace Mestr.Test.Repository
                 ProjectStatus.Aktiv,
                 DateTime.Now.AddMonths(10)
             );
-            _projectRepository.Add(project);
+            _projectRepository.AddAsync(project).Wait();
             _projectsToCleanup.Add(project.Uuid);
             return project;
         }
@@ -61,10 +71,10 @@ namespace Mestr.Test.Repository
             _earningsToCleanup.Add(testEarning.Uuid);
 
             // Act
-            _earningRepository.Add(testEarning);
+            _earningRepository.AddAsync(testEarning).Wait();
 
             // Assert
-            Earning? retrievedEarning = _earningRepository.GetByUuid(testEarning.Uuid);
+            Earning? retrievedEarning = _earningRepository.GetByUuidAsync(testEarning.Uuid).Result;
             Assert.NotNull(retrievedEarning);
             Assert.Equal(testEarning.Uuid, retrievedEarning.Uuid);
             Assert.Equal(testEarning.ProjectUuid, retrievedEarning.ProjectUuid);
@@ -83,7 +93,7 @@ namespace Mestr.Test.Repository
             var nonExistentUuid = Guid.NewGuid();
 
             // Act
-            Earning? retrievedEarning = _earningRepository.GetByUuid(nonExistentUuid);
+            Earning? retrievedEarning = _earningRepository.GetByUuidAsync(nonExistentUuid).Result;
 
             // Assert
             Assert.Null(retrievedEarning);
@@ -96,7 +106,7 @@ namespace Mestr.Test.Repository
             Earning? nullEarning = null;
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => _earningRepository.Add(nullEarning!));
+            Assert.ThrowsAsync<ArgumentNullException>(() => _earningRepository.AddAsync(nullEarning!)).Wait();
         }
 
         [Fact]
@@ -106,7 +116,7 @@ namespace Mestr.Test.Repository
             var emptyGuid = Guid.Empty;
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => _earningRepository.GetByUuid(emptyGuid));
+            Assert.ThrowsAsync<ArgumentNullException>(() => _earningRepository.GetByUuidAsync(emptyGuid)).Wait();
         }
 
         [Fact]
@@ -135,11 +145,11 @@ namespace Mestr.Test.Repository
             _earningsToCleanup.Add(testEarning1.Uuid);
             _earningsToCleanup.Add(testEarning2.Uuid);
 
-            _earningRepository.Add(testEarning1);
-            _earningRepository.Add(testEarning2);
+            _earningRepository.AddAsync(testEarning1).Wait();
+            _earningRepository.AddAsync(testEarning2).Wait();
 
             // Act
-            var allEarnings = _earningRepository.GetAll().ToList();
+            var allEarnings = _earningRepository.GetAllAsync().Result.ToList();
 
             // Assert
             Assert.Contains(allEarnings, e => e.Uuid == testEarning1.Uuid);
@@ -159,13 +169,13 @@ namespace Mestr.Test.Repository
                 false
             );
             testEarning.ProjectUuid = testProject.Uuid;
-            _earningRepository.Add(testEarning);
+            _earningRepository.AddAsync(testEarning).Wait();
 
             // Act
-            _earningRepository.Delete(testEarning.Uuid);
+            _earningRepository.DeleteAsync(testEarning.Uuid).Wait();
 
             // Assert
-            Earning? retrievedEarning = _earningRepository.GetByUuid(testEarning.Uuid);
+            Earning? retrievedEarning = _earningRepository.GetByUuidAsync(testEarning.Uuid).Result;
             Assert.Null(retrievedEarning);
         }
 
@@ -183,30 +193,29 @@ namespace Mestr.Test.Repository
             );
             testEarning.ProjectUuid = testProject.Uuid;
             _earningsToCleanup.Add(testEarning.Uuid);
-            _earningRepository.Add(testEarning);
+            _earningRepository.AddAsync(testEarning).Wait();
 
             // Act
             testEarning.Description = "Updated Description";
             testEarning.Amount = 1250.00m;
             testEarning.IsPaid = true;
-            _earningRepository.Update(testEarning);
+            _earningRepository.UpdateAsync(testEarning).Wait();
 
             // Assert
-            Earning? retrievedEarning = _earningRepository.GetByUuid(testEarning.Uuid);
+            Earning? retrievedEarning = _earningRepository.GetByUuidAsync(testEarning.Uuid).Result;
             Assert.NotNull(retrievedEarning);
             Assert.Equal("Updated Description", retrievedEarning.Description);
             Assert.Equal(1250.00m, retrievedEarning.Amount);
             Assert.True(retrievedEarning.IsPaid);
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            // Cleanup in correct order due to foreign keys
             foreach (var earningUuid in _earningsToCleanup)
             {
                 try
                 {
-                    _earningRepository.Delete(earningUuid);
+                    await _earningRepository.DeleteAsync(earningUuid);
                 }
                 catch
                 {
@@ -218,7 +227,7 @@ namespace Mestr.Test.Repository
             {
                 try
                 {
-                    _projectRepository.Delete(projectUuid);
+                    await _projectRepository.DeleteAsync(projectUuid);
                 }
                 catch
                 {
@@ -230,7 +239,7 @@ namespace Mestr.Test.Repository
             {
                 try
                 {
-                    _clientRepository.Delete(clientUuid);
+                    await _clientRepository.DeleteAsync(clientUuid);
                 }
                 catch
                 {

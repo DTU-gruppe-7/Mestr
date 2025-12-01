@@ -10,41 +10,41 @@ namespace Mestr.Data.Repository
 {
     public class EarningRepository : IRepository<Earning>
     {
-        public void Add(Earning entity)
+        public async Task AddAsync(Earning entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
             using (var context = new dbContext())
             {
                 context.Earnings.Add(entity);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
         }
 
-        public Earning? GetByUuid(Guid uuid)
+        public async Task<Earning?> GetByUuidAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
             using (var context = new dbContext())
             {
-                return context.Earnings
+                return await context.Earnings
                     .Include(e => e.Project)
-                    .FirstOrDefault(e => e.Uuid == uuid);
+                    .FirstOrDefaultAsync(e => e.Uuid == uuid);
             }
         }
 
-        public IEnumerable<Earning> GetAll()
+        public async Task<IEnumerable<Earning>> GetAllAsync()
         {
             using (var context = new dbContext())
             {
-                return context.Earnings
+                return await context.Earnings
                     .Include(e => e.Project)
                     .AsNoTracking()
-                    .ToList();
+                    .ToListAsync();
             }
         }
 
-        public void Update(Earning entity)
+        public async Task UpdateAsync(Earning entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
@@ -62,7 +62,7 @@ namespace Mestr.Data.Repository
                     existing.IsPaid = entity.IsPaid;
                     existing.ProjectUuid = entity.ProjectUuid;
                     
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
                 else
                 {
@@ -72,7 +72,7 @@ namespace Mestr.Data.Repository
             }
         }
 
-        public void Delete(Guid uuid)
+        public async Task DeleteAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
@@ -82,7 +82,7 @@ namespace Mestr.Data.Repository
                 if (earning != null)
                 {
                     context.Earnings.Remove(earning);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
             }
         }

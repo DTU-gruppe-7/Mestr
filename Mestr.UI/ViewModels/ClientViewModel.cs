@@ -51,9 +51,9 @@ namespace Mestr.UI.ViewModels
             profile = _companyProfileService.GetProfile();
         }
 
-        private void LoadClients()
+        private async void LoadClients()
         {
-            var clients = _clientService.GetAllClients();
+            var clients = await _clientService.GetAllClientsAsync();
             Clients = new ObservableCollection<Client>(clients);
         }
         private void NavigateToAddClient()
@@ -76,11 +76,11 @@ namespace Mestr.UI.ViewModels
             LoadClients();
         }
 
-        private void EditClient(Guid clientId)
+        private async void EditClient(Guid clientId)
         {
             try
             {
-                var client = _clientService.GetClientByUuid(clientId);
+                var client = await _clientService.GetClientByUuidAsync(clientId);
                 if (client == null)
                 {
                     MessageBoxHelper.Standard.ClientNotFound();
