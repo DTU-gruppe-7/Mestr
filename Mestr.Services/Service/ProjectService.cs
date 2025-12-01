@@ -36,7 +36,7 @@ namespace Mestr.Services.Service
                 endDate
             );
 
-            await _projectRepository.AddAsync(newProject);
+            await _projectRepository.AddAsync(newProject).ConfigureAwait(false);
             return newProject;
         }
 
@@ -45,17 +45,17 @@ namespace Mestr.Services.Service
             if (uuid == Guid.Empty)
                 throw new ArgumentException("UUID cannot be empty.", nameof(uuid));
             
-            return await _projectRepository.GetByUuidAsync(uuid);
+            return await _projectRepository.GetByUuidAsync(uuid).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<Project>> LoadAllProjectsAsync()
         {
-            return await _projectRepository.GetAllAsync();
+            return await _projectRepository.GetAllAsync().ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<Project>> LoadOngoingProjectsAsync() 
         {
-            var projects = await _projectRepository.GetAllAsync();
+            var projects = await _projectRepository.GetAllAsync().ConfigureAwait(false);
             return projects.Where(p => p.Status == ProjectStatus.Aktiv || 
                             p.Status == ProjectStatus.Planlagt || 
                             p.Status == ProjectStatus.Aflyst);
@@ -63,7 +63,7 @@ namespace Mestr.Services.Service
 
         public async Task<IEnumerable<Project>> LoadCompletedProjectsAsync()
         {
-            var projects = await _projectRepository.GetAllAsync();
+            var projects = await _projectRepository.GetAllAsync().ConfigureAwait(false);
             return projects.Where(p => p.Status == ProjectStatus.Afsluttet);
         }
 
@@ -72,12 +72,12 @@ namespace Mestr.Services.Service
             if (project == null)
                 throw new ArgumentNullException(nameof(project));
             
-            await _projectRepository.UpdateAsync(project);
+            await _projectRepository.UpdateAsync(project).ConfigureAwait(false);
         }
 
         public async Task UpdateProjectStatusAsync(Guid projectId, ProjectStatus newStatus)
         {
-            var project = await _projectRepository.GetByUuidAsync(projectId);
+            var project = await _projectRepository.GetByUuidAsync(projectId).ConfigureAwait(false);
             if (project == null)
                 throw new ArgumentException("Project not found.", nameof(projectId));
             
@@ -87,18 +87,18 @@ namespace Mestr.Services.Service
             }
 
             project.Status = newStatus;
-            await _projectRepository.UpdateAsync(project);
+            await _projectRepository.UpdateAsync(project).ConfigureAwait(false);
         }
 
         public async Task CompleteProjectAsync(Guid projectId)
         {
-            var project = await _projectRepository.GetByUuidAsync(projectId);
+            var project = await _projectRepository.GetByUuidAsync(projectId).ConfigureAwait(false);
             if (project == null)
                 throw new ArgumentException("Project not found.", nameof(projectId));
             
             project.Status = ProjectStatus.Afsluttet;
             project.EndDate = DateTime.Now;
-            await _projectRepository.UpdateAsync(project);
+            await _projectRepository.UpdateAsync(project).ConfigureAwait(false);
         }
 
         public async Task DeleteProjectAsync(Guid projectId)
@@ -106,11 +106,11 @@ namespace Mestr.Services.Service
             if (projectId == Guid.Empty)
                 throw new ArgumentException("Project ID cannot be empty.", nameof(projectId));
             
-            var project = await _projectRepository.GetByUuidAsync(projectId);
+            var project = await _projectRepository.GetByUuidAsync(projectId).ConfigureAwait(false);
             if (project == null)
                 throw new ArgumentException("Project not found.", nameof(projectId));
             
-            await _projectRepository.DeleteAsync(projectId);
+            await _projectRepository.DeleteAsync(projectId).ConfigureAwait(false);
         }
 
         public async Task AddExpenseToProjectAsync(Guid projectUuid, Expense expense)
@@ -120,13 +120,13 @@ namespace Mestr.Services.Service
             if (expense == null)
                 throw new ArgumentNullException(nameof(expense));
             
-            var project = await _projectRepository.GetByUuidAsync(projectUuid);
+            var project = await _projectRepository.GetByUuidAsync(projectUuid).ConfigureAwait(false);
             if (project == null)
                 throw new ArgumentException("Project not found.", nameof(projectUuid));
             
             expense.ProjectUuid = projectUuid;
             project.Expenses.Add(expense);
-            await _projectRepository.UpdateAsync(project);
+            await _projectRepository.UpdateAsync(project).ConfigureAwait(false);
         }
 
         public async Task AddEarningToProjectAsync(Guid projectUuid, Earning earning)
@@ -136,13 +136,13 @@ namespace Mestr.Services.Service
             if (earning == null)
                 throw new ArgumentNullException(nameof(earning));
             
-            var project = await _projectRepository.GetByUuidAsync(projectUuid);
+            var project = await _projectRepository.GetByUuidAsync(projectUuid).ConfigureAwait(false);
             if (project == null)
                 throw new ArgumentException("Project not found.", nameof(projectUuid));
             
             earning.ProjectUuid = projectUuid;
             project.Earnings.Add(earning);
-            await _projectRepository.UpdateAsync(project);
+            await _projectRepository.UpdateAsync(project).ConfigureAwait(false);
         }
 
         public async Task RemoveExpenseFromProjectAsync(Guid projectUuid, Guid expenseUuid)
@@ -152,7 +152,7 @@ namespace Mestr.Services.Service
             if (expenseUuid == Guid.Empty)
                 throw new ArgumentException("Expense UUID cannot be empty.", nameof(expenseUuid));
             
-            var project = await _projectRepository.GetByUuidAsync(projectUuid);
+            var project = await _projectRepository.GetByUuidAsync(projectUuid).ConfigureAwait(false);
             if (project == null)
                 throw new ArgumentException("Project not found.", nameof(projectUuid));
             
@@ -160,7 +160,7 @@ namespace Mestr.Services.Service
             if (expense != null)
             {
                 project.Expenses.Remove(expense);
-                await _projectRepository.UpdateAsync(project);
+                await _projectRepository.UpdateAsync(project).ConfigureAwait(false);
             }
         }
 
@@ -171,7 +171,7 @@ namespace Mestr.Services.Service
             if (earningUuid == Guid.Empty)
                 throw new ArgumentException("Earning UUID cannot be empty.", nameof(earningUuid));
             
-            var project = await _projectRepository.GetByUuidAsync(projectUuid);
+            var project = await _projectRepository.GetByUuidAsync(projectUuid).ConfigureAwait(false);
             if (project == null)
                 throw new ArgumentException("Project not found.", nameof(projectUuid));
             
@@ -179,7 +179,7 @@ namespace Mestr.Services.Service
             if (earning != null)
             {
                 project.Earnings.Remove(earning);
-                await _projectRepository.UpdateAsync(project);
+                await _projectRepository.UpdateAsync(project).ConfigureAwait(false);
             }
         }
     }

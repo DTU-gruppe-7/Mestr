@@ -21,13 +21,14 @@ namespace Mestr.UI.ViewModels
         private ObservableCollection<Project> _projects = [];
         private ObservableCollection<Project> _completedProjects = [];
         private ObservableCollection<Project> _allOngoingProjects = [];
-        private CompanyProfile profile;
+        private CompanyProfile? _profile;
 
         public DashboardViewModel(MainViewModel mainViewModel, IProjectService projectService, ICompanyProfileService companyProfileService, CompanyProfile profile)
         {
             _mainViewModel = mainViewModel ?? throw new ArgumentNullException(nameof(mainViewModel));
             _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
             _companyProfileService = companyProfileService ?? throw new ArgumentNullException(nameof(companyProfileService));
+            _profile = profile ?? throw new ArgumentNullException(nameof(profile));
 
             // Command that accepts a Guid parameter
             ViewProjectDetailsCommand = new RelayCommand<Guid>(ViewProjectDetails);
@@ -35,7 +36,6 @@ namespace Mestr.UI.ViewModels
             OpenCompanyInfoCommand = new RelayCommand(OpenCompanyInfo);
 
             LoadProjects();
-            this.profile = _companyProfileService.GetProfile();
         }
 
         public ICommand NavigateToProjectCommand => _mainViewModel.NavigateToAddNewProjectCommand;
@@ -171,6 +171,7 @@ namespace Mestr.UI.ViewModels
             // Use MainViewModel's parameterized navigation command
             _mainViewModel.NavigateToProjectDetailsCommand.Execute(projectId);
         }
+        
         private void OpenCompanyInfo()
         {
             // Hent den nyeste version fra databasen for at sikre, vi har de seneste data
@@ -190,8 +191,8 @@ namespace Mestr.UI.ViewModels
 
                 addCompanyInfoWindow.ShowDialog();
 
-                // Opdater den lokale profil-variabel, så dashboardet evt. kan bruge de nye data (hvis nødvendigt)
-                this.profile = currentProfile;
+                // Opdater den lokale profil-variabel
+                _profile = _companyProfileService.GetProfile();
             }
         }
     }

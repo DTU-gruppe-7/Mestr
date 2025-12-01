@@ -34,10 +34,10 @@ namespace Mestr.Test.Repository
             return ValueTask.CompletedTask;
         }
 
-        private Project CreateTestProject()
+        private async Task<Project> CreateTestProjectAsync()
         {
-            var client = new Client(Guid.NewGuid(), "Test Client", "John Doe", "test@something.com", "12345678", "123 Test St", "12345", "Test City", "88888888");
-            _clientRepository.AddAsync(client).Wait();
+            var client = Client.Create(Guid.NewGuid(), "Test Client", "John Doe", "test@something.com", "12345678", "123 Test St", "12345", "Test City", "88888888");
+            await _clientRepository.AddAsync(client);
             _clientsToCleanup.Add(client.Uuid);
 
             var project = new Project(
@@ -50,16 +50,16 @@ namespace Mestr.Test.Repository
                 ProjectStatus.Aktiv,
                 DateTime.Now.AddMonths(10)
             );
-            _projectRepository.AddAsync(project).Wait();
+            await _projectRepository.AddAsync(project);
             _projectsToCleanup.Add(project.Uuid);
             return project;
         }
 
         [Fact]
-        public void AddToRepositoryTest()
+        public async Task AddToRepositoryTest()
         {
             // Arrange
-            var testProject = CreateTestProject();
+            var testProject = await CreateTestProjectAsync();
             var testExpense = new Expense(
                 Guid.NewGuid(),
                 "Test Expense Description",
@@ -72,10 +72,10 @@ namespace Mestr.Test.Repository
             _expensesToCleanup.Add(testExpense.Uuid);
 
             // Act
-            _expenseRepository.AddAsync(testExpense).Wait();
+            await _expenseRepository.AddAsync(testExpense);
 
             // Assert
-            Expense? retrievedExpense = _expenseRepository.GetByUuidAsync(testExpense.Uuid).Result;
+            Expense? retrievedExpense = await _expenseRepository.GetByUuidAsync(testExpense.Uuid);
             Assert.NotNull(retrievedExpense);
             Assert.Equal(testExpense.Uuid, retrievedExpense.Uuid);
             Assert.Equal(testExpense.ProjectUuid, retrievedExpense.ProjectUuid);
@@ -88,43 +88,43 @@ namespace Mestr.Test.Repository
         }
 
         [Fact]
-        public void GetByUuid_NonExistentUuid_ReturnNull()
+        public async Task GetByUuid_NonExistentUuid_ReturnNull()
         {
             // Arrange
             var nonExistentUuid = Guid.NewGuid();
 
             // Act
-            Expense? retrievedExpense = _expenseRepository.GetByUuidAsync(nonExistentUuid).Result;
+            Expense? retrievedExpense = await _expenseRepository.GetByUuidAsync(nonExistentUuid);
 
             // Assert
             Assert.Null(retrievedExpense);
         }
 
         [Fact]
-        public void Add_NullExpense_ThrowsArgumentNullException()
+        public async Task Add_NullExpense_ThrowsArgumentNullException()
         {
             // Arrange
             Expense? nullExpense = null;
 
             // Act & Assert
-            Assert.ThrowsAsync<ArgumentNullException>(() => _expenseRepository.AddAsync(nullExpense)).Wait();
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _expenseRepository.AddAsync(nullExpense));
         }
 
         [Fact]
-        public void GetByUuid_EmptyGuid_ThrowsArgumentNullException()
+        public async Task GetByUuid_EmptyGuid_ThrowsArgumentNullException()
         {
             // Arrange
             var emptyGuid = Guid.Empty;
 
             // Act & Assert
-            Assert.ThrowsAsync<ArgumentNullException>(() => _expenseRepository.GetByUuidAsync(emptyGuid)).Wait();
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _expenseRepository.GetByUuidAsync(emptyGuid));
         }
 
         [Fact]
-        public void GetAll_ExpensesExist_ReturnsAllExpenses()
+        public async Task GetAll_ExpensesExist_ReturnsAllExpenses()
         {
             // Arrange
-            var testProject = CreateTestProject();
+            var testProject = await CreateTestProjectAsync();
             var testExpense1 = new Expense(
                 Guid.NewGuid(),
                 "Test Expense 1",
@@ -148,11 +148,11 @@ namespace Mestr.Test.Repository
             _expensesToCleanup.Add(testExpense1.Uuid);
             _expensesToCleanup.Add(testExpense2.Uuid);
 
-            _expenseRepository.AddAsync(testExpense1).Wait();
-            _expenseRepository.AddAsync(testExpense2).Wait();
+            await _expenseRepository.AddAsync(testExpense1);
+            await _expenseRepository.AddAsync(testExpense2);
 
             // Act
-            var allExpenses = _expenseRepository.GetAllAsync().Result.ToList();
+            var allExpenses = (await _expenseRepository.GetAllAsync()).ToList();
 
             // Assert
             Assert.Contains(allExpenses, e => e.Uuid == testExpense1.Uuid);
@@ -160,10 +160,10 @@ namespace Mestr.Test.Repository
         }
 
         [Fact]
-        public void Delete_ExistingExpense_RemovesExpense()
+        public async Task Delete_ExistingExpense_RemovesExpense()
         {
             // Arrange
-            var testProject = CreateTestProject();
+            var testProject = await CreateTestProjectAsync();
             var testExpense = new Expense(
                 Guid.NewGuid(),
                 "Test Expense to Delete",
@@ -173,21 +173,21 @@ namespace Mestr.Test.Repository
                 false
             );
             testExpense.ProjectUuid = testProject.Uuid;
-            _expenseRepository.AddAsync(testExpense).Wait();
+            await _expenseRepository.AddAsync(testExpense);
 
             // Act
-            _expenseRepository.DeleteAsync(testExpense.Uuid).Wait();
+            await _expenseRepository.DeleteAsync(testExpense.Uuid);
 
             // Assert
-            var retrievedExpense = _expenseRepository.GetByUuidAsync(testExpense.Uuid).Result;
+            var retrievedExpense = await _expenseRepository.GetByUuidAsync(testExpense.Uuid);
             Assert.Null(retrievedExpense);
         }
 
         [Fact]
-        public void Update_ExistingExpense_UpdatesExpense()
+        public async Task Update_ExistingExpense_UpdatesExpense()
         {
             // Arrange
-            var testProject = CreateTestProject();
+            var testProject = await CreateTestProjectAsync();
             var testExpense = new Expense(
                 Guid.NewGuid(),
                 "Test Expense to Update",
@@ -198,16 +198,16 @@ namespace Mestr.Test.Repository
             );
             testExpense.ProjectUuid = testProject.Uuid;
             _expensesToCleanup.Add(testExpense.Uuid);
-            _expenseRepository.AddAsync(testExpense).Wait();
+            await _expenseRepository.AddAsync(testExpense);
 
             // Act
             testExpense.Description = "Updated Expense Description";
             testExpense.Amount = 800.00m;
             testExpense.IsAccepted = true;
-            _expenseRepository.UpdateAsync(testExpense).Wait();
+            await _expenseRepository.UpdateAsync(testExpense);
 
             // Assert
-            var updatedExpense = _expenseRepository.GetByUuidAsync(testExpense.Uuid).Result;
+            var updatedExpense = await _expenseRepository.GetByUuidAsync(testExpense.Uuid);
             Assert.Equal("Updated Expense Description", updatedExpense.Description);
             Assert.Equal(800.00m, updatedExpense.Amount);
             Assert.True(updatedExpense.IsAccepted);

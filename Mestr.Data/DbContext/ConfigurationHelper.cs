@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Mestr.Data.DbContext
 {
-    public static class ConfigutationHelper
+    public static class ConfigurationHelper
     {
         public static IConfiguration GetConfiguration()
         {

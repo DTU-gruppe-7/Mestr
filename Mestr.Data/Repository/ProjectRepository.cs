@@ -17,7 +17,9 @@ namespace Mestr.Data.Repository
 
             using (var context = new dbContext())
             {
-                var existingClient = await context.Clients.FindAsync(entity.Client.Uuid);
+                var existingClient = await context.Clients
+                    .FindAsync(entity.Client.Uuid)
+                    .ConfigureAwait(false);
                 if (existingClient != null)
                 {
                     entity.Client = existingClient;
@@ -28,7 +30,7 @@ namespace Mestr.Data.Repository
                 }
 
                 context.Projects.Add(entity);
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -42,7 +44,8 @@ namespace Mestr.Data.Repository
                     .Include(p => p.Client)
                     .Include(p => p.Expenses)
                     .Include(p => p.Earnings)
-                    .FirstOrDefaultAsync(p => p.Uuid == uuid);
+                    .FirstOrDefaultAsync(p => p.Uuid == uuid)
+                    .ConfigureAwait(false);
             }
         }
 
@@ -55,7 +58,8 @@ namespace Mestr.Data.Repository
                     .Include(p => p.Expenses)
                     .Include(p => p.Earnings)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .ToListAsync()
+                    .ConfigureAwait(false);
             }
         }
 
@@ -69,7 +73,8 @@ namespace Mestr.Data.Repository
                     .Include(p => p.Client)
                     .Include(p => p.Expenses)
                     .Include(p => p.Earnings)
-                    .FirstOrDefaultAsync(p => p.Uuid == entity.Uuid);
+                    .FirstOrDefaultAsync(p => p.Uuid == entity.Uuid)
+                    .ConfigureAwait(false);
 
                 if (existingProject != null)
                 {
@@ -77,7 +82,9 @@ namespace Mestr.Data.Repository
 
                     if (existingProject.Client.Uuid != entity.Client.Uuid)
                     {
-                        var newClient = await context.Clients.FindAsync(entity.Client.Uuid);
+                        var newClient = await context.Clients
+                            .FindAsync(entity.Client.Uuid)
+                            .ConfigureAwait(false);
                         if (newClient != null)
                         {
                             existingProject.Client = newClient;
@@ -90,7 +97,7 @@ namespace Mestr.Data.Repository
                     UpdateCollection(existingProject.Expenses, entity.Expenses, context);
                     UpdateCollection(existingProject.Earnings, entity.Earnings, context);
 
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
         }
@@ -125,11 +132,13 @@ namespace Mestr.Data.Repository
 
             using (var context = new dbContext())
             {
-                var project = await context.Projects.FirstOrDefaultAsync(p => p.Uuid == uuid);
+                var project = await context.Projects
+                    .FirstOrDefaultAsync(p => p.Uuid == uuid)
+                    .ConfigureAwait(false);
                 if (project != null)
                 {
                     context.Projects.Remove(project);
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
         }

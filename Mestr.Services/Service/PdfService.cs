@@ -53,7 +53,7 @@ public class PdfService : IPdfService
             }
             
             // Update project in database
-            await _projectService.UpdateProjectAsync(project);
+            await _projectService.UpdateProjectAsync(project).ConfigureAwait(false);
         }
 
         // Create PDF

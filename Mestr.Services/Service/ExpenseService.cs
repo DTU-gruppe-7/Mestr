@@ -24,7 +24,7 @@ namespace Mestr.Services.Service
             if (uuid == Guid.Empty) 
                 throw new ArgumentException("UUID cannot be empty.", nameof(uuid));
             
-            var expense = await _expenseRepository.GetByUuidAsync(uuid);
+            var expense = await _expenseRepository.GetByUuidAsync(uuid).ConfigureAwait(false);
             if (expense == null)
                 throw new ArgumentException("Expense not found.", nameof(uuid));
             
@@ -45,7 +45,7 @@ namespace Mestr.Services.Service
                 ProjectUuid = projectUuid
             };
             
-            await _expenseRepository.AddAsync(expense);
+            await _expenseRepository.AddAsync(expense).ConfigureAwait(false);
             return expense;
         }
         
@@ -54,7 +54,7 @@ namespace Mestr.Services.Service
             if (entity == null) 
                 throw new ArgumentNullException(nameof(entity));
             
-            await _expenseRepository.DeleteAsync(entity.Uuid);
+            await _expenseRepository.DeleteAsync(entity.Uuid).ConfigureAwait(false);
             return true;
         }
         
@@ -63,9 +63,9 @@ namespace Mestr.Services.Service
             if (entity == null) 
                 throw new ArgumentNullException(nameof(entity));
             
-            await _expenseRepository.UpdateAsync(entity);
+            await _expenseRepository.UpdateAsync(entity).ConfigureAwait(false);
             
-            var updatedExpense = await _expenseRepository.GetByUuidAsync(entity.Uuid);
+            var updatedExpense = await _expenseRepository.GetByUuidAsync(entity.Uuid).ConfigureAwait(false);
             return updatedExpense 
                 ?? throw new InvalidOperationException("Failed to retrieve updated expense.");
         }

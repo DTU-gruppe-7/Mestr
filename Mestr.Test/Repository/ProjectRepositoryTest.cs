@@ -30,19 +30,19 @@ namespace Mestr.Test.Repository
             return ValueTask.CompletedTask;
         }
 
-        private Client CreateTestClient()
+        private async Task<Client> CreateTestClientAsync()
         {
-            var client = new Client(Guid.NewGuid(), "Test Client", "John Doe", "test@something.com", "12345678", "123 Test St", "12345", "Test City", "88888888");
-            _clientRepository.AddAsync(client).Wait();
+            var client = Client.Create(Guid.NewGuid(), "Test Client", "John Doe", "test@something.com", "12345678", "123 Test St", "12345", "Test City", "88888888");
+            await _clientRepository.AddAsync(client);
             _clientsToCleanup.Add(client.Uuid);
             return client;
         }
 
         [Fact]
-        public void AddProject_ToRepository_Succeeds()
+        public async Task AddProject_ToRepository_Succeeds()
         {
             // Arrange
-            var client = CreateTestClient();
+            var client = await CreateTestClientAsync();
             var project = new Project(
                 Guid.NewGuid(),
                 "Test Project",
@@ -56,10 +56,10 @@ namespace Mestr.Test.Repository
             _projectsToCleanup.Add(project.Uuid);
 
             // Act
-            _projectRepository.AddAsync(project).Wait();
+            await _projectRepository.AddAsync(project);
 
             // Assert
-            var retrievedProject = _projectRepository.GetByUuidAsync(project.Uuid).Result;
+            var retrievedProject = await _projectRepository.GetByUuidAsync(project.Uuid);
             Assert.NotNull(retrievedProject);
             Assert.Equal(project.Uuid, retrievedProject.Uuid);
             Assert.NotNull(retrievedProject.Client);
@@ -67,10 +67,10 @@ namespace Mestr.Test.Repository
         }
 
         [Fact]
-        public void GetByUuid_ProjectExists_ReturnsProject()
+        public async Task GetByUuid_ProjectExists_ReturnsProject()
         {
             // Arrange
-            var client = CreateTestClient();
+            var client = await CreateTestClientAsync();
             var project = new Project(
                 Guid.NewGuid(),
                 "Test Project",
@@ -82,10 +82,10 @@ namespace Mestr.Test.Repository
                 DateTime.Now.AddDays(10)
             );
             _projectsToCleanup.Add(project.Uuid);
-            _projectRepository.AddAsync(project).Wait();
+            await _projectRepository.AddAsync(project);
 
             // Act
-            var retrievedProject = _projectRepository.GetByUuidAsync(project.Uuid).Result;
+            var retrievedProject = await _projectRepository.GetByUuidAsync(project.Uuid);
 
             // Assert
             Assert.NotNull(retrievedProject);
@@ -93,30 +93,30 @@ namespace Mestr.Test.Repository
         }
 
         [Fact]
-        public void AddNullProject_ThrowsArgumentNullException()
+        public async Task AddNullProject_ThrowsArgumentNullException()
         {
             // Arrange
             Project? project = null;
 
             // Act & Assert
-            Assert.ThrowsAsync<ArgumentNullException>(() => _projectRepository.AddAsync(project)).Wait();
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _projectRepository.AddAsync(project));
         }
 
         [Fact]
-        public void GetByUuid_EmptyGuid_ThrowsArgumentException()
+        public async Task GetByUuid_EmptyGuid_ThrowsArgumentException()
         {
             // Arrange
             var emptyGuid = Guid.Empty;
 
             // Act & Assert
-            Assert.ThrowsAsync<ArgumentNullException>(() => _projectRepository.GetByUuidAsync(emptyGuid)).Wait();
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _projectRepository.GetByUuidAsync(emptyGuid));
         }
 
         [Fact]
-        public void GetAll_ReturnsAllProjects()
+        public async Task GetAll_ReturnsAllProjects()
         {
             // Arrange
-            var client = CreateTestClient();
+            var client = await CreateTestClientAsync();
             var project1 = new Project(
                 Guid.NewGuid(),
                 "Test Project 1",
@@ -140,11 +140,11 @@ namespace Mestr.Test.Repository
             _projectsToCleanup.Add(project1.Uuid);
             _projectsToCleanup.Add(project2.Uuid);
 
-            _projectRepository.AddAsync(project1).Wait();
-            _projectRepository.AddAsync(project2).Wait();
+            await _projectRepository.AddAsync(project1);
+            await _projectRepository.AddAsync(project2);
 
             // Act
-            var allProjects = _projectRepository.GetAllAsync().Result;
+            var allProjects = await _projectRepository.GetAllAsync();
 
             // Assert
             Assert.Contains(allProjects, p => p.Uuid == project1.Uuid);
@@ -152,10 +152,10 @@ namespace Mestr.Test.Repository
         }
 
         [Fact]
-        public void Delete_ExistingProject_RemovesProject()
+        public async Task Delete_ExistingProject_RemovesProject()
         {
             // Arrange
-            var client = CreateTestClient();
+            var client = await CreateTestClientAsync();
             var project = new Project(
                 Guid.NewGuid(),
                 "Test Project",
@@ -166,21 +166,21 @@ namespace Mestr.Test.Repository
                 ProjectStatus.Aktiv,
                 DateTime.Now.AddDays(10)
             );
-            _projectRepository.AddAsync(project).Wait();
+            await _projectRepository.AddAsync(project);
 
             // Act
-            _projectRepository.DeleteAsync(project.Uuid).Wait();
+            await _projectRepository.DeleteAsync(project.Uuid);
 
             // Assert
-            var retrievedProject = _projectRepository.GetByUuidAsync(project.Uuid).Result;
+            var retrievedProject = await _projectRepository.GetByUuidAsync(project.Uuid);
             Assert.Null(retrievedProject);
         }
 
         [Fact]
-        public void Update_ExistingProject_UpdatesProject()
+        public async Task Update_ExistingProject_UpdatesProject()
         {
             // Arrange
-            var client = CreateTestClient();
+            var client = await CreateTestClientAsync();
             var project = new Project(
                 Guid.NewGuid(),
                 "Test Project",
@@ -192,14 +192,14 @@ namespace Mestr.Test.Repository
                 DateTime.Now.AddDays(10)
             );
             _projectsToCleanup.Add(project.Uuid);
-            _projectRepository.AddAsync(project).Wait();
+            await _projectRepository.AddAsync(project);
 
             // Act
             project.Description = "Updated Description";
-            _projectRepository.UpdateAsync(project).Wait();
+            await _projectRepository.UpdateAsync(project);
 
             // Assert
-            var retrievedProject = _projectRepository.GetByUuidAsync(project.Uuid).Result;
+            var retrievedProject = await _projectRepository.GetByUuidAsync(project.Uuid);
             Assert.Equal("Updated Description", retrievedProject.Description);
         }
 

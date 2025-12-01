@@ -1,4 +1,5 @@
 ﻿using Mestr.Core.Model;
+using Mestr.Core.Constants;
 using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Mestr.Data.Repository;
@@ -23,6 +24,7 @@ namespace Mestr.UI
     public partial class App : Application
     {
         public IServiceProvider Services { get; }
+        
         public App()
         {
             Services = ConfigureServices();
@@ -31,7 +33,7 @@ namespace Mestr.UI
         protected override void OnStartup(StartupEventArgs e)
         {
             // Sæt kultur FØRST, før noget UI oprettes
-            var cultureInfo = new CultureInfo("da-DK");
+            var cultureInfo = new CultureInfo(AppConstants.Culture.Danish);
 
             Thread.CurrentThread.CurrentCulture = cultureInfo;
             Thread.CurrentThread.CurrentUICulture = cultureInfo;
@@ -55,8 +57,8 @@ namespace Mestr.UI
             catch (Exception ex)
             {
                 MessageBoxHelper.ShowError(
-                    $"Databasen kunne ikke initialiseres.\n\nFejl: {ex.Message}",
-                    "Kritisk fejl");
+                    string.Format(AppConstants.ErrorMessages.DatabaseInitError, ex.Message),
+                    AppConstants.WindowTitles.CriticalError);
 
                 // Luk applikationen da den ikke kan virke uden database
                 Shutdown();

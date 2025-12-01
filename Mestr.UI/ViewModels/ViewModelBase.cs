@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Mestr.Core.Constants;
 
 namespace Mestr.UI.ViewModels
 {
@@ -17,6 +18,7 @@ namespace Mestr.UI.ViewModels
         public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
 
         private readonly Dictionary<string, List<string>> _errors = [];
+        
         protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
@@ -42,6 +44,7 @@ namespace Mestr.UI.ViewModels
             _errors.Remove(propertyName);
             ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
         }
+        
         public IEnumerable GetErrors(string? propertyName)
         {
             if (propertyName != null && _errors.TryGetValue(propertyName, out var errors))
@@ -57,9 +60,10 @@ namespace Mestr.UI.ViewModels
             {
                 AddError(propertyName, $"{displayName} kan ikke være tomt.");
             }
-            else if (value.Length < 3)
+            else if (value.Length < AppConstants.Validation.MinTextLength)
             {
-                AddError(propertyName, $"{displayName} skal være mindst 3 tegn langt");
+                AddError(propertyName, 
+                    string.Format(AppConstants.ErrorMessages.DescriptionTooShort, AppConstants.Validation.MinTextLength));
             }
         }
 
@@ -70,13 +74,14 @@ namespace Mestr.UI.ViewModels
             // Check if amount is zero or negative
             if (amount <= 0)
             {
-                AddError(propertyName, "Beløb skal være større end 0.");
+                AddError(propertyName, AppConstants.ErrorMessages.AmountMustBePositive);
             }
 
-            // Optional: Check for upper limit
-            if (amount > 1_000_000) // Example max limit
+            // Check for upper limit
+            if (amount > AppConstants.Validation.MaxAmount)
             {
-                AddError(propertyName, "Beløb må ikke overstige 1.000.000.");
+                AddError(propertyName, 
+                    string.Format(AppConstants.ErrorMessages.AmountTooLarge, AppConstants.Validation.MaxAmount));
             }
         }
 
@@ -86,7 +91,7 @@ namespace Mestr.UI.ViewModels
 
             if (date.HasValue && date.Value.Date < DateTime.Today)
             {
-                AddError(propertyName, "Deadline skal være en fremtidig dato.");
+                AddError(propertyName, AppConstants.ErrorMessages.DateMustBeFuture);
             }
         }
     }

@@ -15,14 +15,16 @@ namespace Mestr.Services.Service
             _repository = companyProfileServiceRepo ?? throw new ArgumentNullException(nameof(companyProfileServiceRepo)); ;
         }
 
-        public CompanyProfile GetProfile()
+        public CompanyProfile? GetProfile()
         {
             return _repository.Get();
         }
 
         public void UpdateProfile(CompanyProfile profile)
         {
-            // Her kunne du validere input (f.eks. at CVR er tal)
+            if (profile == null)
+                throw new ArgumentNullException(nameof(profile));
+            
             _repository.Save(profile);
         }
     }

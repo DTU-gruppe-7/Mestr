@@ -23,7 +23,7 @@ namespace Mestr.Services.Service
             if (uuid == Guid.Empty) 
                 throw new ArgumentException("UUID cannot be empty.", nameof(uuid));
             
-            var earning = await _earningRepository.GetByUuidAsync(uuid);
+            var earning = await _earningRepository.GetByUuidAsync(uuid).ConfigureAwait(false);
             if (earning == null)
                 throw new ArgumentException("Earning not found.", nameof(uuid));
             
@@ -44,7 +44,7 @@ namespace Mestr.Services.Service
                 ProjectUuid = projectUuid
             };
             
-            await _earningRepository.AddAsync(earning);
+            await _earningRepository.AddAsync(earning).ConfigureAwait(false);
             return earning;
         }
         
@@ -56,7 +56,7 @@ namespace Mestr.Services.Service
             if (entity.IsPaid)
                 throw new InvalidOperationException("Betalte indtægter kan ikke slettes.");
             
-            await _earningRepository.DeleteAsync(entity.Uuid);
+            await _earningRepository.DeleteAsync(entity.Uuid).ConfigureAwait(false);
             return true;
         }
         
@@ -65,9 +65,9 @@ namespace Mestr.Services.Service
             if (entity == null) 
                 throw new ArgumentNullException(nameof(entity));
             
-            await _earningRepository.UpdateAsync(entity);
+            await _earningRepository.UpdateAsync(entity).ConfigureAwait(false);
             
-            var updatedEarning = await _earningRepository.GetByUuidAsync(entity.Uuid);
+            var updatedEarning = await _earningRepository.GetByUuidAsync(entity.Uuid).ConfigureAwait(false);
             return updatedEarning 
                 ?? throw new InvalidOperationException("Failed to retrieve updated earning.");
         }

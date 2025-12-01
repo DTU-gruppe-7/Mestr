@@ -17,7 +17,7 @@ namespace Mestr.Data.Repository
             using (var context = new dbContext())
             {
                 context.Earnings.Add(entity);
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -29,7 +29,8 @@ namespace Mestr.Data.Repository
             {
                 return await context.Earnings
                     .Include(e => e.Project)
-                    .FirstOrDefaultAsync(e => e.Uuid == uuid);
+                    .FirstOrDefaultAsync(e => e.Uuid == uuid)
+                    .ConfigureAwait(false);
             }
         }
 
@@ -40,7 +41,8 @@ namespace Mestr.Data.Repository
                 return await context.Earnings
                     .Include(e => e.Project)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .ToListAsync()
+                    .ConfigureAwait(false);
             }
         }
 
@@ -51,7 +53,9 @@ namespace Mestr.Data.Repository
             using (var context = new dbContext())
             {
                 // Fetch the existing entity from this context
-                var existing = await context.Earnings.FirstOrDefaultAsync(e => e.Uuid == entity.Uuid);
+                var existing = await context.Earnings
+                    .FirstOrDefaultAsync(e => e.Uuid == entity.Uuid)
+                    .ConfigureAwait(false);
                 
                 if (existing != null)
                 {
@@ -62,7 +66,7 @@ namespace Mestr.Data.Repository
                     existing.IsPaid = entity.IsPaid;
                     existing.ProjectUuid = entity.ProjectUuid;
                     
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
                 else
                 {
@@ -78,11 +82,13 @@ namespace Mestr.Data.Repository
 
             using (var context = new dbContext())
             {
-                var earning = await context.Earnings.FirstOrDefaultAsync(e => e.Uuid == uuid);
+                var earning = await context.Earnings
+                    .FirstOrDefaultAsync(e => e.Uuid == uuid)
+                    .ConfigureAwait(false);
                 if (earning != null)
                 {
                     context.Earnings.Remove(earning);
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
         }

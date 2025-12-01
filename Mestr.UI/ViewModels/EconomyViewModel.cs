@@ -1,5 +1,6 @@
 ﻿using Mestr.Core.Enum;
 using Mestr.Core.Model;
+using Mestr.Core.Constants;
 using Mestr.Services.Interface;
 using Mestr.UI.Command;
 using Mestr.UI.Utilities;
@@ -46,14 +47,17 @@ namespace Mestr.UI.ViewModels
             _onEarningSaved = onEarningSaved;
             _onExpenseSaved = onExpenseSaved;
 
-            TransactionTypes = new ObservableCollection<string> { "Udgift", "Indtægt" };
+            TransactionTypes = new ObservableCollection<string> { 
+                AppConstants.UI.TransactionTypes.Expense, 
+                AppConstants.UI.TransactionTypes.Earning 
+            };
             Categories = new ObservableCollection<string>();
             
             // Defaults for create mode
-            _selectedTransactionType = "Udgift";
+            _selectedTransactionType = AppConstants.UI.TransactionTypes.Expense;
             _description = string.Empty;
             _selectedCategory = string.Empty;
-            SelectedTransactionType = "Udgift";
+            SelectedTransactionType = AppConstants.UI.TransactionTypes.Expense;
             Date = DateTime.Now;
             CategoryVisibility = Visibility.Visible;
 

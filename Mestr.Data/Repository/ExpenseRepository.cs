@@ -17,7 +17,7 @@ namespace Mestr.Data.Repository
             using (var context = new dbContext())
             {
                 context.Expenses.Add(entity);
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -29,7 +29,8 @@ namespace Mestr.Data.Repository
             {
                 return await context.Expenses
                     .Include(e => e.Project)
-                    .FirstOrDefaultAsync(e => e.Uuid == uuid);
+                    .FirstOrDefaultAsync(e => e.Uuid == uuid)
+                    .ConfigureAwait(false);
             }
         }
 
@@ -40,7 +41,8 @@ namespace Mestr.Data.Repository
                 return await context.Expenses
                     .Include(e => e.Project)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .ToListAsync()
+                    .ConfigureAwait(false);
             }
         }
 
@@ -50,12 +52,12 @@ namespace Mestr.Data.Repository
 
             using (var context = new dbContext())
             {
-                // Fetch the existing entity from this context
-                var existing = await context.Expenses.FirstOrDefaultAsync(e => e.Uuid == entity.Uuid);
+                var existing = await context.Expenses
+                    .FirstOrDefaultAsync(e => e.Uuid == entity.Uuid)
+                    .ConfigureAwait(false);
                 
                 if (existing != null)
                 {
-                    // Update properties
                     existing.Description = entity.Description;
                     existing.Amount = entity.Amount;
                     existing.Date = entity.Date;
@@ -63,11 +65,10 @@ namespace Mestr.Data.Repository
                     existing.IsAccepted = entity.IsAccepted;
                     existing.ProjectUuid = entity.ProjectUuid;
                     
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
                 else
                 {
-                    // If not found, throw exception
                     throw new InvalidOperationException($"Expense with UUID {entity.Uuid} not found.");
                 }
             }
@@ -79,11 +80,13 @@ namespace Mestr.Data.Repository
 
             using (var context = new dbContext())
             {
-                var expense = await context.Expenses.FirstOrDefaultAsync(e => e.Uuid == uuid);
+                var expense = await context.Expenses
+                    .FirstOrDefaultAsync(e => e.Uuid == uuid)
+                    .ConfigureAwait(false);
                 if (expense != null)
                 {
                     context.Expenses.Remove(expense);
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
         }

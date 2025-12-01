@@ -1,4 +1,5 @@
 ﻿using Mestr.Core.Model;
+using Mestr.Core.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -9,7 +10,7 @@ namespace Mestr.Data.DbContext
     public class dbContext : Microsoft.EntityFrameworkCore.DbContext
     {
         // Constructor er nu public, så Repositories kan oprette deres egne instanser.
-        // Dette matcher "Unit of Work" princippet beskrevet i Pro C# 10 with .NET 6.
+        // Dette matcher "Unit of Work" princippet beskrevet in Pro C# 10 with .NET 6.
         public dbContext()
         {
             //Tom da databasen bliver oprettet i App.xaml.cs
@@ -32,7 +33,15 @@ namespace Mestr.Data.DbContext
                     .Build();
 
                 // Hent connection string fra filen
-                var connectionString = config.GetConnectionString("DefaultConnection");
+                var connectionString = config.GetConnectionString(AppConstants.Database.DefaultConnectionStringName);
+                
+                // Validate connection string
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    throw new InvalidOperationException(
+                        string.Format(AppConstants.ErrorMessages.ConnectionStringMissing, 
+                                     AppConstants.Database.DefaultConnectionStringName));
+                }
 
                 // Brug den
                 optionsBuilder.UseSqlite(connectionString);
@@ -94,7 +103,9 @@ namespace Mestr.Data.DbContext
                 entity.HasKey(e => e.Uuid);
                 entity.Property(e => e.Uuid).HasField("_uuid");
                 entity.Property(e => e.Description).IsRequired();
-                entity.Property(e => e.Amount).HasPrecision(18, 2).IsRequired();
+                entity.Property(e => e.Amount)
+                    .HasPrecision(AppConstants.Database.DecimalPrecision, AppConstants.Database.DecimalScale)
+                    .IsRequired();
                 entity.Property(e => e.Category).IsRequired();
                 entity.Property(e => e.Date).IsRequired();
 
@@ -108,7 +119,9 @@ namespace Mestr.Data.DbContext
                 entity.HasKey(e => e.Uuid);
                 entity.Property(e => e.Uuid).HasField("_uuid");
                 entity.Property(e => e.Description).IsRequired();
-                entity.Property(e => e.Amount).HasPrecision(18, 2).IsRequired();
+                entity.Property(e => e.Amount)
+                    .HasPrecision(AppConstants.Database.DecimalPrecision, AppConstants.Database.DecimalScale)
+                    .IsRequired();
                 entity.Property(e => e.Date).IsRequired();
 
                 // Explicit foreign key property

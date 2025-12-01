@@ -33,17 +33,17 @@ namespace Mestr.Test.Repository
         }
 
         [Fact]
-        public void AddClient_ToRepository_Succeeds()
+        public async Task AddClient_ToRepository_Succeeds()
         {
             // Arrange
-            var client = new Client(Guid.NewGuid(), "Test Client", "John Doe", "test@something.com", "12345678", "123 Test St", "12345", "Test City", "88888888");
+            var client = Client.Create(Guid.NewGuid(), "Test Client", "John Doe", "test@something.com", "12345678", "123 Test St", "12345", "Test City", "88888888");
             _clientsToCleanup.Add(client.Uuid);
 
             // Act
-            _clientRepository.AddAsync(client).Wait();
+            await _clientRepository.AddAsync(client);
 
             // Assert
-            var retrievedClient = _clientRepository.GetByUuidAsync(client.Uuid).Result;
+            var retrievedClient = await _clientRepository.GetByUuidAsync(client.Uuid);
             Assert.NotNull(retrievedClient);
             Assert.Equal(client.Uuid, retrievedClient.Uuid);
             Assert.Equal(client.Name, retrievedClient.Name);
@@ -51,15 +51,15 @@ namespace Mestr.Test.Repository
         }
 
         [Fact]
-        public void GetByUuid_ClientExists_ReturnsClient()
+        public async Task GetByUuid_ClientExists_ReturnsClient()
         {
             // Arrange
-            var client = new Client(Guid.NewGuid(), "Test Client", "Jane Doe", "jane@test.com", "87654321", "456 Test Ave", "54321", "Test Town", "99999999");
+            var client = Client.Create(Guid.NewGuid(), "Test Client", "Jane Doe", "jane@test.com", "87654321", "456 Test Ave", "54321", "Test Town", "99999999");
             _clientsToCleanup.Add(client.Uuid);
-            _clientRepository.AddAsync(client).Wait();
+            await _clientRepository.AddAsync(client);
 
             // Act
-            var retrievedClient = _clientRepository.GetByUuidAsync(client.Uuid).Result;
+            var retrievedClient = await _clientRepository.GetByUuidAsync(client.Uuid);
 
             // Assert
             Assert.NotNull(retrievedClient);
@@ -68,52 +68,52 @@ namespace Mestr.Test.Repository
         }
 
         [Fact]
-        public void GetByUuid_NonExistentClient_ReturnsNull()
+        public async Task GetByUuid_NonExistentClient_ReturnsNull()
         {
             // Arrange
             var nonExistentUuid = Guid.NewGuid();
 
             // Act
-            var result = _clientRepository.GetByUuidAsync(nonExistentUuid).Result;
+            var result = await _clientRepository.GetByUuidAsync(nonExistentUuid);
 
             // Assert
             Assert.Null(result);
         }
 
         [Fact]
-        public void AddNullClient_ThrowsArgumentNullException()
+        public async Task AddNullClient_ThrowsArgumentNullException()
         {
             // Arrange
             Client? client = null;
 
             // Act & Assert
-            Assert.ThrowsAsync<ArgumentNullException>(() => _clientRepository.AddAsync(client)).Wait();
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _clientRepository.AddAsync(client));
         }
 
         [Fact]
-        public void GetByUuid_EmptyGuid_ThrowsArgumentNullException()
+        public async Task GetByUuid_EmptyGuid_ThrowsArgumentNullException()
         {
             // Arrange
             var emptyGuid = Guid.Empty;
 
             // Act & Assert
-            Assert.ThrowsAsync<ArgumentNullException>(() => _clientRepository.GetByUuidAsync(emptyGuid)).Wait();
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _clientRepository.GetByUuidAsync(emptyGuid));
         }
 
         [Fact]
-        public void GetAll_ReturnsAllClients()
+        public async Task GetAll_ReturnsAllClients()
         {
             // Arrange
-            var client1 = new Client(Guid.NewGuid(), "Client 1", "Person 1", "client1@test.com", "11111111", "Address 1", "11111", "City 1", "12345678");
-            var client2 = new Client(Guid.NewGuid(), "Client 2", "Person 2", "client2@test.com", "22222222", "Address 2", "22222", "City 2", "87654321");
+            var client1 = Client.Create(Guid.NewGuid(), "Client 1", "Person 1", "client1@test.com", "11111111", "Address 1", "11111", "City 1", "12345678");
+            var client2 = Client.Create(Guid.NewGuid(), "Client 2", "Person 2", "client2@test.com", "22222222", "Address 2", "22222", "City 2", "87654321");
             _clientsToCleanup.Add(client1.Uuid);
             _clientsToCleanup.Add(client2.Uuid);
 
-            _clientRepository.AddAsync(client1).Wait();
-            _clientRepository.AddAsync(client2).Wait();
+            await _clientRepository.AddAsync(client1);
+            await _clientRepository.AddAsync(client2);
 
             // Act
-            var allClients = _clientRepository.GetAllAsync().Result;
+            var allClients = await _clientRepository.GetAllAsync();
 
             // Assert
             Assert.Contains(allClients, c => c.Uuid == client1.Uuid);
@@ -121,38 +121,62 @@ namespace Mestr.Test.Repository
         }
 
         [Fact]
-        public void Update_ExistingClient_UpdatesClient()
+        public async Task Update_ExistingClient_UpdatesClient()
         {
             // Arrange
-            var client = new Client(Guid.NewGuid(), "Original Name", "Original Person", "original@test.com", "33333333", "Original Address", "33333", "Original City", "11111111");
+            var client = Client.Create(Guid.NewGuid(), "Original Name", "Original Person", "original@test.com", "33333333", "Original Address", "33333", "Original City", "11111111");
             _clientsToCleanup.Add(client.Uuid);
-            _clientRepository.AddAsync(client).Wait();
+            await _clientRepository.AddAsync(client);
 
             // Act
             client.Name = "Updated Name";
             client.Email = "updated@test.com";
-            _clientRepository.UpdateAsync(client).Wait();
+            await _clientRepository.UpdateAsync(client);
 
             // Assert
-            var retrievedClient = _clientRepository.GetByUuidAsync(client.Uuid).Result;
+            var retrievedClient = await _clientRepository.GetByUuidAsync(client.Uuid);
             Assert.Equal("Updated Name", retrievedClient.Name);
             Assert.Equal("updated@test.com", retrievedClient.Email);
         }
 
         [Fact]
-        public void Delete_ExistingClient_RemovesClient()
+        public async Task Delete_ExistingClient_RemovesClient()
         {
             // Arrange
-            var client = new Client(Guid.NewGuid(), "To Be Deleted", "Delete Person", "delete@test.com", "44444444", "Delete Address", "44444", "Delete City", "22222222");
+            var client = Client.Create(Guid.NewGuid(), "To Be Deleted", "Delete Person", "delete@test.com", "44444444", "Delete Address", "44444", "Delete City", "22222222");
             _clientsToCleanup.Add(client.Uuid);
-            _clientRepository.AddAsync(client).Wait();
+            await _clientRepository.AddAsync(client);
 
             // Act
-            _clientRepository.DeleteAsync(client.Uuid).Wait();
+            await _clientRepository.DeleteAsync(client.Uuid);
 
             // Assert
-            var retrievedClient = _clientRepository.GetByUuidAsync(client.Uuid).Result;
+            var retrievedClient = await _clientRepository.GetByUuidAsync(client.Uuid);
             Assert.Null(retrievedClient);
+        }
+
+        [Fact]
+        public void Create_WithInvalidEmail_ThrowsArgumentException()
+        {
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() =>
+                Client.Create(Guid.NewGuid(), "Test", "Person", "invalid-email", "12345678", "Address", "12345", "City"));
+        }
+
+        [Fact]
+        public void Create_WithInvalidPhoneNumber_ThrowsArgumentException()
+        {
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() =>
+                Client.Create(Guid.NewGuid(), "Test", "Person", "test@example.com", "123", "Address", "12345", "City"));
+        }
+
+        [Fact]
+        public void Create_WithEmptyContactPerson_ThrowsArgumentException()
+        {
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() =>
+                Client.Create(Guid.NewGuid(), "Test", "", "test@example.com", "12345678", "Address", "12345", "City"));
         }
 
         public async ValueTask DisposeAsync()

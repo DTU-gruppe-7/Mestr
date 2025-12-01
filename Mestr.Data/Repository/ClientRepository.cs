@@ -17,7 +17,7 @@ namespace Mestr.Data.Repository
             using (var context = new dbContext())
             {
                 context.Clients.Add(entity);
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -29,7 +29,8 @@ namespace Mestr.Data.Repository
             {
                 return await context.Clients
                     .Include(c => c.Projects)
-                    .FirstOrDefaultAsync(c => c.Uuid == uuid);
+                    .FirstOrDefaultAsync(c => c.Uuid == uuid)
+                    .ConfigureAwait(false);
             }
         }
 
@@ -40,7 +41,8 @@ namespace Mestr.Data.Repository
                 return await context.Clients
                     .Include(c => c.Projects)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .ToListAsync()
+                    .ConfigureAwait(false);
             }
         }
 
@@ -50,9 +52,8 @@ namespace Mestr.Data.Repository
 
             using (var context = new dbContext())
             {
-                // Attach og set state til Modified er ofte den enkleste måde at opdatere disconnected entities
                 context.Clients.Update(entity);
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -62,11 +63,13 @@ namespace Mestr.Data.Repository
 
             using (var context = new dbContext())
             {
-                var client = await context.Clients.FirstOrDefaultAsync(c => c.Uuid == uuid);
+                var client = await context.Clients
+                    .FirstOrDefaultAsync(c => c.Uuid == uuid)
+                    .ConfigureAwait(false);
                 if (client != null)
                 {
                     context.Clients.Remove(client);
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
         }
