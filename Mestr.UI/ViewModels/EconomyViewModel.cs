@@ -17,6 +17,10 @@ namespace Mestr.UI.ViewModels
         
         private readonly IEarningService _earningService;
         private readonly IExpenseService _expenseService;
+        private readonly Action<Earning>? _onEarningSaved;
+        private readonly Action<Expense>? _onExpenseSaved;
+        private readonly Action<Earning>? _onEarningDeleted;
+        private readonly Action<Expense>? _onExpenseDeleted;
 
         private string _selectedTransactionType;
         private string _description;
@@ -28,11 +32,18 @@ namespace Mestr.UI.ViewModels
         private bool _isTypeEnabled = true;
 
         // Constructor 1: Opret ny transaktion (accepterer services som parameter)
-        public EconomyViewModel(Guid projectUuid, IEarningService earningService, IExpenseService expenseService)
+        public EconomyViewModel(
+            Guid projectUuid, 
+            IEarningService earningService, 
+            IExpenseService expenseService,
+            Action<Earning>? onEarningSaved = null,
+            Action<Expense>? onExpenseSaved = null)
         {
             _projectUuid = projectUuid;
             _earningService = earningService ?? throw new ArgumentNullException(nameof(earningService));
             _expenseService = expenseService ?? throw new ArgumentNullException(nameof(expenseService));
+            _onEarningSaved = onEarningSaved;
+            _onExpenseSaved = onExpenseSaved;
 
             TransactionTypes = new ObservableCollection<string> { "Udgift", "Indtægt" };
             Categories = new ObservableCollection<string>();
@@ -52,12 +63,19 @@ namespace Mestr.UI.ViewModels
         }
 
         // Constructor 2: Rediger eksisterende udgift
-        public EconomyViewModel(Guid projectUuid, IEarningService earningService, IExpenseService expenseService, Expense expenseToEdit) 
-            : this(projectUuid, earningService, expenseService)
+        public EconomyViewModel(
+            Guid projectUuid, 
+            IEarningService earningService, 
+            IExpenseService expenseService, 
+            Expense expenseToEdit,
+            Action<Expense>? onExpenseSaved = null,
+            Action<Expense>? onExpenseDeleted = null) 
+            : this(projectUuid, earningService, expenseService, null, onExpenseSaved)
         {
             if (expenseToEdit == null) throw new ArgumentNullException(nameof(expenseToEdit));
             
             _editingId = expenseToEdit.Uuid;
+            _onExpenseDeleted = onExpenseDeleted;
             IsTypeEnabled = false;
             SelectedTransactionType = "Udgift";
 
@@ -69,12 +87,19 @@ namespace Mestr.UI.ViewModels
         }
 
         // Constructor 3: Rediger eksisterende indtægt
-        public EconomyViewModel(Guid projectUuid, IEarningService earningService, IExpenseService expenseService, Earning earningToEdit) 
-            : this(projectUuid, earningService, expenseService)
+        public EconomyViewModel(
+            Guid projectUuid, 
+            IEarningService earningService, 
+            IExpenseService expenseService, 
+            Earning earningToEdit,
+            Action<Earning>? onEarningSaved = null,
+            Action<Earning>? onEarningDeleted = null) 
+            : this(projectUuid, earningService, expenseService, onEarningSaved, null)
         {
             if (earningToEdit == null) throw new ArgumentNullException(nameof(earningToEdit));
             
             _editingId = earningToEdit.Uuid;
+            _onEarningDeleted = onEarningDeleted;
             IsTypeEnabled = false;
             SelectedTransactionType = "Indtægt";
             Description = earningToEdit.Description;
@@ -231,7 +256,7 @@ namespace Mestr.UI.ViewModels
 
                     if (_editingId.HasValue)
                     {
-                        // EDIT MODE: Hent -> Modificer -> Gem
+                        // EDIT MODE: Hent og modificer objekt
                         var existingExpense = _expenseService.GetByUuid(_editingId.Value);
                         if (existingExpense != null)
                         {
@@ -241,7 +266,8 @@ namespace Mestr.UI.ViewModels
                             existingExpense.Category = categoryEnum;
                             existingExpense.IsAccepted = IsPaid;
                             
-                            _expenseService.Update(existingExpense);
+                            // Notify parent through callback
+                            _onExpenseSaved?.Invoke(existingExpense);
                         }
                         else
                         {
@@ -252,20 +278,21 @@ namespace Mestr.UI.ViewModels
                     }
                     else
                     {
-                        // CREATE MODE
-                        _expenseService.AddNewExpense(
-                            _projectUuid, 
-                            Description, 
-                            Amount, 
-                            Date, 
-                            categoryEnum);
+                        // CREATE MODE: Create new object
+                        var newExpense = new Expense(Guid.NewGuid(), Description, Amount, Date, categoryEnum, IsPaid)
+                        {
+                            ProjectUuid = _projectUuid
+                        };
+                        
+                        // Notify parent through callback
+                        _onExpenseSaved?.Invoke(newExpense);
                     }
                 }
                 else // Indtægt
                 {
                     if (_editingId.HasValue)
                     {
-                        // EDIT MODE: Hent -> Modificer -> Gem
+                        // EDIT MODE: Hent og modificer objekt
                         var existingEarning = _earningService.GetByUuid(_editingId.Value);
                         if (existingEarning != null)
                         {
@@ -274,7 +301,8 @@ namespace Mestr.UI.ViewModels
                             existingEarning.Date = Date;
                             existingEarning.IsPaid = IsPaid;
                             
-                            _earningService.Update(existingEarning);
+                            // Notify parent through callback
+                            _onEarningSaved?.Invoke(existingEarning);
                         }
                         else
                         {
@@ -285,12 +313,14 @@ namespace Mestr.UI.ViewModels
                     }
                     else
                     {
-                        // CREATE MODE
-                        _earningService.AddNewEarning(
-                            _projectUuid, 
-                            Description, 
-                            Amount, 
-                            Date);
+                        // CREATE MODE: Create new object
+                        var newEarning = new Earning(Guid.NewGuid(), Description, Amount, Date, IsPaid)
+                        {
+                            ProjectUuid = _projectUuid
+                        };
+                        
+                        // Notify parent through callback
+                        _onEarningSaved?.Invoke(newEarning);
                     }
                 }
 
@@ -323,31 +353,43 @@ namespace Mestr.UI.ViewModels
             {
                 if (SelectedTransactionType == "Udgift")
                 {
+                    // Try to get from database first
                     var expense = _expenseService.GetByUuid(_editingId!.Value);
-                    if (expense != null)
+                    
+                    // If not found in database, create a temporary object with the ID for tracking
+                    if (expense == null)
                     {
-                        _expenseService.Delete(expense);
+                        // Create a minimal expense object for deletion tracking
+                        if (!Enum.TryParse(SelectedCategory, out ExpenseCategory categoryEnum))
+                        {
+                            categoryEnum = ExpenseCategory.Andet;
+                        }
+                        
+                        expense = new Expense(_editingId.Value, Description, Amount, Date, categoryEnum, IsPaid)
+                        {
+                            ProjectUuid = _projectUuid
+                        };
                     }
-                    else
-                    {
-                        MessageBox.Show("Udgiften blev ikke fundet.", "Fejl",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
+                    
+                    // Notify parent through callback
+                    _onExpenseDeleted?.Invoke(expense);
                 }
                 else // Indtægt
                 {
+                    // Try to get from database first
                     var earning = _earningService.GetByUuid(_editingId!.Value);
-                    if (earning != null)
+                    
+                    // If not found in database, create a temporary object with the ID for tracking
+                    if (earning == null)
                     {
-                        _earningService.Delete(earning);
+                        earning = new Earning(_editingId.Value, Description, Amount, Date, IsPaid)
+                        {
+                            ProjectUuid = _projectUuid
+                        };
                     }
-                    else
-                    {
-                        MessageBox.Show("Indtægten blev ikke fundet.", "Fejl",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
+                    
+                    // Notify parent through callback
+                    _onEarningDeleted?.Invoke(earning);
                 }
 
                 CloseWindow();

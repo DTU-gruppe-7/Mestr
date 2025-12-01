@@ -50,8 +50,26 @@ namespace Mestr.Data.Repository
 
             using (var context = new dbContext())
             {
-                context.Expenses.Update(entity);
-                context.SaveChanges();
+                // Fetch the existing entity from this context
+                var existing = context.Expenses.FirstOrDefault(e => e.Uuid == entity.Uuid);
+                
+                if (existing != null)
+                {
+                    // Update properties
+                    existing.Description = entity.Description;
+                    existing.Amount = entity.Amount;
+                    existing.Date = entity.Date;
+                    existing.Category = entity.Category;
+                    existing.IsAccepted = entity.IsAccepted;
+                    existing.ProjectUuid = entity.ProjectUuid;
+                    
+                    context.SaveChanges();
+                }
+                else
+                {
+                    // If not found, throw exception
+                    throw new InvalidOperationException($"Expense with UUID {entity.Uuid} not found.");
+                }
             }
         }
 

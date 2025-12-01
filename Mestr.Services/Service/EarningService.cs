@@ -61,18 +61,12 @@ namespace Mestr.Services.Service
             if (entity == null) 
                 throw new ArgumentNullException(nameof(entity));
             
-            var existing = _earningRepository.GetByUuid(entity.Uuid);
-            if (existing == null)
-                throw new ArgumentException("Earning not found.", nameof(entity));
+            // Just pass to repository - it will handle fetching and updating
+            _earningRepository.Update(entity);
             
-            // Update properties
-            existing.Description = entity.Description;
-            existing.Amount = entity.Amount;
-            existing.Date = entity.Date;
-            existing.IsPaid = entity.IsPaid;
-            
-            _earningRepository.Update(existing);
-            return existing;
+            // Return the updated entity from repository
+            return _earningRepository.GetByUuid(entity.Uuid) 
+                ?? throw new InvalidOperationException("Failed to retrieve updated earning.");
         }
     }
 }
