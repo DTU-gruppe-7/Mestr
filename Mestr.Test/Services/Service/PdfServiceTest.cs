@@ -50,16 +50,16 @@ namespace Mestr.Test.Services.Service
 
         public async ValueTask InitializeAsync()
         {
-            await EnsureCompanyProfileExistsAsync();
+            EnsureCompanyProfileExists();
         }
 
         #region Helper Methods
 
-        private async Task EnsureCompanyProfileExistsAsync()
+        private void EnsureCompanyProfileExists()
         {
             try
             {
-                var existingProfile = await _companyProfileRepository.GetAsync();
+                var existingProfile = _companyProfileRepository.Get();
                 
                 if (existingProfile == null)
                 {
@@ -74,7 +74,7 @@ namespace Mestr.Test.Services.Service
                         BankAccountNumber = "12345678"
                     };
                     
-                    await _companyProfileRepository.SaveAsync(profile);
+                    _companyProfileRepository.Save(profile);
                 }
             }
             catch
