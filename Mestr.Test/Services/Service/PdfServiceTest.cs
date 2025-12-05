@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 using Mestr.Core.Model;
 using Mestr.Core.Enum;
 using Mestr.Data.Repository;
+using Mestr.Services.Service;
+using Mestr.Services.Interface;
+using Mestr.Data.Interface;
 using QuestPDF.Infrastructure;
 
 namespace Mestr.Test.Services.Service
@@ -12,13 +16,13 @@ namespace Mestr.Test.Services.Service
     /// <summary>
     /// Integration tests for PdfService - Testing core invoice generation functionality
     /// </summary>
-    public class PdfServiceTest : IDisposable
+    public class PdfServiceTest : IAsyncLifetime
     {
-        private readonly PdfService _sut;
-        private readonly CompanyProfileRepository _companyProfileRepository;
-        private readonly ProjectRepository _projectRepository;
-        private readonly ClientRepository _clientRepository;
-        private readonly EarningRepository _earningRepository;
+        private readonly IPdfService _sut;
+        private readonly ICompanyProfileRepository _companyProfileRepository;
+        private readonly IRepository<Project> _projectRepository;
+        private readonly IRepository<Client> _clientRepository;
+        private readonly IRepository<Earning> _earningRepository;
         private readonly List<Guid> _projectsToCleanup;
         private readonly List<Guid> _clientsToCleanup;
         private readonly List<Guid> _earningsToCleanup;
@@ -29,26 +33,33 @@ namespace Mestr.Test.Services.Service
             // Configure QuestPDF license for testing
             QuestPDF.Settings.License = LicenseType.Community;
             
-            _sut = new PdfService();
-            _companyProfileRepository = new CompanyProfileRepository();
             _projectRepository = new ProjectRepository();
             _clientRepository = new ClientRepository();
             _earningRepository = new EarningRepository();
+            _companyProfileRepository = new CompanyProfileRepository();
+            
+            var projectService = new ProjectService(_projectRepository);
+            var companyProfileService = new CompanyProfileService(_companyProfileRepository);
+            _sut = new PdfService(projectService, companyProfileService);
+            
             _projectsToCleanup = new List<Guid>();
             _clientsToCleanup = new List<Guid>();
             _earningsToCleanup = new List<Guid>();
             _testRunId = Guid.NewGuid().ToString().Substring(0, 8);
+        }
 
-            EnsureCompanyProfileExists();
+        public async ValueTask InitializeAsync()
+        {
+            await EnsureCompanyProfileExistsAsync();
         }
 
         #region Helper Methods
 
-        private void EnsureCompanyProfileExists()
+        private async Task EnsureCompanyProfileExistsAsync()
         {
             try
             {
-                var existingProfile = _companyProfileRepository.Get();
+                var existingProfile = await _companyProfileRepository.GetAsync();
                 
                 if (existingProfile == null)
                 {
@@ -63,7 +74,7 @@ namespace Mestr.Test.Services.Service
                         BankAccountNumber = "12345678"
                     };
                     
-                    _companyProfileRepository.Save(profile);
+                    await _companyProfileRepository.SaveAsync(profile);
                 }
             }
             catch
@@ -72,9 +83,9 @@ namespace Mestr.Test.Services.Service
             }
         }
 
-        private Project CreateTestProject(bool isBusinessClient = true, bool hasEarnings = true)
+        private async Task<Project> CreateTestProjectAsync(bool isBusinessClient = true, bool hasEarnings = true)
         {
-            var client = new Client(
+            var client = Client.Create(
                 Guid.NewGuid(),
                 isBusinessClient ? $"PdfTestCompany_{_testRunId}" : $"PdfJohnDoe_{_testRunId}",
                 $"PdfPerson_{_testRunId}",
@@ -85,7 +96,7 @@ namespace Mestr.Test.Services.Service
                 "Testby",
                 isBusinessClient ? "12345678" : null
             );
-            _clientRepository.Add(client);
+            await _clientRepository.AddAsync(client);
             _clientsToCleanup.Add(client.Uuid);
 
             var project = new Project(
@@ -98,7 +109,7 @@ namespace Mestr.Test.Services.Service
                 ProjectStatus.Aktiv,
                 null
             );
-            _projectRepository.Add(project);
+            await _projectRepository.AddAsync(project);
             _projectsToCleanup.Add(project.Uuid);
 
             if (hasEarnings)
@@ -107,12 +118,12 @@ namespace Mestr.Test.Services.Service
                 {
                     ProjectUuid = project.Uuid
                 };
-                _earningRepository.Add(earning);
+                await _earningRepository.AddAsync(earning);
                 _earningsToCleanup.Add(earning.Uuid);
                 
-                System.Threading.Thread.Sleep(100);
+                await Task.Delay(100);
                 
-                project = _projectRepository.GetByUuid(project.Uuid);
+                project = await _projectRepository.GetByUuidAsync(project.Uuid);
             }
 
             return project;
@@ -123,20 +134,20 @@ namespace Mestr.Test.Services.Service
         #region Tests
 
         [Fact]
-        public void GeneratePdfInvoice_WithNullProject_ShouldThrowArgumentNullException()
+        public async Task GeneratePdfInvoice_WithNullProject_ShouldThrowArgumentNullException()
         {
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => _sut.GeneratePdfInvoice(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _sut.GeneratePdfInvoiceAsync(null));
         }
 
         [Fact]
-        public void GeneratePdfInvoice_WithBusinessClient_ShouldGeneratePDF()
+        public async Task GeneratePdfInvoice_WithBusinessClient_ShouldGeneratePDF()
         {
             // Arrange
-            var project = CreateTestProject(isBusinessClient: true);
+            var project = await CreateTestProjectAsync(isBusinessClient: true);
 
             // Act
-            var result = _sut.GeneratePdfInvoice(project);
+            var result = await _sut.GeneratePdfInvoiceAsync(project);
 
             // Assert
             Assert.NotNull(result);
@@ -144,13 +155,13 @@ namespace Mestr.Test.Services.Service
         }
 
         [Fact]
-        public void GeneratePdfInvoice_WithPrivateClient_ShouldGeneratePDF()
+        public async Task GeneratePdfInvoice_WithPrivateClient_ShouldGeneratePDF()
         {
             // Arrange
-            var project = CreateTestProject(isBusinessClient: false);
+            var project = await CreateTestProjectAsync(isBusinessClient: false);
 
             // Act
-            var result = _sut.GeneratePdfInvoice(project);
+            var result = await _sut.GeneratePdfInvoiceAsync(project);
 
             // Assert
             Assert.NotNull(result);
@@ -158,13 +169,13 @@ namespace Mestr.Test.Services.Service
         }
 
         [Fact]
-        public void GeneratePdfInvoice_WithNoEarnings_ShouldGeneratePDF()
+        public async Task GeneratePdfInvoice_WithNoEarnings_ShouldGeneratePDF()
         {
             // Arrange
-            var project = CreateTestProject(hasEarnings: false);
+            var project = await CreateTestProjectAsync(hasEarnings: false);
 
             // Act
-            var result = _sut.GeneratePdfInvoice(project);
+            var result = await _sut.GeneratePdfInvoiceAsync(project);
 
             // Assert
             Assert.NotNull(result);
@@ -172,13 +183,13 @@ namespace Mestr.Test.Services.Service
         }
 
         [Fact]
-        public void GeneratePdfInvoice_ShouldReturnByteArray()
+        public async Task GeneratePdfInvoice_ShouldReturnByteArray()
         {
             // Arrange
-            var project = CreateTestProject();
+            var project = await CreateTestProjectAsync();
 
             // Act
-            var result = _sut.GeneratePdfInvoice(project);
+            var result = await _sut.GeneratePdfInvoiceAsync(project);
 
             // Assert
             Assert.IsType<byte[]>(result);
@@ -186,26 +197,26 @@ namespace Mestr.Test.Services.Service
 
         #endregion
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
             foreach (var earningUuid in _earningsToCleanup)
             {
-                try { _earningRepository.Delete(earningUuid); } catch { }
+                try { await _earningRepository.DeleteAsync(earningUuid); } catch { }
             }
 
-            System.Threading.Thread.Sleep(100);
+            await Task.Delay(100);
 
             foreach (var projectUuid in _projectsToCleanup)
             {
-                try { _projectRepository.Delete(projectUuid); } catch { }
+                try { await _projectRepository.DeleteAsync(projectUuid); } catch { }
             }
 
             foreach (var clientUuid in _clientsToCleanup)
             {
-                try { _clientRepository.Delete(clientUuid); } catch { }
+                try { await _clientRepository.DeleteAsync(clientUuid); } catch { }
             }
 
-            System.Threading.Thread.Sleep(100);
+            await Task.Delay(100);
         }
     }
 }
