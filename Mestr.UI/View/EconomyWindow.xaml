@@ -44,7 +44,7 @@
                     </Grid.RowDefinitions>
                     <TextBox x:Name="descriptionBox"
                              Grid.Row="0"
-                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                             Text="{Binding Description, UpdateSourceTrigger=LostFocus, ValidatesOnNotifyDataErrors=True}"
                              Style="{StaticResource ModernTextBoxStyle}"
                              Height="35"/>
                     <ItemsControl Grid.Row="1"
@@ -67,7 +67,7 @@
                     </Grid.RowDefinitions>
                     <TextBox x:Name="amountBox"
                              Grid.Row="0"
-                             Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                             Text="{Binding Amount, UpdateSourceTrigger=LostFocus, ValidatesOnNotifyDataErrors=True}"
                              Style="{StaticResource ModernTextBoxStyle}"
                              Height="35"
                              PreviewTextInput="AmountBox_PreviewTextInput"
@@ -107,7 +107,7 @@
                         <RowDefinition Height="20"/>
                     </Grid.RowDefinitions>
                     <DatePicker Grid.Row="0"
-                                SelectedDate="{Binding Date, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                SelectedDate="{Binding Date, UpdateSourceTrigger=LostFocus, ValidatesOnNotifyDataErrors=True}"
                                 Style="{StaticResource ModernDatePickerStyle}"
                                 Height="35"/>
                 </Grid>

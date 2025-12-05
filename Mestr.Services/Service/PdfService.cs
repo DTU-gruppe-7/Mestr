@@ -16,13 +16,12 @@ public class PdfService : IPdfService
     private readonly IProjectService _projectService;
     private readonly ICompanyProfileService _companyProfileService;
 
-    public PdfService()
+    public PdfService(IProjectService projectService, ICompanyProfileService companyProfileService)
     {
-        _projectService = new ProjectService();
-        _companyProfileService = new CompanyProfileService();
+        _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
+        _companyProfileService = companyProfileService ?? throw new ArgumentNullException(nameof(companyProfileService));
     }
-
-    public byte[] GeneratePdfInvoice(Project project)
+    public async Task<byte[]> GeneratePdfInvoiceAsync(Project project)
     {
         if (project == null)
             throw new ArgumentNullException(nameof(project));
@@ -54,7 +53,7 @@ public class PdfService : IPdfService
             }
             
             // Update project in database
-            _projectService.UpdateProject(project);
+            await _projectService.UpdateProjectAsync(project).ConfigureAwait(false);
         }
 
         // Create PDF

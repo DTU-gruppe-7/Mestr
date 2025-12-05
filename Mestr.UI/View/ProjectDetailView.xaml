@@ -7,488 +7,360 @@
              d:DesignHeight="700" d:DesignWidth="1000"
              Background="#F5F7FA">
 
-    <Grid Margin="20">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="10,0,10,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <Button Grid.Column="0"
-                    Content="Tilbage"
-                    Style="{StaticResource HomeButtonStyle}"
-                    Command="{Binding NavigateToDashboardCommand}"
-                    VerticalAlignment="Center"/>
-
-            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                <TextBox Text="{Binding Project.Name, UpdateSourceTrigger=PropertyChanged, FallbackValue='Projekt Navn'}"
-                 FontSize="24" 
-                 FontWeight="SemiBold"
-                 Foreground="#1E293B"
-                 HorizontalAlignment="Center"
-                 HorizontalContentAlignment="Center"
-                 Background="Transparent"
-                 BorderThickness="0"
-                 BorderBrush="Gray"
-                 MinWidth="200"/>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
-                    <TextBlock Text="Status: " FontSize="14" Foreground="#555" VerticalAlignment="Center"/>
-                    <ComboBox ItemsSource="{Binding AvailableStatuses}"
-                              SelectedItem="{Binding Project.Status, Mode=TwoWay}"
-                              Style="{StaticResource InlineComboBoxStyle}"
-                              ItemContainerStyle="{StaticResource InlineComboBoxItemStyle}"
-                              VerticalAlignment="Center"/>
-                </StackPanel>
-                <TextBlock FontSize="14" Foreground="#555" HorizontalAlignment="Center" Margin="0,5,0,0">
-                    <Run Text="Kunde: "/>
-                    <Run Text="{Binding Project.Client.Name}"/>
-                </TextBlock>
-            </StackPanel>
-
-            <Button Grid.Column="2"
-                    VerticalAlignment="Center"
-                   Command="{Binding ToggleProjectStatusCommand}">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource LinkButton}">
-                        <Setter Property="Content" Value="Afslut projekt"/>
-
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsProjectCompleted}" Value="True">
-                                <Setter Property="Content" Value="Genåbn projekt"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-        </Grid>
-
-
-        <Border Grid.Row="1"
-                Background="White"
-                CornerRadius="8"
-                BorderBrush="#E0E0E0"
-                BorderThickness="1"
-                Padding="25">
-            <Border.Effect>
-                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="5" Opacity="0.25" BlurRadius="20"/>
-            </Border.Effect>
-
+        <!-- Navigation Top Bar -->
+        <Border Grid.Row="0" Style="{StaticResource NavigationBarStyle}">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button Content="Projekter" 
+                            Style="{StaticResource NavTabButtonStyle}"
+                            Command="{Binding NavigateToDashboardCommand}"/>
+                    
+                    <Button Content="Kunder" 
+                            Style="{StaticResource NavTabButtonStyle}"
+                            IsEnabled="False"
+                            Opacity="0.6"/>
+                </StackPanel>
 
-                <TextBlock Grid.Row="0"
-                           Text="PROJEKTOVERSIGT" 
-                           FontSize="14"
-                           FontWeight="SemiBold"
-                           Foreground="#888"
-                           Margin="0,0,0,10"/>
-
-                <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0">
-                    <TabItem Header="Indtægter &amp; Udgifter" IsSelected="True">
-                        <TabItem.Style>
-                            <Style TargetType="TabItem">
-                                <Setter Property="Foreground" Value="#1E293B"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="Padding" Value="15,10"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TabItem">
-                                            <Grid>
-                                                <Border Name="Border"
-                                                        Background="#F5F7FA"
-                                                        BorderBrush="#E0E0E0"
-                                                        BorderThickness="0,0,0,2"
-                                                        Padding="{TemplateBinding Padding}">
-                                                    <ContentPresenter ContentSource="Header"
-                                                                      HorizontalAlignment="Center"
-                                                                      VerticalAlignment="Center"/>
-                                                </Border>
-                                            </Grid>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#1E293B"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TabItem.Style>
-
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.Resources>
-                                <Style x:Key="HeaderStyle" TargetType="DataGridColumnHeader">
-                                    <Setter Property="Background" Value="Transparent"/>
-                                    <Setter Property="Foreground" Value="#1E293B"/>
-                                    <Setter Property="FontWeight" Value="SemiBold"/>
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="Padding" Value="0,10,5,5"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="DataGridColumnHeader">
-                                                <Grid>
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <ContentPresenter VerticalAlignment="Center"/>
-                                                            <Path x:Name="SortArrow"
-                                                                  Margin="5,0,0,0"
-                                                                  VerticalAlignment="Center"
-                                                                  Width="8"
-                                                                  Height="10"
-                                                                  Stretch="Fill"
-                                                                  Visibility="Collapsed"
-                                                                  Fill="#1E293B"
-                                                                  Data="M 0 4 L 4 0 L 8 4 Z"/>
-                                                        </StackPanel>
-                                                    </Border>
-                                                </Grid>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="SortDirection" Value="Ascending">
-                                                        <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
-                                                        <Setter TargetName="SortArrow" Property="Data" Value="M 0 4 L 4 0 L 8 4 Z"/>
-                                                    </Trigger>
-                                                    <Trigger Property="SortDirection" Value="Descending">
-                                                        <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
-                                                        <Setter TargetName="SortArrow" Property="Data" Value="M 0 0 L 4 4 L 8 0 Z"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-
-                                <Style x:Key="CellStyle" TargetType="DataGridCell">
-                                    <Setter Property="Padding" Value="0,5,5,5" />
-                                    <Setter Property="BorderThickness" Value="0" />
-                                </Style>
-                                
-                                <!-- ✅ NY: Row style med hånd-cursor og hover-effekt -->
-                                <Style x:Key="RowStyle" TargetType="DataGridRow">
-                                    <Setter Property="Cursor" Value="Hand" />
-                                    <EventSetter Event="MouseLeftButtonUp" Handler="Row_MouseLeftButtonUp"/>
-
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#F0F4F8" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                                
-                                <Style x:Key="ListTitle" TargetType="TextBlock">
-                                    <Setter Property="FontSize" Value="18"/>
-                                    <Setter Property="FontWeight" Value="SemiBold"/>
-                                    <Setter Property="Foreground" Value="#333"/>
-                                    <Setter Property="Margin" Value="0,0,0,8"/>
-                                </Style>
-                            </Grid.Resources>
-
-                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                                <StackPanel Orientation="Horizontal">
-                                    <!-- Indtægter -->
-                                    <StackPanel Width="440" Margin="0,0,20,0">
-                                        <TextBlock Text="Indtægter" Style="{StaticResource ListTitle}"/>
-                                        <DataGrid ItemsSource="{Binding Earnings}"
-                                              AutoGenerateColumns="False"
-                                              IsReadOnly="True"
-                                              CanUserSortColumns="True"
-                                              BorderThickness="0"
-                                              Background="Transparent"
-                                              HeadersVisibility="Column"
-                                              GridLinesVisibility="Horizontal"
-                                              HorizontalGridLinesBrush="#EAEBEE"
-                                              ColumnHeaderStyle="{StaticResource HeaderStyle}"
-                                              CellStyle="{StaticResource CellStyle}"
-                                              RowStyle="{StaticResource RowStyle}">
-                                            <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Navn" Binding="{Binding Description}" Width="*" />
-                                                <DataGridTextColumn Header="Estimat" Binding="{Binding Amount, StringFormat='{}{0:N2} kr.'}" Width="*" />
-                                                <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
-                                                <DataGridCheckBoxColumn Header="Faktureret" Binding="{Binding IsPaid}" Width="Auto" />
-                                            </DataGrid.Columns>
-                                        </DataGrid>
-                                    </StackPanel>
-
-                                    <!-- Udgifter -->
-                                    <StackPanel Width="440">
-                                        <TextBlock Text="Udgifter" Style="{StaticResource ListTitle}" Margin="0,0,0,8"/>
-                                        <DataGrid ItemsSource="{Binding Expenses}"
-                                                AutoGenerateColumns="False"
-                                                IsReadOnly="True"
-                                                CanUserSortColumns="True"
-                                                BorderThickness="0"
-                                                Background="Transparent"
-                                                HeadersVisibility="Column"
-                                                GridLinesVisibility="Horizontal"
-                                                HorizontalGridLinesBrush="#EAEBEE"
-                                                ColumnHeaderStyle="{StaticResource HeaderStyle}"
-                                                CellStyle="{StaticResource CellStyle}"
-                                                RowStyle="{StaticResource RowStyle}">
-                                            <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Kategori" Binding="{Binding Category}" SortMemberPath="Category" Width="*" />
-                                                <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Description}" SortMemberPath="Description" Width="*" />
-                                                <DataGridTextColumn Header="Beløb" Binding="{Binding Amount, StringFormat='{}{0:N2} kr.'}" SortMemberPath="Amount" Width="*" />
-                                                <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" SortMemberPath="Date" Width="*" />
-                                            </DataGrid.Columns>
-                                        </DataGrid>
-                                    </StackPanel>
-                                </StackPanel>
-                            </ScrollViewer>
-
-                            <Grid Grid.Row="1" Margin="0,15,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Button Grid.Column="0"
-                                        Content="Tilføj ny post..."
-                                        Style="{StaticResource LinkButton}"
-                                        Command="{Binding ShowEconomyWindowCommand}"
-                                        HorizontalAlignment="Left"/>
-
-                                <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                    <TextBlock Text="Gevinst/Tab: " FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding Project.Result, StringFormat='{}{0:N2} kr.'}" FontSize="16" FontWeight="SemiBold" Foreground="{Binding Project.ResultColor}" VerticalAlignment="Center" Margin="0,0,20,0"/>
-                                </StackPanel>
-                            </Grid>
-                        </Grid>
-                    </TabItem>
-
-                    <TabItem Header="Beskrivelse">
-                        <TabItem.Style>
-                            <Style TargetType="TabItem">
-                                <Setter Property="Foreground" Value="#1E293B"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="Padding" Value="15,10"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TabItem">
-                                            <Grid>
-                                                <Border Name="Border"
-                                                        Background="#F5F7FA"
-                                                        BorderBrush="#E0E0E0"
-                                                        BorderThickness="0,0,0,2"
-                                                        Padding="{TemplateBinding Padding}">
-                                                    <ContentPresenter ContentSource="Header"
-                                                                      HorizontalAlignment="Center"
-                                                                      VerticalAlignment="Center"/>
-                                                </Border>
-                                            </Grid>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#1E293B"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TabItem.Style>
-
-                        <Grid Margin="0,15,0,0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- Deadline Section -->
-                            <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                                <TextBlock Text="DEADLINE" 
-                                           Foreground="#475569" 
-                                           FontWeight="SemiBold" 
-                                           Margin="0,0,0,5"/>
-                                <DatePicker SelectedDate="{Binding Project.EndDate, UpdateSourceTrigger=PropertyChanged}"
-                                            Style="{StaticResource ModernDatePickerStyle}"
-                                            Height="40"
-                                            Language="da-DK"
-                                            HorizontalAlignment="Left"
-                                            MinWidth="250"/>
-                            </StackPanel>
-
-                            <!-- Description Section -->
-                            <TextBlock Grid.Row="1"
-                                       Text="PROJEKTBESKRIVELSE"
-                                       Foreground="#475569"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,5"/>
-
-                            <TextBox Grid.Row="2"
-                                     Text="{Binding Project.Description, UpdateSourceTrigger=PropertyChanged}"
-                                     Background="White"
-                                     Foreground="#1E293B"
-                                     BorderBrush="#E0E0E0"
-                                     BorderThickness="1"
-                                     Padding="12"
-                                     FontSize="14"
-                                     TextWrapping="Wrap"
-                                     VerticalScrollBarVisibility="Auto"
-                                     AcceptsReturn="True"
-                                     MinHeight="300"/>
-                        </Grid>
-                    </TabItem>
-
-                    <TabItem Header="Kunde">
-                        <TabItem.Style>
-                            <Style TargetType="TabItem">
-                                <Setter Property="Foreground" Value="#1E293B"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="Padding" Value="15,10"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TabItem">
-                                            <Grid>
-                                                <Border Name="Border"
-                                                        Background="#F5F7FA"
-                                                        BorderBrush="#E0E0E0"
-                                                        BorderThickness="0,0,0,2"
-                                                        Padding="{TemplateBinding Padding}">
-                                                    <ContentPresenter ContentSource="Header"
-                                                                      HorizontalAlignment="Center"
-                                                                      VerticalAlignment="Center"/>
-                                                </Border>
-                                            </Grid>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#1E293B"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TabItem.Style>
-
-                        <Grid Margin="0,15,0,0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Grid.Row="0"
-                                       Text="Kundeoplysninger"
-                                       FontSize="18"
-                                       FontWeight="SemiBold"
-                                       Foreground="#333"
-                                       Margin="0,0,0,20"/>
-
-                            <StackPanel Grid.Row="1" MaxWidth="600" HorizontalAlignment="Left">
-                                <Grid Margin="0,0,0,15">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="150"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="Navn:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.Name}" Foreground="#1E293B" FontSize="14"/>
-                                </Grid>
-
-                                <Grid Margin="0,0,0,15">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="150"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="Email:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.Email}" Foreground="#1E293B" FontSize="14"/>
-                                </Grid>
-
-                                <Grid Margin="0,0,0,15">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="150"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="Telefon:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.PhoneNumber}" Foreground="#1E293B" FontSize="14"/>
-                                </Grid>
-
-                                <Grid Margin="0,0,0,15">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="150"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="Adresse:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
-                                    <TextBlock Grid.Column="1" Foreground="#1E293B" FontSize="14" TextWrapping="Wrap">
-                                        <Run Text="{Binding Project.Client.Address}"/>
-                                        <Run Text=","/>
-                                        <Run Text="{Binding Project.Client.PostalAddress}"/>
-                                        <Run Text="{Binding Project.Client.City}"/>
-                                    </TextBlock>
-                                </Grid>
-
-                                <Grid Margin="0,0,0,15">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="150"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="CVR:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Project.Client.Cvr}" Foreground="#1E293B" FontSize="14"/>
-                                </Grid>
-                            </StackPanel>
-                        </Grid>
-                    </TabItem>
-                </TabControl>
+                <Button Command="{Binding OpenCompanyInfoCommand}"
+                        Style="{StaticResource IconButton}"
+                        ToolTip="Virksomhedsindstillinger"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Margin="10,0">
+                    <Path Data="{StaticResource SettingsIconGeometry}"
+                          Fill="{StaticResource PrimaryBrush}"
+                          Width="24"
+                          Height="24"
+                          Stretch="Uniform"/>
+                </Button>
             </Grid>
         </Border>
 
-
-        <Grid Grid.Row="2" Margin="0,20,0,0">
+        <!-- Main Content -->
+        <Grid Grid.Row="1" Margin="20">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
-                <Button Content="Generer faktura"
-                        Style="{StaticResource ModernButtonStyle}"
-                        Command="{Binding GenerateInvoiceCommand}"
-                        HorizontalAlignment="Left"
-                        Padding="14,8"
-                        Margin="0,0,10,0"/>
+            <Grid Grid.Row="0" Margin="10,0,10,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-                <Button Content="Slet Projekt"
-                        Style="{StaticResource ModernButtonStyle}"
-                        Command="{Binding DeleteProjectCommand}"
-                        HorizontalAlignment="Left"
-                        Padding="14,8"/>
-            </StackPanel>
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                    <TextBox Text="{Binding Project.Name, UpdateSourceTrigger=LostFocus, FallbackValue='Projekt Navn'}"
+                     FontSize="24" 
+                     FontWeight="SemiBold"
+                     Foreground="#1E293B"
+                     HorizontalAlignment="Center"
+                     HorizontalContentAlignment="Center"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     BorderBrush="Gray"
+                     MinWidth="200"/>
 
-            <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
-                <Button Content="Annuller"
-                        Style="{StaticResource LinkButton}"
-                        Command="{Binding NavigateToDashboardCommand}"
-                        Margin="0,0,20,0"
-                        VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+                        <TextBlock Text="Status: " FontSize="14" Foreground="#555" VerticalAlignment="Center"/>
+                        <ComboBox ItemsSource="{Binding AvailableStatuses}"
+                                  SelectedItem="{Binding Project.Status, Mode=TwoWay}"
+                                  Style="{StaticResource InlineComboBoxStyle}"
+                                  ItemContainerStyle="{StaticResource InlineComboBoxItemStyle}"
+                                  VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock FontSize="14" Foreground="#555" HorizontalAlignment="Center" Margin="0,5,0,0">
+                        <Run Text="Kunde: "/>
+                        <Run Text="{Binding Project.Client.Name}"/>
+                    </TextBlock>
+                </StackPanel>
 
-                <Button Content="Gem" 
-                        Style="{StaticResource ModernButtonStyle}"
-                        Command="{Binding SaveProjectDetailsCommand}"
-                        Padding="20,8"
-                        VerticalAlignment="Center">
+                <Button Grid.Column="2"
+                        VerticalAlignment="Center"
+                       Command="{Binding ToggleProjectStatusCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource LinkButton}">
+                            <Setter Property="Content" Value="Afslut projekt"/>
+
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsProjectCompleted}" Value="True">
+                                    <Setter Property="Content" Value="Genåbn projekt"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
-            </StackPanel>
+            </Grid>
 
+
+            <Border Grid.Row="1"
+                    Style="{StaticResource CardBorderStyle}"
+                    Padding="25">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="PROJEKTOVERSIGT" 
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="#888"
+                               Margin="0,0,0,10"/>
+
+                    <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0">
+                        <TabItem Header="Indtægter &amp; Udgifter" IsSelected="True" Style="{StaticResource ModernTabItemStyle}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.Resources>
+                                    <Style x:Key="RowStyle" TargetType="DataGridRow" BasedOn="{StaticResource DataGridRowStyle}">
+                                        <EventSetter Event="MouseLeftButtonUp" Handler="Row_MouseLeftButtonUp"/>
+                                    </Style>
+                                </Grid.Resources>
+
+                                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                    <StackPanel Orientation="Horizontal">
+                                        <!-- Indtægter -->
+                                        <StackPanel Width="440" Margin="0,0,20,0">
+                                            <TextBlock Text="Indtægter" Style="{StaticResource ListTitleStyle}"/>
+                                            <DataGrid ItemsSource="{Binding Earnings}"
+                                                  AutoGenerateColumns="False"
+                                                  IsReadOnly="True"
+                                                  CanUserSortColumns="True"
+                                                  BorderThickness="0"
+                                                  Background="Transparent"
+                                                  HeadersVisibility="Column"
+                                                  GridLinesVisibility="Horizontal"
+                                                  HorizontalGridLinesBrush="#EAEBEE"
+                                                  ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}"
+                                                  CellStyle="{StaticResource DataGridCellStyle}"
+                                                  RowStyle="{StaticResource RowStyle}">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Navn" Binding="{Binding Description}" Width="*" />
+                                                    <DataGridTextColumn Header="Estimat" Binding="{Binding Amount, StringFormat='{}{0:C}'}" Width="*" />
+                                                    <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" Width="*" />
+                                                    <DataGridCheckBoxColumn Header="Faktureret" Binding="{Binding IsPaid}" Width="Auto" />
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+
+                                        <!-- Udgifter -->
+                                        <StackPanel Width="440">
+                                            <TextBlock Text="Udgifter" Style="{StaticResource ListTitleStyle}"/>
+                                            <DataGrid ItemsSource="{Binding Expenses}"
+                                                    AutoGenerateColumns="False"
+                                                    IsReadOnly="True"
+                                                    CanUserSortColumns="True"
+                                                    BorderThickness="0"
+                                                    Background="Transparent"
+                                                    HeadersVisibility="Column"
+                                                    GridLinesVisibility="Horizontal"
+                                                    HorizontalGridLinesBrush="#EAEBEE"
+                                                    ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}"
+                                                    CellStyle="{StaticResource DataGridCellStyle}"
+                                                    RowStyle="{StaticResource RowStyle}">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Kategori" Binding="{Binding Category}" SortMemberPath="Category" Width="*" />
+                                                    <DataGridTextColumn Header="Beskrivelse" Binding="{Binding Description}" SortMemberPath="Description" Width="*" />
+                                                    <DataGridTextColumn Header="Beløb" Binding="{Binding Amount, StringFormat='{}{0:C}'}" SortMemberPath="Amount" Width="*" />
+                                                    <DataGridTextColumn Header="Dato" Binding="{Binding Date, StringFormat={}{0:dd-MM-yyyy}}" SortMemberPath="Date" Width="*" />
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </ScrollViewer>
+
+                                <Grid Grid.Row="1" Margin="0,15,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button Grid.Column="0"
+                                            Content="Tilføj ny post..."
+                                            Style="{StaticResource LinkButton}"
+                                            Command="{Binding ShowEconomyWindowCommand}"
+                                            HorizontalAlignment="Left"/>
+
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                        <TextBlock Text="Gevinst/Tab: " FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Project.Result, StringFormat='{}{0:C}'}" FontSize="16" FontWeight="SemiBold" Foreground="{Binding Project.ResultColor}" VerticalAlignment="Center" Margin="0,0,20,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
+
+                        <TabItem Header="Beskrivelse" Style="{StaticResource ModernTabItemStyle}">
+                            <Grid Margin="0,15,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Deadline Section -->
+                                <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                                    <TextBlock Text="DEADLINE" 
+                                               Foreground="#475569" 
+                                               FontWeight="SemiBold" 
+                                               Margin="0,0,0,5"/>
+                                    <DatePicker SelectedDate="{Binding Project.EndDate, UpdateSourceTrigger=LostFocus}"
+                                                Style="{StaticResource ModernDatePickerStyle}"
+                                                Height="40"
+                                                Language="da-DK"
+                                                HorizontalAlignment="Left"
+                                                MinWidth="250"/>
+                                </StackPanel>
+
+                                <!-- Description Section -->
+                                <TextBlock Grid.Row="1"
+                                           Text="PROJEKTBESKRIVELSE"
+                                           Foreground="#475569"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,5"/>
+
+                                <TextBox Grid.Row="2"
+                                         Text="{Binding Project.Description, UpdateSourceTrigger=LostFocus}"
+                                         Background="White"
+                                         Foreground="#1E293B"
+                                         BorderBrush="#E0E0E0"
+                                         BorderThickness="1"
+                                         Padding="12"
+                                         FontSize="14"
+                                         TextWrapping="Wrap"
+                                         VerticalScrollBarVisibility="Auto"
+                                         AcceptsReturn="True"
+                                         MinHeight="300"/>
+                            </Grid>
+                        </TabItem>
+
+                        <TabItem Header="Kunde" Style="{StaticResource ModernTabItemStyle}">
+                            <Grid Margin="0,15,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0"
+                                           Text="Kundeoplysninger"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="#333"
+                                           Margin="0,0,0,20"/>
+
+                                <StackPanel Grid.Row="1" MaxWidth="600" HorizontalAlignment="Left">
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Navn:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Project.Client.Name}" Foreground="#1E293B" FontSize="14"/>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Email:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Project.Client.Email}" Foreground="#1E293B" FontSize="14"/>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Telefon:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Project.Client.PhoneNumber}" Foreground="#1E293B" FontSize="14"/>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Adresse:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
+                                        <TextBlock Grid.Column="1" Foreground="#1E293B" FontSize="14" TextWrapping="Wrap">
+                                            <Run Text="{Binding Project.Client.Address}"/>
+                                            <Run Text=","/>
+                                            <Run Text="{Binding Project.Client.PostalAddress}"/>
+                                            <Run Text="{Binding Project.Client.City}"/>
+                                        </TextBlock>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="CVR:" FontWeight="SemiBold" Foreground="#555" FontSize="14"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Project.Client.Cvr}" Foreground="#1E293B" FontSize="14"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </Border>
+
+
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+                    <Button Content="Generer faktura"
+                            Style="{StaticResource ModernButtonStyle}"
+                            Command="{Binding GenerateInvoiceCommand}"
+                            HorizontalAlignment="Left"
+                            Padding="14,8"
+                            Margin="0,0,10,0"/>
+
+                    <Button Content="Slet Projekt"
+                            Style="{StaticResource ModernButtonStyle}"
+                            Command="{Binding DeleteProjectCommand}"
+                            HorizontalAlignment="Left"
+                            Padding="14,8"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
+                    <Button Content="Annuller"
+                            Style="{StaticResource LinkButton}"
+                            Command="{Binding NavigateToDashboardCommand}"
+                            Margin="0,0,20,0"
+                            VerticalAlignment="Center"/>
+
+                    <Button Content="Gem" 
+                            Style="{StaticResource ModernButtonStyle}"
+                            Command="{Binding SaveProjectDetailsCommand}"
+                            Padding="20,8"
+                            VerticalAlignment="Center">
+                    </Button>
+                </StackPanel>
+
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>

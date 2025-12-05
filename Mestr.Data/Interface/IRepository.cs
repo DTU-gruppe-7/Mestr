@@ -8,10 +8,10 @@ namespace Mestr.Data.Interface
 {
     public interface IRepository<T>
     {
-        void Add(T entity);
-        T? GetByUuid(Guid uuid);
-        IEnumerable<T> GetAll();
-        void Update(T entity);
-        void Delete(Guid uuid);
+        Task AddAsync(T entity);
+        Task<T?> GetByUuidAsync(Guid uuid);
+        Task<IEnumerable<T>> GetAllAsync();
+        Task UpdateAsync(T entity);
+        Task DeleteAsync(Guid uuid);
     }
 }

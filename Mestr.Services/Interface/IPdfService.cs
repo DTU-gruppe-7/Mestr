@@ -8,11 +8,12 @@ using QuestPDF.Infrastructure;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Mestr.Services.Interface
 {
     public interface IPdfService
     {
-        public byte[] GeneratePdfInvoice(Project project);
+        Task<byte[]> GeneratePdfInvoiceAsync(Project project);
     }
 }

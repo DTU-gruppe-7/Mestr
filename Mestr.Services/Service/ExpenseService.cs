@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Mestr.Core.Model;
 using Mestr.Core.Enum;
 using Mestr.Services.Interface;
@@ -13,24 +14,24 @@ namespace Mestr.Services.Service
     {
         private readonly IRepository<Expense> _expenseRepository;
         
-        public ExpenseService()
+        public ExpenseService(IRepository<Expense> expenseRepo)
         {
-            _expenseRepository = new ExpenseRepository();
+            _expenseRepository = expenseRepo ?? throw new ArgumentNullException(nameof(expenseRepo));
         }
         
-        public Expense GetByUuid(Guid uuid)
+        public async Task<Expense> GetByUuidAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) 
                 throw new ArgumentException("UUID cannot be empty.", nameof(uuid));
             
-            var expense = _expenseRepository.GetByUuid(uuid);
+            var expense = await _expenseRepository.GetByUuidAsync(uuid).ConfigureAwait(false);
             if (expense == null)
                 throw new ArgumentException("Expense not found.", nameof(uuid));
             
             return expense;
         }
         
-        public Expense AddNewExpense(Guid projectUuid, string description, decimal amount, DateTime date, ExpenseCategory category)
+        public async Task<Expense> AddNewExpenseAsync(Guid projectUuid, string description, decimal amount, DateTime date, ExpenseCategory category)
         {
             if (projectUuid == Guid.Empty)
                 throw new ArgumentException("Project UUID cannot be empty.", nameof(projectUuid));
@@ -44,37 +45,29 @@ namespace Mestr.Services.Service
                 ProjectUuid = projectUuid
             };
             
-            _expenseRepository.Add(expense);
+            await _expenseRepository.AddAsync(expense).ConfigureAwait(false);
             return expense;
         }
         
-        public bool Delete(Expense entity)
+        public async Task<bool> DeleteAsync(Expense entity)
         {
             if (entity == null) 
                 throw new ArgumentNullException(nameof(entity));
             
-            _expenseRepository.Delete(entity.Uuid);
+            await _expenseRepository.DeleteAsync(entity.Uuid).ConfigureAwait(false);
             return true;
         }
         
-        public Expense Update(Expense entity)
+        public async Task<Expense> UpdateAsync(Expense entity)
         {
             if (entity == null) 
                 throw new ArgumentNullException(nameof(entity));
             
-            var existing = _expenseRepository.GetByUuid(entity.Uuid);
-            if (existing == null)
-                throw new ArgumentException("Expense not found.", nameof(entity));
+            await _expenseRepository.UpdateAsync(entity).ConfigureAwait(false);
             
-            // Update properties
-            existing.Description = entity.Description;
-            existing.Amount = entity.Amount;
-            existing.Date = entity.Date;
-            existing.Category = entity.Category;
-            existing.IsAccepted = entity.IsAccepted;
-            
-            _expenseRepository.Update(existing);
-            return existing;
+            var updatedExpense = await _expenseRepository.GetByUuidAsync(entity.Uuid).ConfigureAwait(false);
+            return updatedExpense 
+                ?? throw new InvalidOperationException("Failed to retrieve updated expense.");
         }
     }
 }

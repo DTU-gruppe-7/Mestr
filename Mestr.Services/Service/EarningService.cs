@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.Data.Interface;
-using Mestr.Data.Repository;
+using Mestr.Data.Interface;
 
 namespace Mestr.Services.Service
 {
@@ -12,24 +13,24 @@ namespace Mestr.Services.Service
     {
         private readonly IRepository<Earning> _earningRepository;
         
-        public EarningService()
+        public EarningService(IRepository<Earning> earningRepo)
         {
-            _earningRepository = new EarningRepository();
+            _earningRepository = earningRepo ?? throw new ArgumentNullException(nameof(earningRepo));
         }
         
-        public Earning GetByUuid(Guid uuid)
+        public async Task<Earning> GetByUuidAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) 
                 throw new ArgumentException("UUID cannot be empty.", nameof(uuid));
             
-            var earning = _earningRepository.GetByUuid(uuid);
+            var earning = await _earningRepository.GetByUuidAsync(uuid).ConfigureAwait(false);
             if (earning == null)
                 throw new ArgumentException("Earning not found.", nameof(uuid));
             
             return earning;
         }
         
-        public Earning AddNewEarning(Guid projectUuid, string description, decimal amount, DateTime date)
+        public async Task<Earning> AddNewEarningAsync(Guid projectUuid, string description, decimal amount, DateTime date)
         {
             if (projectUuid == Guid.Empty)
                 throw new ArgumentException("Project UUID cannot be empty.", nameof(projectUuid));
@@ -43,36 +44,32 @@ namespace Mestr.Services.Service
                 ProjectUuid = projectUuid
             };
             
-            _earningRepository.Add(earning);
+            await _earningRepository.AddAsync(earning).ConfigureAwait(false);
             return earning;
         }
         
-        public bool Delete(Earning entity)
+        public async Task<bool> DeleteAsync(Earning entity)
         {
             if (entity == null) 
                 throw new ArgumentNullException(nameof(entity));
             
-            _earningRepository.Delete(entity.Uuid);
+            if (entity.IsPaid)
+                throw new InvalidOperationException("Betalte indtægter kan ikke slettes.");
+            
+            await _earningRepository.DeleteAsync(entity.Uuid).ConfigureAwait(false);
             return true;
         }
         
-        public Earning Update(Earning entity)
+        public async Task<Earning> UpdateAsync(Earning entity)
         {
             if (entity == null) 
                 throw new ArgumentNullException(nameof(entity));
             
-            var existing = _earningRepository.GetByUuid(entity.Uuid);
-            if (existing == null)
-                throw new ArgumentException("Earning not found.", nameof(entity));
+            await _earningRepository.UpdateAsync(entity).ConfigureAwait(false);
             
-            // Update properties
-            existing.Description = entity.Description;
-            existing.Amount = entity.Amount;
-            existing.Date = entity.Date;
-            existing.IsPaid = entity.IsPaid;
-            
-            _earningRepository.Update(existing);
-            return existing;
+            var updatedEarning = await _earningRepository.GetByUuidAsync(entity.Uuid).ConfigureAwait(false);
+            return updatedEarning 
+                ?? throw new InvalidOperationException("Failed to retrieve updated earning.");
         }
     }
 }

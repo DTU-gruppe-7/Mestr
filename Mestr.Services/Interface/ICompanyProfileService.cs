@@ -10,7 +10,7 @@ namespace Mestr.Services.Interface
 {
     public interface ICompanyProfileService
     {
-        CompanyProfile GetProfile();
+        CompanyProfile? GetProfile();
         void UpdateProfile(CompanyProfile profile);
         
     }

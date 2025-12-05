@@ -4,6 +4,7 @@ using Mestr.Data.Repository;
 using Mestr.Services.Interface;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Mestr.Services.Service
 {
@@ -11,70 +12,54 @@ namespace Mestr.Services.Service
     {
         private readonly IRepository<Client> _clientRepository;
 
-        public ClientService()
+        public ClientService(IRepository<Client> clientRepo)
         {
-            _clientRepository = new ClientRepository();
+            _clientRepository = clientRepo ?? throw new ArgumentNullException(nameof(clientRepo));
         }
 
-        public Client CreateClient(string companyName, string contactName, string email, string phoneNumber, string address,
+        public async Task<Client> CreateClientAsync(string companyName, string contactName, string email, string phoneNumber, string address,
                                    string postalAddress, string city, string? cvr = null)
-
         {
-            if (string.IsNullOrWhiteSpace(contactName))
-            {
-                throw new ArgumentException("Contact name cannot be null or empty.", nameof(contactName));
-            }
-
-
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                throw new ArgumentException("Email cannot be null or empty.", nameof(email));
-            }
-
-            if (string.IsNullOrWhiteSpace(phoneNumber))
-            {
-                throw new ArgumentException("Phone number cannot be null or empty.", nameof(phoneNumber));
-            }
-
-            var newClient = new Client(
+            // Factory method handles all validation
+            var newClient = Client.Create(
                 Guid.NewGuid(),
                 companyName,
                 contactName,
                 email,
                 phoneNumber,
-                address,
-                postalAddress,
-                city,
-                cvr!
+                address ?? string.Empty,
+                postalAddress ?? string.Empty,
+                city ?? string.Empty,
+                cvr
             );
 
-            _clientRepository.Add(newClient);
+            await _clientRepository.AddAsync(newClient).ConfigureAwait(false);
 
             return newClient;
         }
 
-        public Client? GetClientByUuid(Guid uuid)
+        public async Task<Client?> GetClientByUuidAsync(Guid uuid)
         {
-            return _clientRepository.GetByUuid(uuid);
+            return await _clientRepository.GetByUuidAsync(uuid).ConfigureAwait(false);
         }
 
-        public IEnumerable<Client> GetAllClients()
+        public async Task<IEnumerable<Client>> GetAllClientsAsync()
         {
-            return _clientRepository.GetAll();
+            return await _clientRepository.GetAllAsync().ConfigureAwait(false);
         }
 
-        public void UpdateClient(Client client)
+        public async Task UpdateClientAsync(Client client)
         {
             if (client == null)
             {
                 throw new ArgumentNullException(nameof(client), "Client must not be null.");
             }
-            _clientRepository.Update(client);
+            await _clientRepository.UpdateAsync(client).ConfigureAwait(false);
         }
 
-        public void DeleteClient(Guid clientId)
+        public async Task DeleteClientAsync(Guid clientId)
         {
-            var client = _clientRepository.GetByUuid(clientId);
+            var client = await _clientRepository.GetByUuidAsync(clientId).ConfigureAwait(false);
             if (client == null)
             {
                 throw new ArgumentException("Client not found.", nameof(clientId));
@@ -83,8 +68,7 @@ namespace Mestr.Services.Service
             {
                 throw new InvalidOperationException($"Kunden kan ikke slettes fordi den har {client.Projects.Count} projekt(er) forbundet.");
             }
-            _clientRepository.Delete(clientId);
+            await _clientRepository.DeleteAsync(clientId).ConfigureAwait(false);
         }
-
     }
 }

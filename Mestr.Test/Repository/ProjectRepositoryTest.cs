@@ -2,10 +2,11 @@
 using Mestr.Core.Enum;
 using Mestr.Data.Repository;
 using Mestr.Data.Interface;
+using Mestr.Data.DbContext;
 
 namespace Mestr.Test.Repository
 {
-    public class ProjectRepositoryTest : IDisposable
+    public class ProjectRepositoryTest : IAsyncLifetime
     {
         private readonly IRepository<Project> _projectRepository;
         private readonly IRepository<Client> _clientRepository;
@@ -20,19 +21,28 @@ namespace Mestr.Test.Repository
             _clientsToCleanup = new List<Guid>();
         }
 
-        private Client CreateTestClient()
+        public ValueTask InitializeAsync()
         {
-            var client = new Client(Guid.NewGuid(), "Test Client", "John Doe", "test@something.com", "12345678", "123 Test St", "12345", "Test City", "88888888");
-            _clientRepository.Add(client);
+            using (var context = new dbContext())
+            {
+                context.Database.EnsureCreated();
+            }
+            return ValueTask.CompletedTask;
+        }
+
+        private async Task<Client> CreateTestClientAsync()
+        {
+            var client = Client.Create(Guid.NewGuid(), "Test Client", "John Doe", "test@something.com", "12345678", "123 Test St", "12345", "Test City", "88888888");
+            await _clientRepository.AddAsync(client);
             _clientsToCleanup.Add(client.Uuid);
             return client;
         }
 
         [Fact]
-        public void AddProject_ToRepository_Succeeds()
+        public async Task AddProject_ToRepository_Succeeds()
         {
             // Arrange
-            var client = CreateTestClient();
+            var client = await CreateTestClientAsync();
             var project = new Project(
                 Guid.NewGuid(),
                 "Test Project",
@@ -46,10 +56,10 @@ namespace Mestr.Test.Repository
             _projectsToCleanup.Add(project.Uuid);
 
             // Act
-            _projectRepository.Add(project);
+            await _projectRepository.AddAsync(project);
 
             // Assert
-            var retrievedProject = _projectRepository.GetByUuid(project.Uuid);
+            var retrievedProject = await _projectRepository.GetByUuidAsync(project.Uuid);
             Assert.NotNull(retrievedProject);
             Assert.Equal(project.Uuid, retrievedProject.Uuid);
             Assert.NotNull(retrievedProject.Client);
@@ -57,10 +67,10 @@ namespace Mestr.Test.Repository
         }
 
         [Fact]
-        public void GetByUuid_ProjectExists_ReturnsProject()
+        public async Task GetByUuid_ProjectExists_ReturnsProject()
         {
             // Arrange
-            var client = CreateTestClient();
+            var client = await CreateTestClientAsync();
             var project = new Project(
                 Guid.NewGuid(),
                 "Test Project",
@@ -72,10 +82,10 @@ namespace Mestr.Test.Repository
                 DateTime.Now.AddDays(10)
             );
             _projectsToCleanup.Add(project.Uuid);
-            _projectRepository.Add(project);
+            await _projectRepository.AddAsync(project);
 
             // Act
-            var retrievedProject = _projectRepository.GetByUuid(project.Uuid);
+            var retrievedProject = await _projectRepository.GetByUuidAsync(project.Uuid);
 
             // Assert
             Assert.NotNull(retrievedProject);
@@ -83,30 +93,30 @@ namespace Mestr.Test.Repository
         }
 
         [Fact]
-        public void AddNullProject_ThrowsArgumentNullException()
+        public async Task AddNullProject_ThrowsArgumentNullException()
         {
             // Arrange
             Project? project = null;
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => _projectRepository.Add(project));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _projectRepository.AddAsync(project));
         }
 
         [Fact]
-        public void GetByUuid_EmptyGuid_ThrowsArgumentException()
+        public async Task GetByUuid_EmptyGuid_ThrowsArgumentException()
         {
             // Arrange
             var emptyGuid = Guid.Empty;
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => _projectRepository.GetByUuid(emptyGuid));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _projectRepository.GetByUuidAsync(emptyGuid));
         }
 
         [Fact]
-        public void GetAll_ReturnsAllProjects()
+        public async Task GetAll_ReturnsAllProjects()
         {
             // Arrange
-            var client = CreateTestClient();
+            var client = await CreateTestClientAsync();
             var project1 = new Project(
                 Guid.NewGuid(),
                 "Test Project 1",
@@ -130,11 +140,11 @@ namespace Mestr.Test.Repository
             _projectsToCleanup.Add(project1.Uuid);
             _projectsToCleanup.Add(project2.Uuid);
 
-            _projectRepository.Add(project1);
-            _projectRepository.Add(project2);
+            await _projectRepository.AddAsync(project1);
+            await _projectRepository.AddAsync(project2);
 
             // Act
-            var allProjects = _projectRepository.GetAll();
+            var allProjects = await _projectRepository.GetAllAsync();
 
             // Assert
             Assert.Contains(allProjects, p => p.Uuid == project1.Uuid);
@@ -142,10 +152,10 @@ namespace Mestr.Test.Repository
         }
 
         [Fact]
-        public void Delete_ExistingProject_RemovesProject()
+        public async Task Delete_ExistingProject_RemovesProject()
         {
             // Arrange
-            var client = CreateTestClient();
+            var client = await CreateTestClientAsync();
             var project = new Project(
                 Guid.NewGuid(),
                 "Test Project",
@@ -156,21 +166,21 @@ namespace Mestr.Test.Repository
                 ProjectStatus.Aktiv,
                 DateTime.Now.AddDays(10)
             );
-            _projectRepository.Add(project);
+            await _projectRepository.AddAsync(project);
 
             // Act
-            _projectRepository.Delete(project.Uuid);
+            await _projectRepository.DeleteAsync(project.Uuid);
 
             // Assert
-            var retrievedProject = _projectRepository.GetByUuid(project.Uuid);
+            var retrievedProject = await _projectRepository.GetByUuidAsync(project.Uuid);
             Assert.Null(retrievedProject);
         }
 
         [Fact]
-        public void Update_ExistingProject_UpdatesProject()
+        public async Task Update_ExistingProject_UpdatesProject()
         {
             // Arrange
-            var client = CreateTestClient();
+            var client = await CreateTestClientAsync();
             var project = new Project(
                 Guid.NewGuid(),
                 "Test Project",
@@ -182,25 +192,24 @@ namespace Mestr.Test.Repository
                 DateTime.Now.AddDays(10)
             );
             _projectsToCleanup.Add(project.Uuid);
-            _projectRepository.Add(project);
+            await _projectRepository.AddAsync(project);
 
             // Act
             project.Description = "Updated Description";
-            _projectRepository.Update(project);
+            await _projectRepository.UpdateAsync(project);
 
             // Assert
-            var retrievedProject = _projectRepository.GetByUuid(project.Uuid);
+            var retrievedProject = await _projectRepository.GetByUuidAsync(project.Uuid);
             Assert.Equal("Updated Description", retrievedProject.Description);
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            // Cleanup projects first (due to foreign key constraint)
             foreach (var projectUuid in _projectsToCleanup)
             {
                 try
                 {
-                    _projectRepository.Delete(projectUuid);
+                    await _projectRepository.DeleteAsync(projectUuid);
                 }
                 catch
                 {
@@ -208,12 +217,11 @@ namespace Mestr.Test.Repository
                 }
             }
 
-            // Then cleanup clients
             foreach (var clientUuid in _clientsToCleanup)
             {
                 try
                 {
-                    _clientRepository.Delete(clientUuid);
+                    await _clientRepository.DeleteAsync(clientUuid);
                 }
                 catch
                 {

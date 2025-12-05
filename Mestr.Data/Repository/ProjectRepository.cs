@@ -3,159 +3,143 @@ using Mestr.Core.Model;
 using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Mestr.Data.Repository
 {
     public class ProjectRepository : IRepository<Project>
     {
-        public void Add(Project entity)
+        public async Task AddAsync(Project entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                // Check if the client already exists in the database
-                var existingClient = dbContext.Instance.Clients.Find(entity.Client.Uuid);
+                var existingClient = await context.Clients
+                    .FindAsync(entity.Client.Uuid)
+                    .ConfigureAwait(false);
                 if (existingClient != null)
                 {
-                    // Attach the existing client as unchanged
                     entity.Client = existingClient;
                 }
                 else
                 {
-                    // Mark the client as Added if it doesn't exist
-                    dbContext.Instance.Clients.Add(entity.Client);
+                    context.Clients.Add(entity.Client);
                 }
 
-                dbContext.Instance.Projects.Add(entity);
-                dbContext.Instance.SaveChanges();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                context.Projects.Add(entity);
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
-        public Project? GetByUuid(Guid uuid)
+        public async Task<Project?> GetByUuidAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Projects
+                return await context.Projects
                     .Include(p => p.Client)
                     .Include(p => p.Expenses)
                     .Include(p => p.Earnings)
-                    .FirstOrDefault(p => p.Uuid == uuid);
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                    .FirstOrDefaultAsync(p => p.Uuid == uuid)
+                    .ConfigureAwait(false);
             }
         }
 
-        public IEnumerable<Project> GetAll()
+        public async Task<IEnumerable<Project>> GetAllAsync()
         {
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Projects
+                return await context.Projects
                     .Include(p => p.Client)
                     .Include(p => p.Expenses)
                     .Include(p => p.Earnings)
                     .AsNoTracking()
-                    .ToList();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                    .ToListAsync()
+                    .ConfigureAwait(false);
             }
         }
 
-        public void Update(Project entity)
+        public async Task UpdateAsync(Project entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                // Reload the entity from the database with tracking
-                var existingProject = dbContext.Instance.Projects
+                var existingProject = await context.Projects
                     .Include(p => p.Client)
                     .Include(p => p.Expenses)
                     .Include(p => p.Earnings)
-                    .FirstOrDefault(p => p.Uuid == entity.Uuid);
+                    .FirstOrDefaultAsync(p => p.Uuid == entity.Uuid)
+                    .ConfigureAwait(false);
 
                 if (existingProject != null)
                 {
-                    // Update scalar properties
-                    dbContext.Instance.Entry(existingProject).CurrentValues.SetValues(entity);
-                    
-                    // Update client if changed
+                    context.Entry(existingProject).CurrentValues.SetValues(entity);
+
                     if (existingProject.Client.Uuid != entity.Client.Uuid)
                     {
-                        existingProject.Client = entity.Client;
+                        var newClient = await context.Clients
+                            .FindAsync(entity.Client.Uuid)
+                            .ConfigureAwait(false);
+                        if (newClient != null)
+                        {
+                            existingProject.Client = newClient;
+                        }
+                        else
+                        {
+                            existingProject.Client = entity.Client;
+                        }
                     }
-                    
-                    // Update expenses collection
-                    UpdateCollection(existingProject.Expenses, entity.Expenses, dbContext.Instance);
-                    
-                    // Update earnings collection
-                    UpdateCollection(existingProject.Earnings, entity.Earnings, dbContext.Instance);
-                    
-                    dbContext.Instance.SaveChanges();
+                    UpdateCollection(existingProject.Expenses, entity.Expenses, context);
+                    UpdateCollection(existingProject.Earnings, entity.Earnings, context);
+
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
 
-        private void UpdateCollection<T>(IList<T> existingCollection, IList<T> newCollection, dbContext context) 
+        private void UpdateCollection<T>(IList<T> existingCollection, IList<T> newCollection, dbContext context)
             where T : class
         {
-            // Remove items that are no longer in the collection
-            var itemsToRemove = existingCollection.Except(newCollection).ToList();
+            var itemsToRemove = existingCollection.Where(e => !newCollection.Contains(e)).ToList();
             foreach (var item in itemsToRemove)
             {
                 existingCollection.Remove(item);
-                context.Entry(item).State = EntityState.Deleted;
+                context.Remove(item);
             }
-
-            // Add new items
-            var itemsToAdd = newCollection.Except(existingCollection).ToList();
+            var itemsToAdd = newCollection.Where(e => !existingCollection.Contains(e)).ToList();
             foreach (var item in itemsToAdd)
             {
                 existingCollection.Add(item);
             }
-
-            // Update existing items
-            foreach (var item in newCollection.Intersect(existingCollection))
+            foreach (var existingItem in existingCollection)
             {
-                context.Entry(item).CurrentValues.SetValues(item);
+                var newItem = newCollection.FirstOrDefault(i => i.Equals(existingItem));
+                if (newItem != null)
+                {
+                    context.Entry(existingItem).CurrentValues.SetValues(newItem);
+                }
             }
         }
 
-        public void Delete(Guid uuid)
+        public async Task DeleteAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                var project = dbContext.Instance.Projects.FirstOrDefault(p => p.Uuid == uuid);
+                var project = await context.Projects
+                    .FirstOrDefaultAsync(p => p.Uuid == uuid)
+                    .ConfigureAwait(false);
                 if (project != null)
                 {
-                    dbContext.Instance.Projects.Remove(project);
-                    dbContext.Instance.SaveChanges();
+                    context.Projects.Remove(project);
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
     }

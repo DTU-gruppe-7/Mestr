@@ -2,93 +2,75 @@ using Mestr.Core.Model;
 using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Mestr.Data.Repository
 {
     public class ClientRepository : IRepository<Client>
     {
-        public void Add(Client entity)
+        public async Task AddAsync(Client entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                dbContext.Instance.Clients.Add(entity);
-                dbContext.Instance.SaveChanges();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                context.Clients.Add(entity);
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
-        public Client? GetByUuid(Guid uuid)
+        public async Task<Client?> GetByUuidAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Clients
+                return await context.Clients
                     .Include(c => c.Projects)
-                    .FirstOrDefault(c => c.Uuid == uuid);
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                    .FirstOrDefaultAsync(c => c.Uuid == uuid)
+                    .ConfigureAwait(false);
             }
         }
 
-        public IEnumerable<Client> GetAll()
+        public async Task<IEnumerable<Client>> GetAllAsync()
         {
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Clients
+                return await context.Clients
                     .Include(c => c.Projects)
                     .AsNoTracking()
-                    .ToList();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                    .ToListAsync()
+                    .ConfigureAwait(false);
             }
         }
 
-        public void Update(Client entity)
+        public async Task UpdateAsync(Client entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                dbContext.Instance.Clients.Update(entity);
-                dbContext.Instance.SaveChanges();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                context.Clients.Update(entity);
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
-        public void Delete(Guid uuid)
+        public async Task DeleteAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                var client = dbContext.Instance.Clients.FirstOrDefault(c => c.Uuid == uuid);
+                var client = await context.Clients
+                    .FirstOrDefaultAsync(c => c.Uuid == uuid)
+                    .ConfigureAwait(false);
                 if (client != null)
                 {
-                    dbContext.Instance.Clients.Remove(client);
-                    dbContext.Instance.SaveChanges();
+                    context.Clients.Remove(client);
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
     }

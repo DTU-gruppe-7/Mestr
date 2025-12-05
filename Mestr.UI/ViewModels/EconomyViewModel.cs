@@ -1,12 +1,14 @@
 ﻿using Mestr.Core.Enum;
 using Mestr.Core.Model;
+using Mestr.Core.Constants;
 using Mestr.Services.Interface;
+using Mestr.UI.Command;
+using Mestr.UI.Utilities;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using Mestr.UI.Command;
 
 namespace Mestr.UI.ViewModels
 {
@@ -17,6 +19,10 @@ namespace Mestr.UI.ViewModels
         
         private readonly IEarningService _earningService;
         private readonly IExpenseService _expenseService;
+        private readonly Action<Earning>? _onEarningSaved;
+        private readonly Action<Expense>? _onExpenseSaved;
+        private readonly Action<Earning>? _onEarningDeleted;
+        private readonly Action<Expense>? _onExpenseDeleted;
 
         private string _selectedTransactionType;
         private string _description;
@@ -28,20 +34,30 @@ namespace Mestr.UI.ViewModels
         private bool _isTypeEnabled = true;
 
         // Constructor 1: Opret ny transaktion (accepterer services som parameter)
-        public EconomyViewModel(Guid projectUuid, IEarningService earningService, IExpenseService expenseService)
+        public EconomyViewModel(
+            Guid projectUuid, 
+            IEarningService earningService, 
+            IExpenseService expenseService,
+            Action<Earning>? onEarningSaved = null,
+            Action<Expense>? onExpenseSaved = null)
         {
             _projectUuid = projectUuid;
             _earningService = earningService ?? throw new ArgumentNullException(nameof(earningService));
             _expenseService = expenseService ?? throw new ArgumentNullException(nameof(expenseService));
+            _onEarningSaved = onEarningSaved;
+            _onExpenseSaved = onExpenseSaved;
 
-            TransactionTypes = new ObservableCollection<string> { "Udgift", "Indtægt" };
+            TransactionTypes = new ObservableCollection<string> { 
+                AppConstants.UI.TransactionTypes.Expense, 
+                AppConstants.UI.TransactionTypes.Earning 
+            };
             Categories = new ObservableCollection<string>();
             
             // Defaults for create mode
-            _selectedTransactionType = "Udgift";
+            _selectedTransactionType = AppConstants.UI.TransactionTypes.Expense;
             _description = string.Empty;
             _selectedCategory = string.Empty;
-            SelectedTransactionType = "Udgift";
+            SelectedTransactionType = AppConstants.UI.TransactionTypes.Expense;
             Date = DateTime.Now;
             CategoryVisibility = Visibility.Visible;
 
@@ -52,12 +68,19 @@ namespace Mestr.UI.ViewModels
         }
 
         // Constructor 2: Rediger eksisterende udgift
-        public EconomyViewModel(Guid projectUuid, IEarningService earningService, IExpenseService expenseService, Expense expenseToEdit) 
-            : this(projectUuid, earningService, expenseService)
+        public EconomyViewModel(
+            Guid projectUuid, 
+            IEarningService earningService, 
+            IExpenseService expenseService, 
+            Expense expenseToEdit,
+            Action<Expense>? onExpenseSaved = null,
+            Action<Expense>? onExpenseDeleted = null) 
+            : this(projectUuid, earningService, expenseService, null, onExpenseSaved)
         {
             if (expenseToEdit == null) throw new ArgumentNullException(nameof(expenseToEdit));
             
             _editingId = expenseToEdit.Uuid;
+            _onExpenseDeleted = onExpenseDeleted;
             IsTypeEnabled = false;
             SelectedTransactionType = "Udgift";
 
@@ -69,12 +92,19 @@ namespace Mestr.UI.ViewModels
         }
 
         // Constructor 3: Rediger eksisterende indtægt
-        public EconomyViewModel(Guid projectUuid, IEarningService earningService, IExpenseService expenseService, Earning earningToEdit) 
-            : this(projectUuid, earningService, expenseService)
+        public EconomyViewModel(
+            Guid projectUuid, 
+            IEarningService earningService, 
+            IExpenseService expenseService, 
+            Earning earningToEdit,
+            Action<Earning>? onEarningSaved = null,
+            Action<Earning>? onEarningDeleted = null) 
+            : this(projectUuid, earningService, expenseService, onEarningSaved, null)
         {
             if (earningToEdit == null) throw new ArgumentNullException(nameof(earningToEdit));
             
             _editingId = earningToEdit.Uuid;
+            _onEarningDeleted = onEarningDeleted;
             IsTypeEnabled = false;
             SelectedTransactionType = "Indtægt";
             Description = earningToEdit.Description;
@@ -167,7 +197,8 @@ namespace Mestr.UI.ViewModels
             set 
             { 
                 _isPaid = value; 
-                OnPropertyChanged(nameof(IsPaid)); 
+                OnPropertyChanged(nameof(IsPaid));
+                ((RelayCommand)DeleteCommand).RaiseCanExecuteChanged();
             } 
         }
 
@@ -224,73 +255,58 @@ namespace Mestr.UI.ViewModels
                 {
                     if (!Enum.TryParse(SelectedCategory, out ExpenseCategory categoryEnum))
                     {
-                        MessageBox.Show("Ugyldig kategori valgt.", "Fejl", 
-                            MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBoxHelper.Standard.InvalidCategory();
                         return;
                     }
 
                     if (_editingId.HasValue)
                     {
-                        // EDIT MODE: Hent -> Modificer -> Gem
-                        var existingExpense = _expenseService.GetByUuid(_editingId.Value);
-                        if (existingExpense != null)
+                        // EDIT MODE: Use the existing object passed in, don't fetch from database
+                        // Create a new expense object with the updated values
+                        var updatedExpense = new Expense(_editingId.Value, Description, Amount, Date, categoryEnum, IsPaid)
                         {
-                            existingExpense.Description = Description;
-                            existingExpense.Amount = Amount;
-                            existingExpense.Date = Date;
-                            existingExpense.Category = categoryEnum;
-                            existingExpense.IsAccepted = IsPaid;
-                            
-                            _expenseService.Update(existingExpense);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Udgiften blev ikke fundet.", "Fejl", 
-                                MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
+                            ProjectUuid = _projectUuid
+                        };
+                        
+                        // Notify parent through callback
+                        _onExpenseSaved?.Invoke(updatedExpense);
                     }
                     else
                     {
-                        // CREATE MODE
-                        _expenseService.AddNewExpense(
-                            _projectUuid, 
-                            Description, 
-                            Amount, 
-                            Date, 
-                            categoryEnum);
+                        // CREATE MODE: Create new object
+                        var newExpense = new Expense(Guid.NewGuid(), Description, Amount, Date, categoryEnum, IsPaid)
+                        {
+                            ProjectUuid = _projectUuid
+                        };
+                        
+                        // Notify parent through callback
+                        _onExpenseSaved?.Invoke(newExpense);
                     }
                 }
                 else // Indtægt
                 {
                     if (_editingId.HasValue)
                     {
-                        // EDIT MODE: Hent -> Modificer -> Gem
-                        var existingEarning = _earningService.GetByUuid(_editingId.Value);
-                        if (existingEarning != null)
+                        // EDIT MODE: Use the existing object passed in, don't fetch from database
+                        // Create a new earning object with the updated values
+                        var updatedEarning = new Earning(_editingId.Value, Description, Amount, Date, IsPaid)
                         {
-                            existingEarning.Description = Description;
-                            existingEarning.Amount = Amount;
-                            existingEarning.Date = Date;
-                            existingEarning.IsPaid = IsPaid;
-                            
-                            _earningService.Update(existingEarning);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Indtægten blev ikke fundet.", "Fejl", 
-                                MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
+                            ProjectUuid = _projectUuid
+                        };
+                        
+                        // Notify parent through callback
+                        _onEarningSaved?.Invoke(updatedEarning);
                     }
                     else
                     {
-                        // CREATE MODE
-                        _earningService.AddNewEarning(
-                            _projectUuid, 
-                            Description, 
-                            Amount, 
-                            Date);
+                        // CREATE MODE: Create new object
+                        var newEarning = new Earning(Guid.NewGuid(), Description, Amount, Date, IsPaid)
+                        {
+                            ProjectUuid = _projectUuid
+                        };
+                        
+                        // Notify parent through callback
+                        _onEarningSaved?.Invoke(newEarning);
                     }
                 }
 
@@ -298,64 +314,64 @@ namespace Mestr.UI.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Fejl ved gemning: {ex.Message}", "Fejl", 
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Standard.SaveError(ex.Message);
             }
         }
 
         private bool CanDelete()
         {
-            return _editingId.HasValue;
+            if (!_editingId.HasValue)
+                return false;
+            
+            // Prevent deletion of paid earnings
+            if (SelectedTransactionType == "Indtægt" && IsPaid)
+                return false;
+            
+            return true;
         }
 
         private void Delete()
         {
-            var result = MessageBox.Show(
-                $"Er du sikker på, at du vil slette denne {(SelectedTransactionType == "Udgift" ? "udgift" : "indtægt")}?",
-                "Bekræft sletning",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result != MessageBoxResult.Yes)
+            string transactionType = SelectedTransactionType == "Udgift" ? "udgift" : "indtægt";
+            
+            if (!MessageBoxHelper.Standard.ConfirmDeleteTransaction(transactionType))
                 return;
 
             try
             {
                 if (SelectedTransactionType == "Udgift")
                 {
-                    var expense = _expenseService.GetByUuid(_editingId!.Value);
-                    if (expense != null)
+                    // Create expense object with current values for deletion
+                    if (!Enum.TryParse(SelectedCategory, out ExpenseCategory categoryEnum))
                     {
-                        _expenseService.Delete(expense);
+                        categoryEnum = ExpenseCategory.Andet;
                     }
-                    else
+                    
+                    var expense = new Expense(_editingId!.Value, Description, Amount, Date, categoryEnum, IsPaid)
                     {
-                        MessageBox.Show("Udgiften blev ikke fundet.", "Fejl",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
+                        ProjectUuid = _projectUuid
+                    };
+                    
+                    // Notify parent through callback
+                    _onExpenseDeleted?.Invoke(expense);
                 }
                 else // Indtægt
                 {
-                    var earning = _earningService.GetByUuid(_editingId!.Value);
-                    if (earning != null)
+                    // Create earning object with current values for deletion
+                    var earning = new Earning(_editingId!.Value, Description, Amount, Date, IsPaid)
                     {
-                        _earningService.Delete(earning);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Indtægten blev ikke fundet.", "Fejl",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
+                        ProjectUuid = _projectUuid
+                    };
+                    
+                    // Notify parent through callback
+                    _onEarningDeleted?.Invoke(earning);
                 }
 
                 CloseWindow();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Fejl ved sletning: {ex.Message}", "Fejl",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Standard.DeleteError(ex.Message);
             }
         }
 

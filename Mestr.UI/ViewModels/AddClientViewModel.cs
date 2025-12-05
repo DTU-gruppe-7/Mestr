@@ -1,6 +1,7 @@
 ﻿using Mestr.Core.Model;
 using Mestr.Services.Interface;
 using Mestr.UI.Command;
+using Mestr.UI.Utilities;
 using System;
 using System.Linq;
 using System.Windows;
@@ -169,13 +170,13 @@ namespace Mestr.UI.ViewModels
             return _editingId.HasValue;
         }
 
-        private void Save()
+        private async void Save()
         {
             try
             {
                 if (_editingId.HasValue)
                 {
-                    var existingClient = _clientService.GetClientByUuid(_editingId.Value);
+                    var existingClient = await _clientService.GetClientByUuidAsync(_editingId.Value);
                     if (existingClient != null)
                     {
                         // Opdater eksisterende klient
@@ -187,28 +188,20 @@ namespace Mestr.UI.ViewModels
                         existingClient.PostalAddress = PostalCode ?? string.Empty;
                         existingClient.City = City ?? string.Empty;
                         existingClient.Cvr = string.IsNullOrWhiteSpace(CVR) ? null : CVR;
-                        _clientService.UpdateClient(existingClient);
+                        await _clientService.UpdateClientAsync(existingClient);
                         
-                        MessageBox.Show(
-                            "Klienten blev opdateret succesfuldt.",
-                            "Opdatering succesfuld",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
+                        MessageBoxHelper.Standard.ClientUpdated();
                     }
                     else
                     {
-                        MessageBox.Show(
-                            "Klienten blev ikke fundet.",
-                            "Fejl",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
+                        MessageBoxHelper.Standard.ClientNotFound();
                         return;
                     }
                 }
                 else
                 {
                     //Create new client
-                    _clientService.CreateClient(
+                    await _clientService.CreateClientAsync(
                         CompanyName,
                         ContactPerson,
                         Email,
@@ -219,22 +212,14 @@ namespace Mestr.UI.ViewModels
                         string.IsNullOrWhiteSpace(CVR) ? null : CVR
                     );
                     
-                    MessageBox.Show(
-                        "Klienten blev oprettet succesfuldt.",
-                        "Oprettelse succesfuld",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                    MessageBoxHelper.Standard.ClientCreated();
                 }
 
                 CloseWindow();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Kunne ikke gemme klienten. Fejl: {ex.Message}",
-                    "Fejl",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBoxHelper.Standard.SaveError(ex.Message);
             }
         }
 
@@ -243,29 +228,19 @@ namespace Mestr.UI.ViewModels
             CloseWindow();
         }
 
-        private void Delete()
+        private async void Delete()
         {
-            var result = MessageBox.Show(
-                $"Er du sikker på, at du vil slette klienten '{CompanyName}'?",
-                "Bekræft sletning",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result != MessageBoxResult.Yes)
+            if (!MessageBoxHelper.Standard.ConfirmDeleteClient(CompanyName))
                 return;
 
             try
             {
-                _clientService.DeleteClient(_editingId!.Value);
+                await _clientService.DeleteClientAsync(_editingId!.Value);
                 CloseWindow();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Fejl ved sletning: {ex.Message}",
-                    "Fejl",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBoxHelper.Standard.DeleteError(ex.Message);
             }
         }
 

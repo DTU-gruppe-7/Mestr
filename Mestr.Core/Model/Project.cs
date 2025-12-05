@@ -1,4 +1,5 @@
 ﻿using Mestr.Core.Enum;
+using Mestr.Core.Constants;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -65,22 +66,21 @@ public class Project
         get
         {
             decimal totalEarnings = earnings?.Sum(e => e.Amount) ?? 0;
-            Console.WriteLine("The earnings sum op to: " + totalEarnings );
             decimal totalExpenses = expenses?.Sum(e => e.Amount) ?? 0;
-            Console.WriteLine("The expenses sum op to: " + totalExpenses);
             return totalEarnings - totalExpenses;
         }
     }
-    public String ResultColor
+    
+    public string ResultColor
     {
         get
         {
             if (Result > 0)
-                return "#22C55E";
+                return AppConstants.UI.Colors.Positive;
             else if (Result < 0)
-                return "#EF4444";
+                return AppConstants.UI.Colors.Negative;
             else 
-                return "#6B7280";
+                return AppConstants.UI.Colors.Neutral;
         }
     }
 }

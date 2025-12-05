@@ -9,14 +9,14 @@ namespace Mestr.Services.Interface
 {
     public interface IClientService
     {
-        IEnumerable<Client> GetAllClients();
-        Client CreateClient(string companyName, string contactName, string email, string phoneNumber,
+        Task<IEnumerable<Client>> GetAllClientsAsync();
+        Task<Client> CreateClientAsync(string companyName, string contactName, string email, string phoneNumber,
                                   string address, string postalAddress, string city, string? cvr = null);
 
-        Client? GetClientByUuid(Guid uuid);
+        Task<Client?> GetClientByUuidAsync(Guid uuid);
 
-        void UpdateClient(Client client);
+        Task UpdateClientAsync(Client client);
 
-        void DeleteClient(Guid clientId);
+        Task DeleteClientAsync(Guid clientId);
     }
 }

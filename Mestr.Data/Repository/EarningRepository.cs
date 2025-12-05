@@ -1,95 +1,95 @@
-﻿using Mestr.Core.Enum;
-using Mestr.Core.Model;
+﻿using Mestr.Core.Model;
 using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Mestr.Data.Repository
 {
     public class EarningRepository : IRepository<Earning>
     {
-        public void Add(Earning entity)
+        public async Task AddAsync(Earning entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                dbContext.Instance.Earnings.Add(entity);
-                dbContext.Instance.SaveChanges();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                context.Earnings.Add(entity);
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
-        public Earning? GetByUuid(Guid uuid)
+        public async Task<Earning?> GetByUuidAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Earnings
+                return await context.Earnings
                     .Include(e => e.Project)
-                    .FirstOrDefault(e => e.Uuid == uuid);
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                    .FirstOrDefaultAsync(e => e.Uuid == uuid)
+                    .ConfigureAwait(false);
             }
         }
 
-        public IEnumerable<Earning> GetAll()
+        public async Task<IEnumerable<Earning>> GetAllAsync()
         {
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Earnings
+                return await context.Earnings
                     .Include(e => e.Project)
                     .AsNoTracking()
-                    .ToList();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                    .ToListAsync()
+                    .ConfigureAwait(false);
             }
         }
 
-        public void Update(Earning entity)
+        public async Task UpdateAsync(Earning entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                dbContext.Instance.Earnings.Update(entity);
-                dbContext.Instance.SaveChanges();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                // Fetch the existing entity from this context
+                var existing = await context.Earnings
+                    .FirstOrDefaultAsync(e => e.Uuid == entity.Uuid)
+                    .ConfigureAwait(false);
+                
+                if (existing != null)
+                {
+                    // Update properties
+                    existing.Description = entity.Description;
+                    existing.Amount = entity.Amount;
+                    existing.Date = entity.Date;
+                    existing.IsPaid = entity.IsPaid;
+                    existing.ProjectUuid = entity.ProjectUuid;
+                    
+                    await context.SaveChangesAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    // If not found, throw exception
+                    throw new InvalidOperationException($"Earning with UUID {entity.Uuid} not found.");
+                }
             }
         }
 
-        public void Delete(Guid uuid)
+        public async Task DeleteAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                var earning = dbContext.Instance.Earnings.FirstOrDefault(e => e.Uuid == uuid);
+                var earning = await context.Earnings
+                    .FirstOrDefaultAsync(e => e.Uuid == uuid)
+                    .ConfigureAwait(false);
                 if (earning != null)
                 {
-                    dbContext.Instance.Earnings.Remove(earning);
-                    dbContext.Instance.SaveChanges();
+                    context.Earnings.Remove(earning);
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
     }

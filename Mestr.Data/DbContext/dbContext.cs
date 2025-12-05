@@ -1,25 +1,20 @@
 ﻿using Mestr.Core.Model;
+using Mestr.Core.Constants;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Sqlite;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Mestr.Data.DbContext
 {
     public class dbContext : Microsoft.EntityFrameworkCore.DbContext
     {
-        private static readonly Lazy<dbContext> _instance = new Lazy<dbContext>(() => new dbContext(), LazyThreadSafetyMode.ExecutionAndPublication);
-        private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-
-        public static dbContext Instance => _instance.Value;
-
-        // Property to access the semaphore for controlling database access
-        public static SemaphoreSlim DatabaseLock => _semaphore;
+        // Constructor er nu public, så Repositories kan oprette deres egne instanser.
+        // Dette matcher "Unit of Work" princippet beskrevet in Pro C# 10 with .NET 6.
+        public dbContext()
+        {
+            //Tom da databasen bliver oprettet i App.xaml.cs
+        }
 
         public DbSet<Client> Clients { get; set; } = null!;
         public DbSet<Project> Projects { get; set; } = null!;
@@ -27,21 +22,29 @@ namespace Mestr.Data.DbContext
         public DbSet<Earning> Earnings { get; set; } = null!;
         public DbSet<CompanyProfile> CompanyProfile { get; set; } = null!;
 
-        private dbContext()
-        {
-            Database.EnsureCreated(); // Ensure database is created
-        }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                var dbFolder = Path.Combine(appDataPath, "Mestr");
-                Directory.CreateDirectory(dbFolder);
-                var dbPath = Path.Combine(dbFolder, "mestr.db");
+                // Byg konfigurationen
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json")
+                    .Build();
 
-                optionsBuilder.UseSqlite($"Data Source={dbPath}");
+                // Hent connection string fra filen
+                var connectionString = config.GetConnectionString(AppConstants.Database.DefaultConnectionStringName);
+                
+                // Validate connection string
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    throw new InvalidOperationException(
+                        string.Format(AppConstants.ErrorMessages.ConnectionStringMissing, 
+                                     AppConstants.Database.DefaultConnectionStringName));
+                }
+
+                // Brug den
+                optionsBuilder.UseSqlite(connectionString);
             }
         }
 
@@ -79,7 +82,7 @@ namespace Mestr.Data.DbContext
                     .OnDelete(DeleteBehavior.Restrict)
                     .IsRequired();
 
-                // Relationships with Expenses and Earnings - NOW WITH NAVIGATION
+                // Relationships with Expenses and Earnings
                 entity.HasMany(e => e.Expenses)
                     .WithOne(ex => ex.Project)
                     .HasForeignKey(ex => ex.ProjectUuid)
@@ -100,10 +103,12 @@ namespace Mestr.Data.DbContext
                 entity.HasKey(e => e.Uuid);
                 entity.Property(e => e.Uuid).HasField("_uuid");
                 entity.Property(e => e.Description).IsRequired();
-                entity.Property(e => e.Amount).HasPrecision(18, 2).IsRequired();
+                entity.Property(e => e.Amount)
+                    .HasPrecision(AppConstants.Database.DecimalPrecision, AppConstants.Database.DecimalScale)
+                    .IsRequired();
                 entity.Property(e => e.Category).IsRequired();
                 entity.Property(e => e.Date).IsRequired();
-                
+
                 // Explicit foreign key property
                 entity.Property(e => e.ProjectUuid).IsRequired();
             });
@@ -114,9 +119,11 @@ namespace Mestr.Data.DbContext
                 entity.HasKey(e => e.Uuid);
                 entity.Property(e => e.Uuid).HasField("_uuid");
                 entity.Property(e => e.Description).IsRequired();
-                entity.Property(e => e.Amount).HasPrecision(18, 2).IsRequired();
+                entity.Property(e => e.Amount)
+                    .HasPrecision(AppConstants.Database.DecimalPrecision, AppConstants.Database.DecimalScale)
+                    .IsRequired();
                 entity.Property(e => e.Date).IsRequired();
-                
+
                 // Explicit foreign key property
                 entity.Property(e => e.ProjectUuid).IsRequired();
             });

@@ -1,95 +1,93 @@
 ﻿using Mestr.Data.DbContext;
 using Mestr.Data.Interface;
 using Mestr.Core.Model;
-using Mestr.Core.Enum;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Mestr.Data.Repository
 {
     public class ExpenseRepository : IRepository<Expense>
     {
-        public void Add(Expense entity)
+        public async Task AddAsync(Expense entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                dbContext.Instance.Expenses.Add(entity);
-                dbContext.Instance.SaveChanges();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                context.Expenses.Add(entity);
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
-        public Expense? GetByUuid(Guid uuid)
+        public async Task<Expense?> GetByUuidAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Expenses
+                return await context.Expenses
                     .Include(e => e.Project)
-                    .FirstOrDefault(e => e.Uuid == uuid);
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                    .FirstOrDefaultAsync(e => e.Uuid == uuid)
+                    .ConfigureAwait(false);
             }
         }
 
-        public IEnumerable<Expense> GetAll()
+        public async Task<IEnumerable<Expense>> GetAllAsync()
         {
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                return dbContext.Instance.Expenses
+                return await context.Expenses
                     .Include(e => e.Project)
                     .AsNoTracking()
-                    .ToList();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                    .ToListAsync()
+                    .ConfigureAwait(false);
             }
         }
 
-        public void Update(Expense entity)
+        public async Task UpdateAsync(Expense entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                dbContext.Instance.Expenses.Update(entity);
-                dbContext.Instance.SaveChanges();
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
+                var existing = await context.Expenses
+                    .FirstOrDefaultAsync(e => e.Uuid == entity.Uuid)
+                    .ConfigureAwait(false);
+                
+                if (existing != null)
+                {
+                    existing.Description = entity.Description;
+                    existing.Amount = entity.Amount;
+                    existing.Date = entity.Date;
+                    existing.Category = entity.Category;
+                    existing.IsAccepted = entity.IsAccepted;
+                    existing.ProjectUuid = entity.ProjectUuid;
+                    
+                    await context.SaveChangesAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Expense with UUID {entity.Uuid} not found.");
+                }
             }
         }
 
-        public void Delete(Guid uuid)
+        public async Task DeleteAsync(Guid uuid)
         {
             if (uuid == Guid.Empty) throw new ArgumentNullException(nameof(uuid));
 
-            dbContext.DatabaseLock.Wait();
-            try
+            using (var context = new dbContext())
             {
-                var expense = dbContext.Instance.Expenses.FirstOrDefault(e => e.Uuid == uuid);
+                var expense = await context.Expenses
+                    .FirstOrDefaultAsync(e => e.Uuid == uuid)
+                    .ConfigureAwait(false);
                 if (expense != null)
                 {
-                    dbContext.Instance.Expenses.Remove(expense);
-                    dbContext.Instance.SaveChanges();
+                    context.Expenses.Remove(expense);
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
-            }
-            finally
-            {
-                dbContext.DatabaseLock.Release();
             }
         }
     }

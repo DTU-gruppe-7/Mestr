@@ -57,7 +57,7 @@
                         </Grid.RowDefinitions>
                         <TextBox x:Name="NameBox"
                                  Grid.Row="0"
-                                 Text="{Binding ProjectName, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                 Text="{Binding ProjectName, UpdateSourceTrigger=LostFocus, ValidatesOnNotifyDataErrors=True}"
                                  Style="{StaticResource ModernTextBoxStyle}"
                                  Height="30"/>
                         <ItemsControl Grid.Row="1"
@@ -80,7 +80,7 @@
                         <ComboBox x:Name="ClientBox"
                             Grid.Row="0"
                               ItemsSource="{Binding Clients}"
-                              SelectedItem="{Binding SelectedClient, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                              SelectedItem="{Binding SelectedClient, UpdateSourceTrigger=LostFocus, ValidatesOnNotifyDataErrors=True}"
                               DisplayMemberPath="Name"
                               Style="{StaticResource ModernComboBoxStyle}"
                               ItemContainerStyle="{StaticResource InlineComboBoxItemStyle}"
@@ -141,7 +141,7 @@
                         </Grid.RowDefinitions>
                         <DatePicker x:Name="DeadlineBox"
                                     Grid.Row="0"
-                                    SelectedDate="{Binding Deadline, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                    SelectedDate="{Binding Deadline, UpdateSourceTrigger=LostFocus, ValidatesOnNotifyDataErrors=True}"
                                     Style="{StaticResource ModernDatePickerStyle}"
                                     Height="40"
                                     Language="da-DK"/>
@@ -166,7 +166,7 @@
 
                     <TextBlock Grid.Row="1" Text="BESKRIVELSE" Foreground="#475569" FontWeight="SemiBold" Margin="0,0,0,5"/>
                     <TextBox Grid.Row="2"
-                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding Description, UpdateSourceTrigger=LostFocus}"
                              TextWrapping="Wrap"
                              HorizontalAlignment="Stretch"
                              VerticalAlignment="Stretch"

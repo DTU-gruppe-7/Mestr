@@ -10,9 +10,9 @@ namespace Mestr.Services.Interface
 {
     public interface IEarningService
     {
-        Earning GetByUuid(Guid uuid);
-        Earning AddNewEarning(Guid projectUuid, string description, decimal amount, DateTime date);
-        bool Delete(Earning entity);
-        Earning Update(Earning entity);
+        Task<Earning> GetByUuidAsync(Guid uuid);
+        Task<Earning> AddNewEarningAsync(Guid projectUuid, string description, decimal amount, DateTime date);
+        Task<bool> DeleteAsync(Earning entity);
+        Task<Earning> UpdateAsync(Earning entity);
     }
 }

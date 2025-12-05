@@ -3,25 +3,26 @@ using System.Collections.Generic;
 using Mestr.Core.Model;
 using Mestr.Data.Interface;
 using Mestr.Core.Enum;
+using System.Threading.Tasks;
 
 namespace Mestr.Services.Interface
 {
     public interface IProjectService
     {
-        Project CreateProject(string name, Client client, string description, DateTime? endDate);
-        Project? GetProjectByUuid(Guid uuid);
-        IEnumerable<Project> LoadAllProjects();
-        IEnumerable<Project> LoadOngoingProjects();
-        IEnumerable<Project> LoadCompletedProjects();
-        void CompleteProject(Guid projectId);
-        void UpdateProject(Project project);
-        void UpdateProjectStatus(Guid projectId, ProjectStatus newStatus);
-        void DeleteProject(Guid projectId);
+        Task<Project> CreateProjectAsync(string name, Client client, string description, DateTime? endDate);
+        Task<Project?> GetProjectByUuidAsync(Guid uuid);
+        Task<IEnumerable<Project>> LoadAllProjectsAsync();
+        Task<IEnumerable<Project>> LoadOngoingProjectsAsync();
+        Task<IEnumerable<Project>> LoadCompletedProjectsAsync();
+        Task CompleteProjectAsync(Guid projectId);
+        Task UpdateProjectAsync(Project project);
+        Task UpdateProjectStatusAsync(Guid projectId, ProjectStatus newStatus);
+        Task DeleteProjectAsync(Guid projectId);
         
         // Nye metoder til at håndtere expenses og earnings
-        void AddExpenseToProject(Guid projectUuid, Expense expense);
-        void AddEarningToProject(Guid projectUuid, Earning earning);
-        void RemoveExpenseFromProject(Guid projectUuid, Guid expenseUuid);
-        void RemoveEarningFromProject(Guid projectUuid, Guid earningUuid);
+        Task AddExpenseToProjectAsync(Guid projectUuid, Expense expense);
+        Task AddEarningToProjectAsync(Guid projectUuid, Earning earning);
+        Task RemoveExpenseFromProjectAsync(Guid projectUuid, Guid expenseUuid);
+        Task RemoveEarningFromProjectAsync(Guid projectUuid, Guid earningUuid);
     }
 }
