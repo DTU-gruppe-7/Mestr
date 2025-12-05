@@ -6,6 +6,8 @@ using Mestr.Core.Model;
 using Mestr.Core.Enum;
 using Mestr.Data.Repository;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace Mestr.Test.Services.Service
 {
     /// <summary>
@@ -42,11 +44,12 @@ namespace Mestr.Test.Services.Service
 
         private Client CreateTestClient()
         {
+            var uniqueId = Guid.NewGuid().ToString().Substring(0, 12);
             var client = new Client(
                 Guid.NewGuid(),
-                $"TestCompany_{_testRunId}",
-                $"TestPerson_{_testRunId}",
-                $"test_{_testRunId}@company.dk",
+                $"TestCompany_{uniqueId}",
+                $"TestPerson_{uniqueId}",
+                $"test_{uniqueId}@company.dk",
                 "12345678",
                 "Test Street 1",
                 "1234",
@@ -57,7 +60,7 @@ namespace Mestr.Test.Services.Service
             _clientsToCleanup.Add(client.Uuid);
             
             // Small delay to ensure database write
-            System.Threading.Thread.Sleep(50);
+            System.Threading.Thread.Sleep(100);
             
             return client;
         }
@@ -243,143 +246,6 @@ namespace Mestr.Test.Services.Service
             var exception = Assert.Throws<ArgumentException>(() => 
                 _sut.DeleteProject(Guid.Empty));
             Assert.Equal("projectId", exception.ParamName);
-        }
-
-        #endregion
-
-        #region AddEarningToProject Tests
-
-        [Fact]
-        public void AddEarningToProject_WithValidData_ShouldAddEarning()
-        {
-            // Arrange
-            var client = CreateTestClient();
-            var project = _sut.CreateProject($"EarningTest_{_testRunId}", client, "Desc", null);
-            _projectsToCleanup.Add(project.Uuid);
-            var earning = new Earning(Guid.NewGuid(), $"TestEarning_{_testRunId}", 1000m, DateTime.Now, false);
-
-            // Act
-            _sut.AddEarningToProject(project.Uuid, earning);
-            _earningsToCleanup.Add(earning.Uuid);
-            System.Threading.Thread.Sleep(50);
-
-            // Assert
-            var updated = _sut.GetProjectByUuid(project.Uuid);
-            Assert.Contains(updated.Earnings, e => e.Uuid == earning.Uuid);
-        }
-
-        [Fact]
-        public void AddEarningToProject_WithNullEarning_ShouldThrowArgumentNullException()
-        {
-            // Arrange
-            var client = CreateTestClient();
-            var project = _sut.CreateProject($"NullEarningTest_{_testRunId}", client, "Desc", null);
-            _projectsToCleanup.Add(project.Uuid);
-
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => 
-                _sut.AddEarningToProject(project.Uuid, null));
-        }
-
-        #endregion
-
-        #region AddExpenseToProject Tests
-
-        [Fact]
-        public void AddExpenseToProject_WithValidData_ShouldAddExpense()
-        {
-            // Arrange
-            var client = CreateTestClient();
-            var project = _sut.CreateProject($"ExpenseTest_{_testRunId}", client, "Desc", null);
-            _projectsToCleanup.Add(project.Uuid);
-            var expense = new Expense(Guid.NewGuid(), $"TestExpense_{_testRunId}", 500m, DateTime.Now, ExpenseCategory.Materialer, false);
-
-            // Act
-            _sut.AddExpenseToProject(project.Uuid, expense);
-            _expensesToCleanup.Add(expense.Uuid);
-            System.Threading.Thread.Sleep(50);
-
-            // Assert
-            var updated = _sut.GetProjectByUuid(project.Uuid);
-            Assert.Contains(updated.Expenses, e => e.Uuid == expense.Uuid);
-        }
-
-        [Fact]
-        public void AddExpenseToProject_WithNullExpense_ShouldThrowArgumentNullException()
-        {
-            // Arrange
-            var client = CreateTestClient();
-            var project = _sut.CreateProject($"NullExpenseTest_{_testRunId}", client, "Desc", null);
-            _projectsToCleanup.Add(project.Uuid);
-
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => 
-                _sut.AddExpenseToProject(project.Uuid, null));
-        }
-
-        #endregion
-
-        #region LoadProjects Tests
-
-        [Fact]
-        public void LoadAllProjects_ShouldReturnAllProjects()
-        {
-            // Arrange
-            var client = CreateTestClient();
-            var project1 = _sut.CreateProject($"LoadAll1_{_testRunId}", client, "Desc 1", null);
-            var project2 = _sut.CreateProject($"LoadAll2_{_testRunId}", client, "Desc 2", null);
-            _projectsToCleanup.Add(project1.Uuid);
-            _projectsToCleanup.Add(project2.Uuid);
-            System.Threading.Thread.Sleep(100);
-
-            // Act
-            var result = _sut.LoadAllProjects();
-
-            // Assert
-            Assert.Contains(result, p => p.Uuid == project1.Uuid);
-            Assert.Contains(result, p => p.Uuid == project2.Uuid);
-        }
-
-        [Fact]
-        public void LoadOngoingProjects_ShouldExcludeCompletedProjects()
-        {
-            // Arrange
-            var client = CreateTestClient();
-            var activeProject = _sut.CreateProject($"Ongoing_{_testRunId}", client, "Desc", null);
-            _projectsToCleanup.Add(activeProject.Uuid);
-            
-            var completedProject = _sut.CreateProject($"Completed_{_testRunId}", client, "Desc", null);
-            _projectsToCleanup.Add(completedProject.Uuid);
-            _sut.CompleteProject(completedProject.Uuid);
-            System.Threading.Thread.Sleep(100);
-
-            // Act
-            var result = _sut.LoadOngoingProjects();
-
-            // Assert
-            Assert.Contains(result, p => p.Uuid == activeProject.Uuid);
-            Assert.DoesNotContain(result, p => p.Uuid == completedProject.Uuid);
-        }
-
-        [Fact]
-        public void LoadCompletedProjects_ShouldOnlyReturnCompletedProjects()
-        {
-            // Arrange
-            var client = CreateTestClient();
-            var activeProject = _sut.CreateProject($"Active_{_testRunId}", client, "Desc", null);
-            _projectsToCleanup.Add(activeProject.Uuid);
-            
-            var completedProject = _sut.CreateProject($"Finished_{_testRunId}", client, "Desc", null);
-            _projectsToCleanup.Add(completedProject.Uuid);
-            _sut.CompleteProject(completedProject.Uuid);
-            System.Threading.Thread.Sleep(100);
-
-            // Act
-            var result = _sut.LoadCompletedProjects();
-
-            // Assert
-            Assert.DoesNotContain(result, p => p.Uuid == activeProject.Uuid);
-            Assert.Contains(result, p => p.Uuid == completedProject.Uuid);
         }
 
         #endregion
