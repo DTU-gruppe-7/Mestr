@@ -85,7 +85,7 @@ namespace Mestr.Test.Services.Service
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
                 _sut.CreateClientAsync("Company", null, "email@test.dk", "12345678", "Street", "1234", "City", "12345678"));
-            Assert.Equal("contactName", exception.ParamName);
+            Assert.Equal("contactPerson", exception.ParamName);
         }
 
         [Fact]
